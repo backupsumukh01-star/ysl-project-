@@ -1,0 +1,124 @@
+.app-page .app-guide {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+  max-width: 720px;
+}
+
+.app-page .app-guide section {
+  background: #fff;
+  border: 1px solid #ece7e1;
+  padding: 22px 18px 8px;
+}
+
+.app-page .app-guide h2 {
+  margin: 0 0 10px;
+  font-size: clamp(26px, 3vw, 32px);
+}
+
+.app-page .app-guide p,
+.app-page .app-guide li {
+  max-width: none;
+  margin: 0 0 12px;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.app-reqs {
+  display: grid;
+  gap: 0;
+  margin: 4px 0 16px;
+}
+
+.app-reqs div {
+  padding: 12px 0;
+  border-top: 1px solid #ece7e1;
+}
+
+.app-reqs strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #161616;
+  font-weight: 500;
+}
+
+.app-reqs p {
+  margin: 0;
+}
+
+.app-page .pdp-stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 16px;
+}
+
+.app-page .pdp-stores a {
+  display: block;
+  width: min(156px, calc(50% - 4px));
+  line-height: 0;
+  text-decoration: none;
+}
+
+.app-page .pdp-stores svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.app-steps {
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 0;
+  counter-reset: app-step;
+}
+
+.app-steps > li {
+  counter-increment: app-step;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  padding: 18px 0 6px;
+  border-top: 1px solid #ece7e1;
+}
+
+.app-steps > li::before {
+  content: counter(app-step, decimal-leading-zero);
+  margin-top: 4px;
+  color: #9a1f33;
+  font-family: var(--serif);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+
+.app-steps h3 {
+  margin: 0 0 6px;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.app-steps ul {
+  margin: 0 0 12px;
+  padding-left: 1.1em;
+}
+
+.app-steps ul li {
+  margin: 0 0 8px;
+}
+
+.app-end {
+  max-width: 720px;
+  margin-top: 22px;
+}
+
+.app-end p {
+  margin: 0 0 16px;
+}
+
+.app-end .btn {
+  min-width: 180px;
+}

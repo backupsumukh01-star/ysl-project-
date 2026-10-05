@@ -1,0 +1,432 @@
+#cartridges,
+#refills { scroll-margin-top: calc(var(--header) + 16px); }
+
+.shop-house .qty { margin-top: 14px; }
+
+.shop-house {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  padding: calc(var(--header) + 36px) 20px 88px;
+  background: #fffaf8;
+  color: #161616;
+}
+
+.shop-intro {
+  padding: 0 0 8px;
+  border: 0;
+}
+
+.shop-house .kicker,
+.shop-label {
+  margin: 0 0 12px;
+  color: #6a6560;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.shop-intro h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  max-width: 11em;
+  font-size: clamp(44px, 5vw, 68px);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: #161616;
+}
+
+.shop-intro .lede {
+  margin: 16px 0 0;
+  max-width: 22em;
+  color: #5c5854;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.shop-collection {
+  display: grid;
+  gap: 48px;
+  margin-top: 36px;
+}
+
+.shop-group {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding-top: 28px;
+  border-top: 1px solid #ece7e1;
+}
+
+.shop-label { margin: 0; }
+
+.shop-house .pick-card {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.shop-house .pick-card__shot {
+  position: relative;
+  display: block;
+  width: min(100%, 300px);
+  aspect-ratio: 9 / 16;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #f3efe9;
+  border: 0;
+}
+
+.shop-house .pick-card--trio .pick-card__shot,
+.shop-house .pick-card--refill .pick-card__shot {
+  width: min(100%, 440px);
+  aspect-ratio: 1;
+}
+
+.shop-house .pick-card__shot img {
+  object-fit: contain;
+  object-position: center center;
+  transition: transform 0.45s ease;
+}
+
+.shop-house .pick-card__blank {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+
+.shop-house .pick-card__blank .refill-mark {
+  width: min(78%, 280px);
+  aspect-ratio: 1;
+  background: transparent;
+}
+
+.shop-house .pick-card__note {
+  margin: 0;
+  max-width: 32ch;
+  color: #6a6560;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.shop-house .pick-card__body {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  min-width: 0;
+}
+
+.shop-house .pick-card h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(32px, 8vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-transform: none;
+}
+
+.shop-house .pick-card--trio h3,
+.shop-house .pick-card--refill h3 {
+  font-size: clamp(28px, 6vw, 36px);
+}
+
+.shop-house .pick-card h3 a {
+  color: #161616;
+  transition: opacity 0.2s ease;
+}
+
+.shop-house .pick-card__name {
+  margin: 10px 0 0;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.shop-house .pick-card__choice {
+  min-height: 0;
+  margin: 10px 0 0;
+  max-width: 28em;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.shop-house .pick-card__swatches,
+.shop-house .refill-choices {
+  max-width: 100%;
+  margin: 16px 0 0;
+}
+
+.shop-house .pick-card__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shop-house .pick-card__swatches button {
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  transition: border-color var(--move-state) var(--ease), box-shadow var(--move-state) var(--ease);
+}
+
+.shop-house .pick-card__swatches button.is-on {
+  border-color: #161616;
+  box-shadow: 0 0 0 1px #161616;
+}
+
+.shop-house .pick-card__swatches button span {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.shop-house .pick-card__swatches i {
+  flex: 1;
+  display: block;
+}
+
+.shop-house .pick-card .price {
+  margin: 14px 0 0;
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-house .pick-card--trio .price,
+.shop-house .pick-card--refill .price {
+  font-size: 18px;
+}
+
+.shop-house .pick-card .btn {
+  width: auto;
+  min-height: 48px;
+  margin-top: 18px;
+  padding-inline: 22px;
+  border-radius: 0;
+  background: #9a1f33;
+  border-color: #9a1f33;
+  color: #fff;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.shop-house .pick-card .btn:hover {
+  background: #7c1828;
+  border-color: #7c1828;
+}
+
+.shop-house .pick-card .btn.is-added,
+.shop-house .pick-card .btn.is-added:hover {
+  background: #161616;
+  border-color: #161616;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shop-house .pick-card__shot:hover img,
+  .shop-house .pick-card__shot:hover .pick-card__blank i {
+    transform: scale(1.03);
+  }
+
+  .shop-house .pick-card h3 a:hover {
+    opacity: 0.55;
+  }
+}
+
+@media (min-width: 900px) {
+  .shop-house {
+    padding: calc(var(--header) + 16px) 40px 104px;
+  }
+
+  .shop-intro {
+    padding-bottom: 12px;
+  }
+
+  .shop-collection {
+    gap: 72px;
+    margin-top: 16px;
+  }
+
+  .shop-group {
+    gap: 22px;
+    padding-top: 36px;
+  }
+
+  .shop-house .pick-card--lead,
+  .shop-house .pick-card--trio,
+  .shop-house .pick-card--refill {
+    width: min(100%, 920px);
+    margin-inline: 0;
+    grid-template-columns: 300px minmax(280px, 460px);
+    justify-content: center;
+    gap: 56px;
+    align-items: center;
+    padding: 0;
+    border: 0;
+  }
+
+  .shop-house .pick-card--lead .pick-card__shot {
+    width: 300px;
+    aspect-ratio: 9 / 16;
+    max-height: none;
+    justify-self: center;
+    margin: 0;
+    border: 0;
+  }
+
+  .shop-house .pick-card--trio .pick-card__shot,
+  .shop-house .pick-card--refill .pick-card__shot {
+    width: 300px;
+    margin: 0;
+  }
+
+  .shop-house .pick-card--lead .btn {
+    max-width: none;
+  }
+}
+
+@media (min-width: 1100px) {
+  .shop-house {
+    display: grid;
+    grid-template-columns: auto minmax(360px, 460px);
+    justify-content: center;
+    column-gap: 72px;
+    width: min(1040px, calc(100% - 80px));
+    padding-top: calc(var(--header) + 28px);
+  }
+
+  .shop-house .buy-grid-wrap,
+  .shop-collection,
+  .shop-feature,
+  .shop-house .pick-card--lead {
+    display: contents;
+  }
+
+  .shop-intro {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    padding-top: 4px;
+    padding-bottom: 8px;
+  }
+
+  .shop-house .pick-card--lead .pick-card__shot {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    height: min(620px, calc(100svh - var(--header) - 80px));
+    aspect-ratio: 9 / 16;
+    max-height: none;
+    margin: 0;
+    align-self: start;
+  }
+
+  .shop-house .pick-card--lead .pick-card__body {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    padding-bottom: 12px;
+  }
+
+  .shop-group {
+    grid-column: 1 / -1;
+    margin-top: 28px;
+  }
+
+  .shop-house .pick-card--trio,
+  .shop-house .pick-card--refill {
+    width: 100%;
+    grid-template-columns: minmax(280px, 360px) minmax(360px, 460px);
+    column-gap: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-house .pick-card__shot img,
+  .shop-house .pick-card__blank i,
+  .shop-house .pick-card h3 a {
+    transition: none;
+  }
+}
+
+@media (min-width: 1100px) {
+  .shop-house {
+    display: grid;
+    grid-template-columns: minmax(240px, 320px) minmax(320px, 420px);
+    justify-content: center;
+    column-gap: 80px;
+    row-gap: 0;
+    width: min(1120px, calc(100% - 80px));
+    padding-top: calc(var(--header) + 36px);
+    align-items: start;
+  }
+
+  .shop-house .buy-grid-wrap,
+  .shop-collection,
+  .shop-feature,
+  .shop-house .pick-card--lead {
+    display: contents;
+  }
+
+  .shop-intro {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    padding: 8px 0 0;
+  }
+
+  .shop-intro h1 {
+    font-size: clamp(52px, 4.4vw, 68px);
+  }
+
+  .shop-house .pick-card--lead .pick-card__shot {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    height: min(500px, calc(100svh - var(--header) - 220px));
+    aspect-ratio: 9 / 16;
+    max-height: none;
+    margin: 0;
+    align-self: center;
+    justify-self: end;
+  }
+
+  .shop-house .pick-card--lead .pick-card__body {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    max-width: 24rem;
+    padding-top: 11rem;
+    padding-bottom: 4px;
+  }
+
+  .shop-group {
+    grid-column: 1 / -1;
+    margin-top: 56px;
+  }
+
+  .shop-house .pick-card--trio,
+  .shop-house .pick-card--refill {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(240px, 360px) minmax(280px, 1fr);
+    justify-content: start;
+    column-gap: 64px;
+    align-items: center;
+  }
+}

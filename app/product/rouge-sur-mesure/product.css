@@ -1,0 +1,1737 @@
+﻿.device-page {
+  width: min(1120px, 100%);
+  background: #fffaf8;
+  color: #161616;
+}
+
+.device-page .product-layout {
+  gap: 28px;
+  align-items: start;
+}
+
+.device-page .gallery .media {
+  width: auto;
+  height: min(54svh, 520px);
+  max-height: none;
+  aspect-ratio: var(--shot, 9 / 16);
+  margin-inline: auto;
+  background: #f3efe9;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.device-page .gallery .media img {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.device-page .thumbs button {
+  flex-basis: 44px;
+  width: 44px;
+  height: 56px;
+  border-color: transparent;
+  border-radius: 8px;
+  background: #f3efe9;
+  opacity: 0.72;
+  transition: opacity var(--move-state) var(--ease), border-color var(--move-state) var(--ease);
+}
+
+.device-page .thumbs button:hover,
+.device-page .thumbs button:focus-visible,
+.device-page .thumbs button[aria-current="true"] {
+  opacity: 1;
+}
+
+.device-page .thumbs button[aria-current="true"] {
+  border-color: #161616;
+}
+
+.device-page .gallery-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: min(100%, 280px);
+  margin: 4px auto 0;
+}
+
+.device-page .gallery-count,
+.device-page .gallery-enlarge,
+.device-page .gallery-save {
+  position: static;
+  margin: 0;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #6a6560;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  min-height: 44px;
+}
+
+.device-page .thumbs img {
+  object-fit: contain;
+  background: #f3efe9;
+}
+
+.device-page .thumbs button[aria-current="true"] {
+  border-color: #161616;
+  transform: translateY(-3px);
+}
+
+.device-page .buy-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.device-page .buy-panel .kicker,
+.device-page .pdp-how .kicker,
+.device-page .pdp-copy .kicker {
+  display: block;
+  margin: 0 0 10px;
+  color: #6a6560;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.device-page .buy-head .kicker {
+  margin: 0 0 2px;
+  color: #8f897f;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+}
+
+.device-page .buy-head .kicker + .kicker {
+  margin-bottom: 14px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+}
+
+.device-page .buy-panel h1,
+.device-page .device-story h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  text-transform: none;
+  color: #161616;
+}
+
+.device-page .buy-panel h1 {
+  margin: 0;
+  font-size: clamp(40px, 9vw, 56px);
+  line-height: 1.02;
+}
+
+.device-page .buy-lede,
+.device-page .buy-head .buy-lede,
+.device-page .buy-summary,
+.device-page .buy-note {
+  margin: 12px 0 0;
+  max-width: 34rem;
+  color: #5c5854;
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.device-page .buy-summary {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #5c5854;
+}
+
+.device-page .pdp-copy p {
+  margin: 12px 0 0;
+  max-width: 38rem;
+  color: #5c5854;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.device-page .pdp-families {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  max-width: 38rem;
+}
+
+.device-page .pdp-families li {
+  display: grid;
+  gap: 2px;
+  padding: 12px 0;
+  border-top: 1px solid #ece7e1;
+  color: #161616;
+  font-size: 15px;
+}
+
+.device-page .pdp-families li:last-child {
+  border-bottom: 1px solid #ece7e1;
+}
+
+.device-page .pdp-families span {
+  color: #5c5854;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.device-page .buy-panel .price {
+  margin: 16px 0 0;
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #161616;
+}
+
+.device-page .trio-pick {
+  margin-top: 22px;
+}
+
+.device-page .trio-pick__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.device-page .trio-pick__label,
+.device-page .buy-panel .trio-pick__count {
+  margin: 0;
+  color: #6a6560;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.device-page .buy-panel .trio-pick__count {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  border: 0;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.device-page .trio-pick__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 6px;
+  margin-top: 12px;
+}
+
+.device-page .trio-card {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  color: #6a6560;
+}
+
+.device-page .trio-card.is-on {
+  color: #161616;
+}
+
+.device-page .trio-card.is-locked {
+  opacity: 0.4;
+}
+
+.device-page .trio-chip__shot {
+  position: relative;
+  width: min(52px, 100%);
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: #f3efe9;
+  box-shadow: 0 0 0 1px transparent;
+  transition: box-shadow var(--move-state) var(--ease);
+}
+
+.device-page .trio-card.is-on .trio-chip__shot {
+  box-shadow: 0 0 0 1px #161616, inset 0 0 0 1px #161616;
+}
+
+.device-page .trio-chip {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+}
+
+.device-page .trio-chip img,
+.device-page .trio-chip__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.device-page .trio-chip__x {
+  position: absolute;
+  z-index: 2;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: #161616;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.device-page .trio-chip__name {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-align: center;
+  cursor: pointer;
+}
+
+.device-page .trio-chip__name:disabled {
+  cursor: default;
+}
+
+.device-page .trio-chip__qty {
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.device-page .trio-pick__shades {
+  margin: 14px 0 0;
+  color: #5c5854;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.device-page .trio-pick__shades strong {
+  display: block;
+  margin-bottom: 2px;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.device-page .trio-slots {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.device-page .trio-slots li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 44px;
+  border-bottom: 1px solid #ece7e1;
+  color: #6a6560;
+  font-size: 14px;
+}
+
+.device-page .trio-slots li.is-on {
+  color: #161616;
+  border-bottom-color: #161616;
+}
+
+.device-page .trio-slots button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #6a6560;
+  font-size: 12px;
+}
+
+.device-page .buy-panel .buy-cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  justify-items: stretch;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 18px;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.device-page .buy-cta__note {
+  margin: 0 0 4px;
+  color: #5c5854;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.device-page .buy-panel .buy-cta button {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 0;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  opacity: 1;
+  transition: background var(--move-state) var(--ease), color var(--move-state) var(--ease), transform var(--move-micro) var(--ease);
+}
+
+.device-page .buy-panel .buy-cta button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.device-page .buy-panel .buy-cta button.buy-add {
+  background: #9a1f33;
+  color: #fff;
+}
+
+.device-page .buy-panel .buy-cta button.buy-add:hover:not(:disabled) {
+  background: #7c1828;
+}
+
+.device-page .buy-panel .buy-cta button.buy-now {
+  background: #fff;
+  color: #161616;
+  border: 1px solid #161616;
+}
+
+.device-page .buy-panel .buy-cta button.buy-now:hover:not(:disabled) {
+  background: #fffaf8;
+}
+
+.device-page .buy-panel .buy-cta button.buy-add:disabled,
+.device-page .buy-panel .buy-cta button.buy-now:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  background: #f3efe9;
+  color: #a39e98;
+  border-color: transparent;
+}
+
+.device-page .buy-includes {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+}
+
+.device-page .buy-includes li {
+  padding: 12px 0;
+  border-top: 1px solid #ece7e1;
+  color: #161616;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.device-page .buy-includes li:last-child {
+  border-bottom: 1px solid #ece7e1;
+}
+
+.device-page .set-fold,
+.device-page .buy-folds > details,
+.device-page .pdp-notes details,
+.device-page .pdp-copy details {
+  border: 0;
+  border-bottom: 1px solid #ece7e1;
+}
+
+.device-page .set-fold summary,
+.device-page .buy-folds summary,
+.device-page .pdp-notes summary,
+.device-page .pdp-copy summary {
+  min-height: 48px;
+  color: #161616;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.device-page .buy-folds > details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.device-page .buy-folds > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.device-page .buy-folds > details > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-top: -3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  flex: 0 0 auto;
+}
+
+.device-page .buy-folds > details[open] > summary::after {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+
+.device-page .buy-folds details > p,
+.device-page .buy-folds .buy-spec p {
+  margin: 0 0 14px;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.device-page .family-sheet {
+  padding: 4px 0 16px;
+}
+
+.device-page .family-sheet .kicker {
+  margin: 0 0 8px;
+  color: #8f897f;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.device-page .family-sheet h3 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: #161616;
+}
+
+.device-page .family-sheet > p {
+  margin: 0 0 4px;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.device-page .description-sheet {
+  padding: 4px 0 12px;
+}
+
+.device-page .description-sheet h3 {
+  margin: 16px 0 6px;
+  color: #161616;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.device-page .description-sheet h3:first-child {
+  margin-top: 0;
+}
+
+.device-page .description-sheet p,
+.device-page .description-sheet li {
+  margin: 0 0 10px;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.device-page .description-sheet ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.device-page .description-sheet li {
+  margin: 0;
+  padding: 6px 0;
+  border-top: 1px solid #ece7e1;
+}
+
+.device-page .description-sheet li:last-child {
+  border-bottom: 1px solid #ece7e1;
+}
+
+.device-page .description-sheet strong {
+  color: #161616;
+  font-weight: 600;
+}
+.device-page .ingredient-sheet {
+  padding: 4px 0 8px;
+}
+
+.device-page .ingredient-sheet section {
+  padding: 16px 0 4px;
+  border-top: 1px solid #ece7e1;
+}
+
+.device-page .ingredient-sheet section:last-child {
+  border-bottom: 0;
+}
+
+.device-page .ingredient-sheet h3 {
+  margin: 0 0 2px;
+  color: #161616;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.device-page .ingredient-code {
+  border-bottom: 1px solid #ece7e1;
+}
+
+.device-page .ingredient-code summary {
+  min-height: 40px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.device-page .ingredient-code ul {
+  margin: 0 0 12px;
+  padding: 0 0 4px 1.15em;
+  color: #5c5854;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.device-page .ingredient-sheet p {
+  margin: 0;
+  color: #5c5854;
+  font-size: 13px;
+  line-height: 1.55;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.device-page .pdp-steps h2 {
+  margin: 0 0 22px;
+}
+
+.device-page .pdp-steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 22px;
+}
+
+.device-page #app {
+  scroll-margin-top: calc(var(--header) + 16px);
+}
+
+.device-page #app p a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.device-page .pdp-steps li {
+  padding-top: 16px;
+  border-top: 1px solid #ece7e1;
+}
+
+.device-page .pdp-steps span {
+  display: block;
+  margin-bottom: 8px;
+  color: #8f897f;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+
+.device-page .pdp-steps h3 {
+  margin: 0 0 8px;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  text-transform: none;
+}
+
+.device-page .pdp-steps p {
+  margin: 0;
+  max-width: 36rem;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.device-page .pdp-steps p + p {
+  margin-top: 8px;
+}
+
+.device-page .pdp-stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.device-page .pdp-stores a,
+.device-page .pdp-stores a:last-child {
+  display: block;
+  width: min(156px, calc(50% - 4px));
+  line-height: 0;
+}
+
+.device-page .pdp-stores svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.device-page .pdp-steps .story-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 18px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+@media (min-width: 768px) {
+  .device-page .pdp-steps ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+}
+.device-page .device-story {
+  margin-top: 28px;
+}
+
+.device-page .device-story .section {
+  padding-top: 36px;
+  padding-bottom: 8px;
+}
+
+.device-page .pdp-how {
+  display: grid;
+  gap: 20px;
+}
+
+.device-page .pdp-how__shot {
+  position: relative;
+  width: min(100%, 280px);
+  aspect-ratio: 3 / 4;
+  margin: 0;
+  background: #f3efe9;
+}
+
+.device-page .pdp-how__shot img {
+  object-fit: contain;
+}
+
+.device-page .pdp-how h2,
+.device-page .device-story h2 {
+  margin: 0 0 16px;
+  font-size: clamp(32px, 6vw, 44px);
+  line-height: 1.05;
+}
+
+.device-page .pdp-how ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.device-page .pdp-how h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.device-page .pdp-how p,
+.device-page .pdp-app p,
+.device-page .pdp-notes p,
+.device-page #reviews .pdp-reviews__state,
+.device-page #reviews .pdp-reviews > p:last-child {
+  margin: 4px 0 0;
+  max-width: 38rem;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.device-page #reviews .pdp-reviews__state {
+  color: #6a6560;
+}
+
+.device-page .pdp-notes h2 {
+  margin-bottom: 8px;
+}
+
+@keyframes pdp-settle {
+  from { opacity: 0.2; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.device-page .gallery-frame {
+  display: contents;
+}
+
+@media (max-width: 767px) {
+  .device-page .gallery-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    width: min(100%, 360px);
+    margin-inline: auto;
+  }
+
+  .device-page .gallery .media {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    aspect-ratio: var(--shot, 9 / 16);
+  }
+
+  .device-page .gallery-tools,
+  .device-page .thumbs {
+    width: 100%;
+  }
+
+  .device-page .gallery-tools {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .device-page .thumbs {
+    display: flex;
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  .device-page .thumbs button {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    height: 56px;
+  }
+
+  .device-page .product-layout > .gallery { order: 1; }
+  .device-page .product-layout .buy-head { order: 2; }
+  .device-page .product-layout .buy-shop { order: 3; }
+  .device-page .buy-panel .buy-head .kicker { display: block; }
+  .device-page .buy-head .buy-lede,
+  .device-page .buy-head .price,
+  .device-page .buy-summary {
+    color: #161616;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .device-page .buy-head .buy-lede,
+  .device-page .buy-summary {
+    color: #5c5854;
+  }
+  .device-page .buy-panel .buy-head h1 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 9vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-transform: none;
+    line-height: 1.02;
+  }
+}
+
+@media (min-width: 768px) {
+  .device-page .product-layout {
+    grid-template-columns: minmax(280px, 440px) minmax(320px, 1fr);
+    gap: 64px;
+  }
+
+  .device-page .gallery .media {
+    width: 100%;
+    height: auto;
+    max-height: min(72vh, 720px);
+    aspect-ratio: var(--shot, 9 / 16);
+    background: #f3efe9;
+  }
+
+  .device-page .gallery .media img {
+    object-fit: contain;
+  }
+
+  .device-page .gallery-count,
+  .device-page .gallery-enlarge,
+  .device-page .gallery-save {
+    white-space: nowrap;
+  }
+
+  .device-page .gallery-tools {
+    grid-column: 2;
+    grid-row: 2;
+    width: max-content;
+    max-width: 100%;
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+  }
+
+  .device-page .buy-panel .buy-cta button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .device-page .trio-pick__grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .device-page .pdp-how {
+    grid-template-columns: minmax(200px, 320px) minmax(0, 1fr);
+    gap: 48px;
+    align-items: center;
+  }
+
+  .device-page .pdp-how__shot {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .device-page .gallery .media img,
+  .device-page .trio-chip img,
+  .device-page .buy-cta button,
+  .device-page .thumbs button {
+    animation: none;
+    transition: none;
+  }
+
+  .device-page .thumbs button[aria-current="true"] {
+    transform: none;
+  }
+}
+
+body:has(.device-page) .sticky-buy {
+  background: #fffaf8;
+  color: #161616;
+  border: 0;
+  border-top: 1px solid #ece7e1;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body:has(.device-page) .sticky-buy p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: #161616;
+}
+
+body:has(.device-page) .sticky-buy .btn {
+  min-height: 44px;
+}
+
+@media (min-width: 1100px) {
+  .device-page .trio-pick__grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 20px 10px;
+  }
+
+  .device-page .trio-chip__shot {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    max-height: 108px;
+  }
+}
+
+.device-page .gallery-tools {
+  width: min(100%, 100%);
+}
+
+.device-page .gallery-count,
+.device-page .gallery-enlarge,
+.device-page .gallery-save {
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.device-page #reviews.section.journal-section {
+  padding: clamp(56px, 8vw, 96px) var(--pad) clamp(72px, 9vw, 112px);
+  text-align: left;
+  border-top: 1px solid var(--line);
+  overflow-x: clip;
+}
+
+.device-page .journal-hero {
+  display: block;
+}
+
+.journal-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.device-page .journal-kicker,
+.device-page .journal h3 {
+  margin: 0;
+  color: #8a8178;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.device-page .journal h2 {
+  margin: 8px 0 10px;
+  font-family: var(--serif);
+  font-size: clamp(40px, 6vw, 68px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.device-page .journal-lede,
+.device-page .journal-sample,
+.device-page .journal-love > p,
+.device-page .journal-write p {
+  margin: 0;
+  max-width: 34rem;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.device-page .journal-sample {
+  margin-top: 10px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.device-page .journal-score {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 360px);
+}
+
+.device-page .journal-score__top,
+.device-page .journal-score__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.device-page .journal-score h2,
+.device-page .journal-score p {
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.device-page .journal-score h2 {
+  font-size: 30px;
+}
+
+.device-page .journal-score p {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-page .journal-score__meta {
+  align-items: center;
+  margin-top: -2px;
+}
+
+.device-page .journal-score__meta > span {
+  color: #6a6560;
+  font-size: 12px;
+}
+
+.device-page .journal-score .journal-stars {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.device-page .journal-score .journal-stars span {
+  display: inline;
+  margin: 0;
+  color: #d9d1c8;
+  font-size: 11px;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
+}
+
+.device-page .journal-score .journal-stars .is-on {
+  color: #9a1f33;
+}
+
+.journal-stars {
+  display: inline-flex;
+  gap: 2px;
+  color: #d9d1c8;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.journal-stars .is-on { color: #9a1f33; }
+.device-page .journal-dist {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.device-page .journal-dist li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) 42px;
+  gap: 8px;
+  align-items: center;
+  color: #6a6560;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-page .journal-dist li span:first-child {
+  color: #161616;
+  font-weight: 500;
+}
+
+.device-page .journal-dist li span:last-child { text-align: right; }
+
+.device-page .journal-dist i,
+.device-page .journal-dist b {
+  display: block;
+  height: 3px;
+  border-radius: 99px;
+}
+
+.device-page .journal-dist i { background: #ece7e1; }
+.device-page .journal-dist b { background: #9a1f33; }
+
+.device-page .journal-love,
+.device-page .journal-colors,
+.device-page .journal-wild {
+  margin-top: 36px;
+}
+
+.device-page .journal-love ul,
+.device-page .journal-colors div,
+.device-page .journal-wild div {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0 0 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.device-page .journal-love ul { list-style: none; }
+
+.device-page .journal-love li,
+.device-page .journal-colors button {
+  flex: 0 0 auto;
+  min-height: 72px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid #e4ddd6;
+  background: transparent;
+  color: #161616;
+  text-align: left;
+  font: inherit;
+}
+
+.device-page .journal-love strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.device-page .journal-love span,
+.device-page .journal-colors span {
+  display: block;
+  margin-top: 2px;
+  color: #5c5854;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.device-page .journal-colors button {
+  display: grid;
+  grid-template-columns: 14px auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  min-width: 112px;
+}
+
+.device-page .journal-colors i {
+  grid-row: 1 / span 2;
+  width: 14px;
+  height: 28px;
+}
+
+.device-page .journal-colors em {
+  grid-column: 2;
+  color: #8a8178;
+  font-style: normal;
+  font-size: 12px;
+}
+
+.device-page .journal-colors button[aria-pressed="true"] {
+  border-bottom-color: #161616;
+}
+
+.device-page .journal-wild div {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 132px;
+  grid-template-rows: 88px 88px;
+  gap: 8px;
+}
+
+.device-page .journal-wild button {
+  position: relative;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: #f3efe9;
+  color: #fffaf8;
+  text-align: left;
+  font: inherit;
+}
+
+.device-page .journal-wild button.is-lead {
+  grid-row: 1 / span 2;
+  width: 196px;
+}
+
+.device-page .journal-wild img,
+.device-page .journal-face {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.journal-face {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  color: #fffaf8;
+}
+
+.journal-face em {
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.journal-play {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 250, 248, 0.8);
+  border-radius: 50%;
+  position: relative;
+}
+
+.journal-play::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 11px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid #fffaf8;
+}
+
+.device-page .journal-wild button span {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  font-size: 12px;
+}
+
+.device-page .journal-wild small {
+  display: block;
+  opacity: 0.85;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.device-page .journal-bar {
+  position: sticky;
+  top: var(--header);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 16px;
+  padding: 4px 0 8px;
+  background: #fffaf8;
+}
+
+.device-page .journal-filters {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.device-page .journal-filters {
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: #f3efe9;
+}
+
+.device-page .journal-sort {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 0 0 auto;
+}
+
+.device-page .journal-sort__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 12px;
+  border: 1px solid #e4ddd6;
+  border-radius: 999px;
+  background: #fff;
+  color: #161616;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.device-page .journal-sort__btn svg {
+  color: #9a1f33;
+  transition: transform 0.2s ease;
+}
+
+.device-page .journal-sort.is-open .journal-sort__btn svg { transform: rotate(180deg); }
+
+.device-page .journal-sort__menu {
+  width: 132px;
+  margin: 6px 0 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid #e4ddd6;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(22, 22, 22, 0.1);
+}
+
+.device-page .journal-sort__menu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #3c3834;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+.device-page .journal-sort__menu button[aria-selected="true"] {
+  background: #9a1f33;
+  color: #fffaf8;
+}
+
+.device-page .journal-filters button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #6a6560;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.device-page .journal-filters b {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-page .journal-filters button > span {
+  color: #b08990;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.device-page .journal-filters button[aria-pressed="true"] {
+  background: #9a1f33;
+  color: #fffaf8;
+}
+
+.device-page .journal-filters button[aria-pressed="true"] > span { color: #fffaf8; }
+
+.device-page .journal-foot button,
+.device-page .journal-write a {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: #5c5854;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.device-page .journal-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.device-page .journal-card,
+.device-page .journal-divider {
+  border-top: 1px solid #ece7e1;
+  background: transparent;
+}
+
+.device-page .journal-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px 0 8px;
+  transition: transform 0.35s ease;
+}
+
+.device-page .journal-card h3,
+.device-page .journal-card blockquote {
+  margin: 8px 0 0;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.device-page .journal-card p {
+  margin: 8px 0 0;
+  color: #3c3834;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.device-page .journal-card p.is-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.device-page .journal-more,
+.device-page .journal-help {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8a8178;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.device-page .journal-card footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 14px;
+  color: #5c5854;
+  font-size: 12px;
+}
+
+.device-page .journal-card footer strong {
+  display: block;
+  color: #161616;
+  font-weight: 500;
+}
+
+.device-page .journal-card footer em {
+  display: block;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.device-page .journal-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e4ddd6;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.device-page .journal-card footer b {
+  padding-bottom: 1px;
+  border-bottom: 1px solid #9a1f33;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.device-page .journal-card__shot {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 220px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: #f3efe9;
+  color: #fffaf8;
+  font: inherit;
+}
+
+.device-page .journal-card__shot span {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.device-page .journal-card__shot img,
+.device-page .journal-card__shot .journal-face {
+  width: 100%;
+  height: 100%;
+}
+
+.device-page .journal-divider {
+  margin: 8px 0;
+  padding: 28px 0;
+  text-align: center;
+}
+
+.device-page .journal-divider strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--serif);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.device-page .journal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.device-page .journal-foot p { margin: 0; color: #5c5854; font-size: 13px; }
+
+.device-page .journal-foot button,
+.device-page .journal-write a {
+  border: 1px solid #161616;
+  color: #161616;
+  letter-spacing: 0.14em;
+}
+
+.device-page .journal-write {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid #ece7e1;
+}
+
+.device-page .journal-write h3 {
+  margin: 0 0 8px;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  text-transform: none;
+}
+
+.device-page .journal-write a {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.journal-light {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+  background: #100e0c;
+  color: #fffaf8;
+}
+
+.journal-light__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 250, 248, 0.4);
+  background: transparent;
+  color: #fffaf8;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.journal-light__media {
+  min-height: 0;
+  background: #1a1715;
+}
+
+.journal-light__media img,
+.journal-light__media video,
+.journal-light__media .journal-face {
+  width: 100%;
+  height: 100%;
+  max-height: 100vh;
+  object-fit: contain;
+}
+
+.journal-light__copy {
+  overflow: auto;
+  padding: 72px 28px 28px;
+}
+
+.journal-light .journal-stars { color: rgba(255, 250, 248, 0.28); }
+.journal-light .journal-stars .is-on { color: #f3e6d8; }
+
+.journal-light__copy h3 {
+  margin: 12px 0 0;
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.journal-light__copy p { margin: 14px 0 0; line-height: 1.55; }
+.journal-light__who { color: #d9d1c8; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+@media (min-width: 800px) {
+  .device-page .journal-score { width: min(100%, 420px); }
+  .device-page .journal-love ul { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; }
+  .device-page .journal-grid { grid-template-columns: 1fr 1fr; gap: 22px 28px; }
+  .device-page .journal-card.is-featured,
+  .device-page .journal-divider { grid-column: 1 / -1; }
+  .device-page .journal-card.is-featured blockquote { max-width: 18em; font-size: clamp(32px, 4vw, 48px); }
+}
+
+@media (max-width: 799px) {
+  .device-page .journal-love,
+  .device-page .journal-colors,
+  .device-page .journal-wild,
+  .device-page .journal-bar { margin-top: 28px; }
+  .device-page .journal-bar { align-items: flex-start; gap: 8px; }
+  .device-page .journal-card.is-image .journal-card__shot { height: 240px; }
+  .device-page .journal-card.is-featured blockquote { font-size: 28px; }
+  .journal-light { grid-template-columns: 1fr; overflow: auto; }
+  .journal-light__media { min-height: 46vh; }
+  .journal-light__media img,
+  .journal-light__media video,
+  .journal-light__media .journal-face { max-height: 52vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .device-page .journal-card,
+  .device-page .journal-card__shot img,
+  .device-page .journal-card__shot .journal-face { transition: none; }
+}

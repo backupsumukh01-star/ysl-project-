@@ -1,0 +1,281 @@
+.account-shell .account-nav {
+  display: flex;
+  gap: 4px 18px;
+  overflow-x: auto;
+  margin: 0 0 28px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid #ece7e1;
+}
+
+.account-shell .account-nav a {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #6a6560;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.account-shell .account-nav a[aria-current="page"] {
+  background: transparent;
+  border: 0;
+  color: #9a1f33;
+}
+
+.account-shell .stack-form {
+  gap: 14px;
+}
+
+.account-shell .auth-google,
+.account-shell .auth-google-btn {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 0 8px;
+}
+
+.account-shell .auth-google-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 12px 0 48px;
+  border: 1px solid #747775;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 20px;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.account-shell .auth-google-btn:hover { background: #f8f8f8; }
+
+.account-shell .auth-google-btn__mark {
+  position: absolute;
+  left: 12px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  background: transparent;
+}
+
+.account-shell .auth-google-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.account-shell .auth-or,
+.account-shell .pay-account-switch {
+  max-width: 420px;
+}
+
+.account-shell .auth-or {
+  margin: 4px 0 16px;
+  color: #6a6560;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.account-shell .pay-account-switch {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.account-shell .pay-account-switch button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #ece7e1;
+  background: #fff;
+  color: #161616;
+}
+
+.account-shell .pay-account-switch button.is-on {
+  border-color: #161616;
+  background: #161616;
+  color: #fffaf8;
+}
+
+.account-shell .auth-code {
+  display: inline-flex;
+  margin: 16px 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.account-shell .field {
+  display: grid;
+  gap: 8px;
+}
+
+.account-shell .field span {
+  color: #6a6560;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.account-shell .stack-form input,
+.account-shell .stack-form textarea,
+.account-shell .stack-form select {
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #ece7e1;
+  background: #fff;
+  color: #161616;
+}
+
+.account-shell .stack-form textarea {
+  min-height: 120px;
+}
+
+.account-shell .stack-form input:focus,
+.account-shell .stack-form textarea:focus {
+  outline: none;
+  border-color: #161616;
+}
+
+.account-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: #5c5854;
+  font-size: 15px;
+}
+
+.account-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.order-card {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 20px 0;
+  border: 0;
+  border-top: 1px solid #ece7e1;
+  background: transparent;
+}
+
+.order-card h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 500;
+}
+
+.order-card p {
+  margin: 0;
+  color: #5c5854;
+}
+
+.order-card a,
+.order-links a {
+  color: #9a1f33;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.order-card__total {
+  color: #161616;
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.order-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  list-style: none;
+  margin: 8px 0 24px;
+  padding: 0;
+}
+
+.order-steps li {
+  color: #6a6560;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.order-steps li[data-state="done"] { color: #161616; }
+.order-steps li[data-state="current"] { color: #9a1f33; }
+
+.order-piece {
+  padding: 18px 0;
+  border-top: 1px solid #ece7e1;
+}
+
+.order-piece h2 {
+  margin: 0 0 6px;
+}
+
+.order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.pay-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.pay-steps li {
+  color: #6a6560;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pay-steps li[aria-current="step"] { color: #9a1f33; }
+
+.order-confirm .order-lines {
+  list-style: none;
+  max-width: 36rem;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.order-confirm .order-lines li {
+  padding: 14px 0;
+  border-top: 1px solid #ece7e1;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 22px;
+}
+
+.order-confirm .order-amount {
+  margin: 8px 0 20px;
+  color: #161616;
+  font-family: var(--sans);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 0;
+}

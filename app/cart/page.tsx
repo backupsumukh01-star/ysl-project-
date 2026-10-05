@@ -1,0 +1,100 @@
+"use client";
+
+import Link from "next/link";
+import { useCart, lineKey } from "@/components/cart-provider";
+import { QuantitySelector } from "@/components/commerce";
+import { lineKind, shippingChargeLabel } from "@/lib/product";
+import { useMoney } from "@/components/market";
+import { CartLineImage } from "@/components/refill-mark";
+import { chosenTrios, SetContains } from "@/components/set-contains";
+import { useBagQuote } from "@/components/bag-quote";
+import "./cart.css";
+
+export default function CartPage() {
+  const money = useMoney();
+  const { items, ready, subtotal, setQuantity, removeItem, clear } = useCart();
+  const quote = useBagQuote(items, ready);
+  const shippingKnown = quote?.shippingConfigured === true && quote.shipping != null;
+
+  return (
+    <main id="main" className="page bag-page">
+      <p className="kicker">Bag</p>
+      <h1>Your bag.</h1>
+      {!ready && !items.length ? null : !items.length ? (
+        <div className="empty bag-empty">
+          <p>Your bag is empty.</p>
+          <Link className="btn btn-gold" href="/shop">
+            Continue shopping
+          </Link>
+        </div>
+      ) : (
+        <div className="split">
+          <div>
+            {items.map((line) => (
+              <article className="line" key={lineKey(line)}>
+                <CartLineImage slug={line.slug} image={line.image} size={160} />
+                <div>
+                  <h2>{line.name}</h2>
+                  {lineKind(line.sku) ? <p className="muted">{lineKind(line.sku)}</p> : null}
+                  {chosenTrios(line.variantName).length === 3 ? null : line.slug === "rouge-sur-mesure" ? (
+                    <p className="muted"><Link href="/product/rouge-sur-mesure#trios">Choose any 3 trios</Link></p>
+                  ) : line.variantName ? (
+                    <p className="muted">{line.variantName}</p>
+                  ) : null}
+                  {line.sku ? <p className="bag-sku">{line.sku}</p> : null}
+                  <p className="bag-price">{money(line.price)}</p>
+                  <div className="bag-actions">
+                    <QuantitySelector value={line.quantity} onChange={(quantity) => setQuantity(lineKey(line), quantity)} />
+                    <button type="button" className="bag-remove" onClick={() => removeItem(lineKey(line))}>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+                {chosenTrios(line.variantName).length === 3 ? (
+                  <div className="bag-set">
+                    <SetContains trios={chosenTrios(line.variantName)} quantity={line.quantity} />
+                  </div>
+                ) : null}
+              </article>
+            ))}
+            <button type="button" className="bag-clear" onClick={clear}>
+              Remove all
+            </button>
+          </div>
+          <aside className="bag-summary">
+            <div className="totals">
+              <div>
+                <span>Subtotal</span>
+                <span>{money(subtotal)}</span>
+              </div>
+              <div>
+                <span>Shipping</span>
+                <span>{!quote ? "Checking" : shippingKnown ? shippingChargeLabel(quote.shipping) : "Not published"}</span>
+              </div>
+              <div>
+                <span>Total</span>
+                <span>{shippingKnown && quote ? money(quote.total) : "Unavailable"}</span>
+              </div>
+            </div>
+            <Link className="btn btn-gold btn-full" href="/checkout">
+              Place order
+            </Link>
+            {quote && !shippingKnown ? <p className="muted">Place order stays closed until a shipping price is set. No charge is made.</p> : null}
+            <Link className="bag-link" href="/shop">
+              Continue shopping
+            </Link>
+          </aside>
+          <div className="bag-pay">
+            <p>
+              <span>Subtotal</span>
+              <span>{money(subtotal)}</span>
+            </p>
+            <Link className="btn btn-gold btn-full" href="/checkout">
+              Place order
+            </Link>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
