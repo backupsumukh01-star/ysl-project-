@@ -34,6 +34,7 @@ export function useBagQuote(items: CartLine[], ready: boolean) {
       setQuote(null);
       return;
     }
+    setQuote(null);
     let cancelled = false;
     api<BagQuote>("/api/checkout/quote", {
       method: "POST",
