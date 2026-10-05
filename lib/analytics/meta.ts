@@ -2,6 +2,7 @@
 
 import { paymentInfoEventId, purchaseEventId, registrationEventId, contactEventId } from "@/lib/analytics/ids";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/analytics/consent";
+import { readAttribution } from "@/lib/analytics/browser";
 
 type Content = { id: string; quantity: number; item_price?: number };
 
@@ -72,7 +73,18 @@ function paramsOf(payload: CommercePayload) {
 
 function mirror(event: string, payload: CommercePayload) {
   if (!analyticsAllowed() && !advertisingAllowed()) return;
-  const body = JSON.stringify({ event, payload, url: window.location.href });
+  let attribution: { source: string; medium: string; campaign: string } | undefined;
+  try {
+    const touch = readAttribution();
+    attribution = {
+      source: touch.lastTouchSource,
+      medium: touch.lastTouchMedium,
+      campaign: touch.lastTouchCampaign,
+    };
+  } catch {
+    attribution = undefined;
+  }
+  const body = JSON.stringify({ event, payload, url: window.location.href, attribution });
   try {
     if (navigator.sendBeacon) {
       navigator.sendBeacon("/api/analytics/events", new Blob([body], { type: "application/json" }));
@@ -169,8 +181,8 @@ export function trackCustom(event: "HowItWorksViewed" | "DemoVideoPlayed" | "Col
   emit(event, {}, { custom: true });
 }
 
-export function trackInternal(event: "PaymentFailed" | "PaymentCancelled") {
-  mirror(event, { eventId: `${event}_${crypto.randomUUID()}` });
+export function trackInternal(event: "PaymentFailed" | "PaymentCancelled", orderId?: string) {
+  emit(event, { orderId, eventId: `${event}_${orderId || "visit"}_${crypto.randomUUID()}` }, { custom: true });
 }
 
 export function knownPurchaseId(orderId: string) {

@@ -6,6 +6,7 @@ import "../app/account/account.css";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api-client";
+import { orderStatusLabel, paymentLabel } from "@/components/account-ui";
 import { formatMoney } from "@/lib/product";
 import { trackPurchase } from "@/lib/analytics/meta";
 
@@ -85,7 +86,7 @@ export function OrderSuccess({ id }: { id: string }) {
     <main id="main" className="page quiet-page order-confirm">
       <p className="kicker">{order.paymentStatus === "PAID" ? "Order confirmed" : "Order received"}</p>
       <h1>Thank you, {order.name}.</h1>
-      <p className="lede">Order {order.number}. Payment: {order.paymentStatus}. Next step: {order.status}.</p>
+      <p className="lede">Order {order.number}. Payment: {paymentLabel(order.paymentStatus)}. Next step: {orderStatusLabel(order.status)}.</p>
       <ul className="order-lines">
         {order.items.map((item) => (
           <li key={item.name}>
@@ -101,7 +102,7 @@ export function OrderSuccess({ id }: { id: string }) {
         </p>
       ) : null}
       <div className="actions">
-        <Link className="btn btn-gold" href={signedIn ? `/account/orders/${order.id}` : "/account/login"}>
+        <Link className="btn btn-gold" href={`/account/orders/${order.id}`}>
           View order
         </Link>
         <Link className="btn btn-ghost" href="/shop">
@@ -111,7 +112,7 @@ export function OrderSuccess({ id }: { id: string }) {
           Contact support
         </Link>
       </div>
-      {!signedIn ? <p>Create your account to track your order. Use the same email at sign-in.</p> : null}
+      {!signedIn ? <p>This confirmation stays on this device. Create an account with the same email to see later orders.</p> : null}
       <p>
         <Link href={`/invoice/${order.id}`}>Invoice</Link>
       </p>

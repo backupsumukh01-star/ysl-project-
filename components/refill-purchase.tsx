@@ -33,7 +33,7 @@ export function RefillPurchase({
   options,
   initialCode,
 }: {
-  product: { id: string; slug: string; name: string; maxQuantity: number; inStock: boolean };
+  product: { id: string; slug: string; name: string; maxQuantity: number; inStock: boolean; compareAt?: number | null };
   options: RefillOption[];
   initialCode: string;
 }) {
@@ -56,6 +56,7 @@ export function RefillPurchase({
         slug: product.slug,
         name: product.name,
         price: selected.price,
+        compareAt: product.compareAt ?? null,
         sku: selected.sku,
         image: selected.image,
         variantId: selected.id,
@@ -143,7 +144,7 @@ export function RefillPurchase({
         </header>
         <div className="trio-buy">
           <p className="trio-lede">Create custom lip shades in pink, orange, red and nude. Cartridges are removable and interchangeable in your Rouge Sur Mesure Custom Lip Color Creator.</p>
-          <Price amount={selected.price} compare={false} />
+          <Price amount={selected.price} compareAt={product.compareAt ?? null} />
           <RefillChoices
             options={options}
             selectedId={selected.id}
@@ -219,7 +220,7 @@ export function RefillPurchase({
         <div className="sticky-buy">
           <div>
             <p>{selected.name}</p>
-            <Price amount={selected.price} compare={false} />
+            <Price amount={selected.price} compareAt={product.compareAt ?? null} />
           </div>
           <AddToCartButton item={item} />
         </div>

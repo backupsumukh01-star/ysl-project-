@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
+import { getCustomer } from "@/lib/auth";
 import { canRecordAnalytics, canSendMarketingEvent, type ConsentChoice } from "@/lib/analytics/consent";
 import { sendMetaServerEvent } from "@/lib/analytics/meta-server";
+import { recordPaymentOutcome } from "@/lib/analytics/purchase";
 
 const SERVER_OWNED = new Set(["Purchase", "AddPaymentInfo", "CompleteRegistration", "Contact"]);
 
@@ -15,6 +17,8 @@ const SERVER_EVENTS = new Set([
   "HowItWorksViewed",
   "DemoVideoPlayed",
   "ColorExperienceViewed",
+  "PaymentFailed",
+  "PaymentCancelled",
 ]);
 
 type Incoming = {
@@ -33,6 +37,7 @@ type Incoming = {
     searchString?: string;
     orderId?: string;
   };
+  attribution?: { source?: string; medium?: string; campaign?: string };
 };
 
 function deviceType(userAgent: string) {
@@ -76,6 +81,24 @@ export async function acceptBrowserEvent(request: Request, body: Incoming, conse
   } catch {
     /* A relative or empty URL is not an error. */
   }
+  source = source || String(body.attribution?.source || "");
+  medium = medium || String(body.attribution?.medium || "");
+  campaign = campaign || String(body.attribution?.campaign || "");
+  let userId = "";
+  try {
+    userId = (await getCustomer())?.id || "";
+  } catch {
+    userId = "";
+  }
+  if ((name === "PaymentFailed" || name === "PaymentCancelled") && payload.orderId) {
+    await recordPaymentOutcome({
+      orderId: String(payload.orderId).slice(0, 80),
+      eventName: name,
+      eventId,
+      request,
+    });
+    return;
+  }
   if (canRecordAnalytics(consent) && !SERVER_OWNED.has(name)) {
     const prisma = db();
     if (prisma) {
@@ -86,6 +109,7 @@ export async function acceptBrowserEvent(request: Request, body: Incoming, conse
           name,
           eventId,
           sessionId: decodeURIComponent(sessionId).slice(0, 80),
+          userId: userId.slice(0, 80),
           path: url.split("?")[0]?.slice(0, 200) || "",
           contentIds: contentIds.join(",").slice(0, 400),
           valueMinor: typeof payload.value === "number" ? Math.round(payload.value * 100) : null,

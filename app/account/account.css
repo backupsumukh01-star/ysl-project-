@@ -1,34 +1,168 @@
+.account-panel {
+  display: grid;
+  gap: 28px;
+}
+
+.account-panel__who {
+  margin: 0;
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.account-panel__mail {
+  margin: 6px 0 8px;
+  color: #6a6560;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .account-shell .account-nav {
-  display: flex;
-  gap: 4px 18px;
-  overflow-x: auto;
-  margin: 0 0 28px;
-  padding: 0 0 12px;
-  border-bottom: 1px solid #ece7e1;
+  display: grid;
+  gap: 0;
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
 }
 
 .account-shell .account-nav a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  flex: 0 0 auto;
-  min-height: 36px;
+  min-height: 46px;
   padding: 0;
   border: 0;
+  border-top: 1px solid #ece7e1;
   border-radius: 0;
   background: transparent;
-  color: #6a6560;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: #161616;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.account-shell .account-nav a:last-child {
+  border-bottom: 1px solid #ece7e1;
 }
 
 .account-shell .account-nav a[aria-current="page"] {
   background: transparent;
-  border: 0;
+  border-color: #ece7e1;
   color: #9a1f33;
 }
 
-.account-shell .stack-form {
+.account-logout {
+  margin-top: 18px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #6a6560;
+  font-family: var(--sans);
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-logout:hover { color: #161616; }
+
+.account-panel__main .stack-form,
+.account-panel__main .address-form {
+  max-width: 560px;
+}
+
+.address-card {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 16px 0;
+  border-top: 1px solid #ece7e1;
+}
+
+.address-card p { margin: 0; color: #5c5854; }
+
+.address-card__name {
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.address-remove {
+  justify-self: start;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9a1f33;
+  font-family: var(--sans);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.address-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.address-form__pair {
+  display: grid;
+  gap: 14px;
+}
+
+.support-list {
+  display: grid;
+  gap: 0;
+  margin: 8px 0 28px;
+}
+
+.support-list article {
+  display: grid;
+  gap: 4px;
+  padding: 16px 0;
+  border-top: 1px solid #ece7e1;
+}
+
+.support-list article:last-child { border-bottom: 1px solid #ece7e1; }
+
+.support-list strong {
+  color: #161616;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.support-list p { margin: 0; color: #5c5854; }
+
+@media (min-width: 720px) {
+  .address-form__pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 900px) {
+  .account-panel {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .account-panel__side {
+    position: sticky;
+    top: calc(var(--header) + 20px);
+  }
+}
+
+.account-shell .stack-form,
+.account-shell .address-form {
   gap: 14px;
 }
 
@@ -134,7 +268,10 @@
 
 .account-shell .stack-form input,
 .account-shell .stack-form textarea,
-.account-shell .stack-form select {
+.account-shell .stack-form select,
+.account-shell .address-form input,
+.account-shell .address-form textarea,
+.account-shell .address-form select {
   min-height: 48px;
   padding: 12px 14px;
   border: 1px solid #ece7e1;
@@ -142,12 +279,15 @@
   color: #161616;
 }
 
-.account-shell .stack-form textarea {
+.account-shell .stack-form textarea,
+.account-shell .address-form textarea {
   min-height: 120px;
 }
 
 .account-shell .stack-form input:focus,
-.account-shell .stack-form textarea:focus {
+.account-shell .stack-form textarea:focus,
+.account-shell .address-form input:focus,
+.account-shell .address-form textarea:focus {
   outline: none;
   border-color: #161616;
 }

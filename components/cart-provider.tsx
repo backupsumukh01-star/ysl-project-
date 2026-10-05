@@ -19,6 +19,7 @@ export type CartLine = {
   variantName: string;
   sku: string;
   price: number | null;
+  compareAt?: number | null;
   image: string;
 };
 
@@ -31,6 +32,7 @@ export type CartInput = {
   variantName?: string;
   sku?: string;
   price: number | null;
+  compareAt?: number | null;
   image?: string;
 };
 
@@ -96,6 +98,7 @@ function normalize(input: number | CartInput | undefined): CartLine {
     variantName: input.variantName || "",
     sku: input.sku || "",
     price: catalogPrice(input.slug, input.id, input.price),
+    compareAt: input.compareAt ?? null,
     image: input.slug === "cartridge-refill" ? input.image || cartridgePhotoSrc(input.variantName) : input.image || product.images.showcase.src,
   };
 }
@@ -120,6 +123,7 @@ function readStored(): CartLine[] {
         variantName: line.variantName || "",
         sku: line.sku || "",
         price: catalogPrice(line.slug || "", line.id, typeof line.price === "number" || line.price === null ? line.price : known ? product.price : null),
+        compareAt: typeof line.compareAt === "number" ? line.compareAt : null,
         image: (line.slug || "") === "cartridge-refill" ? line.image || cartridgePhotoSrc(line.variantName) : line.image || (known ? product.images.showcase.src : "/images/showcase.png"),
       }];
     });

@@ -47,6 +47,7 @@ export default async function Page() {
               slug: device.slug,
               name: device.name,
               price: device.price,
+              compareAt: device.compareAt,
               sku: device.sku,
               image: product.images.showcase.src,
             }

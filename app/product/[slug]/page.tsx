@@ -72,7 +72,7 @@ export default async function ProductSlugPage({
       <main id="main" className="page trio-page">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <RefillPurchase
-          product={{ id: product.id, slug: product.slug, name: product.name, maxQuantity, inStock: product.inStock }}
+          product={{ id: product.id, slug: product.slug, name: product.name, maxQuantity, inStock: product.inStock, compareAt: product.compareAt }}
           options={options}
           initialCode={cartridgeCode(query.cartridge)}
         />

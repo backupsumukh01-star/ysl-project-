@@ -130,6 +130,44 @@ function requestSignals(request?: Request) {
   return { userAgent, ip };
 }
 
+function orderContext(order: { attributionJson: string; addressJson: string }) {
+  let source = "";
+  let medium = "";
+  let campaign = "";
+  let fbp = "";
+  let fbc = "";
+  let city = "";
+  let region = "";
+  let postcode = "";
+  let country = "";
+  try {
+    const attribution = JSON.parse(order.attributionJson) as {
+      lastTouchSource?: string;
+      lastTouchMedium?: string;
+      lastTouchCampaign?: string;
+      fbp?: string;
+      fbc?: string;
+    };
+    source = attribution.lastTouchSource || "";
+    medium = attribution.lastTouchMedium || "";
+    campaign = attribution.lastTouchCampaign || "";
+    fbp = attribution.fbp || "";
+    fbc = attribution.fbc || "";
+  } catch {
+    /* Attribution is optional. */
+  }
+  try {
+    const address = JSON.parse(order.addressJson) as { city?: string; region?: string; postcode?: string; country?: string };
+    city = address.city || "";
+    region = address.region || "";
+    postcode = address.postcode || "";
+    country = address.country || "";
+  } catch {
+    /* Address is optional for matching. */
+  }
+  return { source, medium, campaign, fbp, fbc, city, region, postcode, country };
+}
+
 export async function sendPaymentInfo(orderId: string, request?: Request) {
   const prisma = db();
   if (!prisma) return;
@@ -139,6 +177,7 @@ export async function sendPaymentInfo(orderId: string, request?: Request) {
   const contents = order.items.map((item) => ({ id: item.productId, quantity: item.quantity, item_price: item.unitMinor / 100 }));
   const signals = requestSignals(request);
   try {
+    const context = orderContext(order);
     if (canRecordAnalytics(consent)) {
       await prisma.analyticsEvent.create({
         data: {
@@ -148,6 +187,9 @@ export async function sendPaymentInfo(orderId: string, request?: Request) {
           contentIds: order.items.map((item) => item.productId).join(",").slice(0, 400),
           valueMinor: order.totalMinor,
           currency: order.currency,
+          source: context.source.slice(0, 120),
+          medium: context.medium.slice(0, 120),
+          campaign: context.campaign.slice(0, 120),
         },
       });
     }
@@ -166,10 +208,86 @@ export async function sendPaymentInfo(orderId: string, request?: Request) {
         content_type: "product",
         num_items: order.items.reduce((sum, item) => sum + item.quantity, 0),
       },
-      userData: { email: order.email, phone: order.phone, externalId: order.userId || undefined, ...signals },
+      userData: {
+        email: order.email,
+        phone: order.phone,
+        externalId: order.userId || undefined,
+        fbp: context.fbp,
+        fbc: context.fbc,
+        city: context.city,
+        region: context.region,
+        postcode: context.postcode,
+        country: context.country,
+        ...signals,
+      },
     });
   } catch {
     logError("meta_event", { event: "AddPaymentInfo", eventId: paymentInfoEventId(order.id), status: "FAILED" });
+  }
+}
+
+export async function recordPaymentOutcome(input: {
+  orderId: string;
+  eventName: "PaymentFailed" | "PaymentCancelled";
+  eventId: string;
+  request?: Request;
+}) {
+  const prisma = db();
+  if (!prisma || !input.orderId || !input.eventId) return;
+  const order = await prisma.order.findUnique({ where: { id: input.orderId }, include: { items: true } });
+  if (!order || order.paymentStatus === "PAID") return;
+  const consent: ConsentChoice = { necessary: true, analytics: order.analyticsConsent, advertising: order.marketingConsent };
+  const context = orderContext(order);
+  const eventId = input.eventId.slice(0, 120);
+  try {
+    if (canRecordAnalytics(consent)) {
+      const existing = await prisma.analyticsEvent.findFirst({ where: { eventId } });
+      if (!existing) {
+        await prisma.analyticsEvent.create({
+          data: {
+            name: input.eventName,
+            eventId,
+            userId: order.userId || "",
+            path: `/checkout`,
+            contentIds: order.items.map((item) => item.productId).join(",").slice(0, 400),
+            valueMinor: order.totalMinor,
+            currency: order.currency,
+            source: context.source.slice(0, 120),
+            medium: context.medium.slice(0, 120),
+            campaign: context.campaign.slice(0, 120),
+          },
+        });
+      }
+    }
+    await sendMetaServerEvent({
+      eventName: input.eventName,
+      eventId,
+      orderId: order.id,
+      userId: order.userId,
+      consent,
+      sourceUrl: process.env.NEXT_PUBLIC_SITE_URL || "",
+      customData: {
+        currency: order.currency,
+        value: order.totalMinor / 100,
+        content_ids: order.items.map((item) => item.productId),
+        content_type: "product",
+        order_id: order.number,
+      },
+      userData: {
+        email: order.email,
+        phone: order.phone,
+        externalId: order.userId || undefined,
+        fbp: context.fbp,
+        fbc: context.fbc,
+        city: context.city,
+        region: context.region,
+        postcode: context.postcode,
+        country: context.country,
+        ...requestSignals(input.request),
+      },
+    });
+  } catch {
+    logError("meta_event", { event: input.eventName, eventId, status: "FAILED" });
   }
 }
 

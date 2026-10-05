@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { siteConfig } from "@/lib/config";
 import { ApiError, api } from "@/lib/api-client";
 import { trackContact } from "@/lib/analytics/meta";
 import { PageBack } from "@/components/page-back";
@@ -50,7 +49,7 @@ export default function ContactPage() {
         }),
       });
       trackContact(result.id);
-      setNote(`Message sent. Your ticket is ${result.number}.`);
+      setNote("Sent. We'll reply to the email you entered.");
       setNoteError(false);
       event.currentTarget.reset();
     } catch (error) {
@@ -66,9 +65,6 @@ export default function ContactPage() {
       <PageBack href="/shop">All products</PageBack>
       <p className="kicker">Contact</p>
       <h1>Write to us.</h1>
-      <p>Email: {siteConfig.supportEmail || "Support email will be published shortly."}</p>
-      <p>Phone: {siteConfig.supportPhone || "Support phone will be published shortly."}</p>
-      <p>Hours: {siteConfig.supportHours || "Support hours will be published shortly."}</p>
       {whatsapp ? <p><a href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}>WhatsApp support</a></p> : null}
       <form onSubmit={onSubmit} noValidate style={{ maxWidth: 560, marginTop: 24 }}>
         <label className="field">

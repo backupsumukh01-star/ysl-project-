@@ -26,7 +26,9 @@ export function LoginScreen() {
   const router = useRouter();
   const [mode, setMode] = useState<"register" | "login">("register");
   const [codeOpen, setCodeOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [resetPending, setResetPending] = useState(false);
   const [message, setMessage] = useState("");
 
   function finish() {
@@ -48,6 +50,21 @@ export function LoginScreen() {
     } catch (error) {
       setMessage(error instanceof ApiError ? error.message : "The account could not be saved.");
       setPending(false);
+    }
+  }
+
+  async function onReset(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const email = String(new FormData(event.currentTarget).get("reset-email") || "");
+    setResetPending(true);
+    setMessage("");
+    try {
+      await api("/api/auth/password-reset", { method: "POST", body: JSON.stringify({ email }) });
+      setMessage("If that email has an account, a reset link is on its way.");
+    } catch (error) {
+      setMessage(error instanceof ApiError ? error.message : "The reset link could not be sent.");
+    } finally {
+      setResetPending(false);
     }
   }
 
@@ -95,6 +112,22 @@ export function LoginScreen() {
           {pending ? "Saving" : mode === "register" ? "Create account" : "Sign in"}
         </button>
       </form>
+      {mode === "login" ? (
+        <button type="button" className="bag-link auth-code" onClick={() => { setResetOpen((open) => !open); setMessage(""); }}>
+          Forgot password
+        </button>
+      ) : null}
+      {resetOpen ? (
+        <form onSubmit={onReset} className="stack-form">
+          <label className="field">
+            <span>Email</span>
+            <input name="reset-email" type="email" autoComplete="email" required />
+          </label>
+          <button className="btn btn-dark" type="submit" disabled={resetPending}>
+            {resetPending ? "Sending" : "Send reset link"}
+          </button>
+        </form>
+      ) : null}
       <button type="button" className="bag-link auth-code" onClick={() => { setCodeOpen((open) => !open); setMessage(""); }}>
         Email me a code
       </button>
@@ -226,16 +259,17 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelled",
   REFUNDED: "Refunded",
   PENDING: "Pending",
+  PENDING_PAYMENT: "Awaiting payment",
   UNPAID: "Unpaid",
   FAILED: "Failed",
   PARTIALLY_REFUNDED: "Partially refunded",
 };
 
-function orderStatusLabel(status: string) {
+export function orderStatusLabel(status: string) {
   return STATUS_LABELS[status] || status;
 }
 
-function paymentLabel(status: string) {
+export function paymentLabel(status: string) {
   return STATUS_LABELS[status] || status;
 }
 
@@ -501,13 +535,24 @@ export function ProfileScreen() {
   );
 }
 
+type SavedAddress = {
+  id: string;
+  name: string;
+  phone: string;
+  line1: string;
+  city: string;
+  region: string;
+  postcode: string;
+  country: string;
+};
+
 export function AddressesScreen() {
-  const [addresses, setAddresses] = useState<{ id: string; name: string; line1: string; city: string; country: string }[]>([]);
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [message, setMessage] = useState("");
   const [session, setSession] = useState<"checking" | "out" | "in">("checking");
 
   function load() {
-    api<{ addresses: { id: string; name: string; line1: string; city: string; country: string }[] }>("/api/account/addresses")
+    api<{ addresses: SavedAddress[] }>("/api/account/addresses")
       .then((result) => setAddresses(result.addresses))
       .catch((error) => setMessage(error instanceof ApiError ? error.message : "Addresses could not be loaded."));
   }
@@ -544,25 +589,35 @@ export function AddressesScreen() {
     <>
       <p className="kicker">Account</p>
       <h1>Addresses</h1>
-      {addresses.map((address) => (
-        <article key={address.id} className="notice">
-          <p>
-            {address.name}, {address.line1}, {address.city}, {address.country}
-          </p>
-          <button
-            className="icon-btn"
-            type="button"
-            onClick={async () => {
-              await api(`/api/account/addresses/${address.id}`, { method: "DELETE" });
-              load();
-            }}
-          >
-            Remove
-          </button>
-        </article>
-      ))}
+      <p className="lede">Save a delivery address here. Checkout can still use a different one.</p>
+      {addresses.length ? (
+        <div className="support-list">
+          {addresses.map((address) => (
+            <article className="address-card" key={address.id}>
+              <p className="address-card__name">{address.name}</p>
+              {address.phone ? <p>{address.phone}</p> : null}
+              <p>{address.line1}</p>
+              <p>{[address.city, address.region, address.postcode].filter(Boolean).join(", ")}</p>
+              <p>{address.country}</p>
+              <button
+                className="address-remove"
+                type="button"
+                onClick={async () => {
+                  await api(`/api/account/addresses/${address.id}`, { method: "DELETE" });
+                  load();
+                }}
+              >
+                Remove
+              </button>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p>No saved addresses yet.</p>
+      )}
+      <h2>Add an address</h2>
       <form
-        className="stack-form"
+        className="address-form"
         onSubmit={async (event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
@@ -586,22 +641,38 @@ export function AddressesScreen() {
           }
         }}
       >
-        {(
-          [
-            ["name", "Name"],
-            ["phone", "Phone"],
-            ["line1", "Street"],
-            ["city", "City"],
-            ["region", "State"],
-            ["postcode", "Postcode"],
-            ["country", "Country"],
-          ] as const
-        ).map(([field, label]) => (
-          <label className="field" key={field}>
-            <span>{label}</span>
-            <input name={field} required={field !== "phone"} autoComplete={field === "phone" ? "tel" : undefined} />
+        <label className="field">
+          <span>Name</span>
+          <input name="name" autoComplete="name" required />
+        </label>
+        <label className="field">
+          <span>Phone</span>
+          <input name="phone" autoComplete="tel" />
+        </label>
+        <label className="field">
+          <span>Street</span>
+          <input name="line1" autoComplete="address-line1" required />
+        </label>
+        <div className="address-form__pair">
+          <label className="field">
+            <span>City</span>
+            <input name="city" autoComplete="address-level2" required />
           </label>
-        ))}
+          <label className="field">
+            <span>State</span>
+            <input name="region" autoComplete="address-level1" required />
+          </label>
+        </div>
+        <div className="address-form__pair">
+          <label className="field">
+            <span>Postcode</span>
+            <input name="postcode" autoComplete="postal-code" required />
+          </label>
+          <label className="field">
+            <span>Country</span>
+            <input name="country" autoComplete="country-name" required />
+          </label>
+        </div>
         <button className="btn btn-gold" type="submit">
           Save address
         </button>
@@ -642,28 +713,18 @@ export function SecurityScreen() {
       <p className="kicker">Account</p>
       <h1>Security</h1>
       <p className="lede">Sign out of this browser, or end every session for this account.</p>
+      <p className="lede">Log out of this browser from the account menu. These actions apply to every signed-in browser.</p>
       <div className="order-actions">
       <button
         className="btn btn-ghost"
         type="button"
         onClick={async () => {
           await api("/api/account/security", { method: "POST" });
-          setMessage("Signed out on this account.");
+          setMessage("Signed out on every browser.");
           router.push("/account/login");
         }}
       >
         Sign out everywhere
-      </button>
-      <button
-        className="btn btn-dark"
-        type="button"
-        onClick={async () => {
-          await api("/api/auth/logout", { method: "POST" });
-          router.push("/");
-          router.refresh();
-        }}
-      >
-        Log out
       </button>
       <button
         className="btn btn-ghost"

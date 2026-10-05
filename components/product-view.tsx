@@ -191,7 +191,7 @@ export function ProductView({
           <h1>Rouge Sur Mesure</h1>
           <p className="buy-lede">The Custom Lip Color Creator</p>
           <p className="buy-summary">{product.shortDescription}</p>
-          <Price amount={price} compare={false} />
+          <Price amount={price} compareAt={offer?.compareAt ?? null} />
         </div>
         <div className="buy-shop">
           <div className="trio-pick" id="trios">

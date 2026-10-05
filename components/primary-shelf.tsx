@@ -25,6 +25,7 @@ export type ShelfCard = {
   key: string;
   title: string;
   price: number | null;
+  compareAt?: number | null;
   start: number;
   lead?: boolean;
   group?: string;
@@ -59,7 +60,7 @@ function PickCard({ card }: { card: ShelfCard }) {
         </h3>
         <p className="pick-card__choice">{card.key === "refill" ? "One cartridge for an existing setup." : current.name ? `${current.name} — ${current.label}` : current.label}</p>
         {!current.image ? <p className="pick-card__note">Color reference for the selected cartridge. This is not a photograph of the refill.</p> : null}
-        <Price amount={card.price} compare={false} />
+        <Price amount={card.price} compareAt={card.compareAt ?? null} />
         {picks && card.key === "refill" ? (
           <RefillChoices
             options={card.swatches.map((swatch) => ({

@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/audience-digest",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

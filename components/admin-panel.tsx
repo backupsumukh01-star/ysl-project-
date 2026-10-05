@@ -5,7 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ApiError, api } from "@/lib/api-client";
 
-const links = ["", "orders", "products", "catalog", "customers", "reviews", "testimonials", "content", "coupons", "support", "returns", "emails", "settings"];
+const links = ["", "audience", "orders", "products", "catalog", "customers", "reviews", "testimonials", "content", "coupons", "support", "returns", "emails", "settings"];
+
+function adminLabel(link: string) {
+  if (!link) return "Overview";
+  if (link === "audience") return "Live";
+  return link;
+}
 
 export function AdminPanel() {
   const pathname = usePathname();
@@ -33,7 +39,10 @@ export function AdminPanel() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+    if (section !== "audience") return;
+    const timer = window.setInterval(() => void load(), 20000);
+    return () => window.clearInterval(timer);
+  }, [load, section]);
 
   return (
     <main id="main" className="page admin-page">
@@ -41,13 +50,14 @@ export function AdminPanel() {
       <nav className="account-nav" aria-label="Admin">
         {links.map((link) => (
           <Link key={link || "home"} href={link ? `/admin/${link}` : "/admin"}>
-            {link || "Overview"}
+            {adminLabel(link)}
           </Link>
         ))}
       </nav>
       {message ? <p className="notice">{message}</p> : null}
       {!authed ? <Link href="/admin/login">Admin sign in</Link> : null}
       {authed && section === "dashboard" ? <Dashboard data={data} /> : null}
+      {authed && section === "audience" ? <Audience data={data} /> : null}
       {authed && section === "orders" ? <Orders data={data} /> : null}
       {authed && section === "products" ? <Products data={data} reload={load} /> : null}
       {authed && section === "catalog" ? <CatalogEditor data={data} reload={load} /> : null}
@@ -226,6 +236,156 @@ function Dashboard({ data }: { data: unknown }) {
           {order.number} · {order.status} · {order.paymentStatus}
         </p>
       ))}
+    </>
+  );
+}
+
+function Audience({ data }: { data: unknown }) {
+  const report = data as {
+    generatedAt?: string;
+    metaConfigured?: boolean;
+    funnel?: {
+      visits: number;
+      visitors: number;
+      productViews: number;
+      addToCart: number;
+      checkoutStarts: number;
+      razorpayOpened: number;
+      paid: number;
+      failed: number;
+      leftWindow: number;
+    };
+    byState?: { state: string; country: string; orders: number; paid: number; failed: number; opened: number }[];
+    byCampaign?: { source: string; campaign: string; visits: number; carts: number; opened: number; paid: number; failed: number }[];
+    interest?: { name: string; views: number; carts: number; checkouts: number; paid: number }[];
+    people?: { at: string; number: string; name: string; email: string; phone: string; city: string; state: string; country: string; source: string; campaign: string; products: string; step: string; total: number | null; currency: string }[];
+    activity?: { at: string; name: string; campaign: string; source: string; device: string; products: string; session: string }[];
+  } | null;
+  if (!report?.funnel) return null;
+  const funnel = report.funnel;
+  const stats = [
+    ["Visits", funnel.visits],
+    ["Browsers", funnel.visitors],
+    ["Product views", funnel.productViews],
+    ["Added to bag", funnel.addToCart],
+    ["Checkout", funnel.checkoutStarts],
+    ["Opened Razorpay", funnel.razorpayOpened],
+    ["Paid", funnel.paid],
+    ["Payment failed", funnel.failed],
+    ["Closed window", funnel.leftWindow],
+  ];
+  return (
+    <>
+      <h1>Live activity</h1>
+      <p className="muted">Last 24 hours. This screen refreshes every 20 seconds. A summary is also emailed once a day when mail is connected.</p>
+      <p>{report.metaConfigured ? "Meta can receive these events for retargeting." : "Meta is not connected yet. Add the pixel and access token, then these same events can build ad audiences."}</p>
+      <div className="audience-grid">
+        {stats.map(([label, value]) => (
+          <p key={String(label)} className="audience-stat">
+            <strong>{value}</strong>
+            {label}
+          </p>
+        ))}
+      </div>
+      <h2>Where orders come from</h2>
+      {report.byState?.length ? (
+        <table className="audience-table">
+          <thead>
+            <tr><th>State</th><th>Orders</th><th>Opened Razorpay</th><th>Paid</th><th>Failed</th></tr>
+          </thead>
+          <tbody>
+            {report.byState.map((row) => (
+              <tr key={`${row.state}-${row.country}`}>
+                <td>{row.state}{row.country ? `, ${row.country}` : ""}</td>
+                <td>{row.orders}</td>
+                <td>{row.opened}</td>
+                <td>{row.paid}</td>
+                <td>{row.failed}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : <p>No orders in the last 24 hours.</p>}
+      <h2>Campaigns</h2>
+      {report.byCampaign?.length ? (
+        <table className="audience-table">
+          <thead>
+            <tr><th>Source</th><th>Campaign</th><th>Visits</th><th>Bags</th><th>Razorpay</th><th>Paid</th><th>Failed</th></tr>
+          </thead>
+          <tbody>
+            {report.byCampaign.map((row) => (
+              <tr key={`${row.source}-${row.campaign}`}>
+                <td>{row.source}</td>
+                <td>{row.campaign}</td>
+                <td>{row.visits}</td>
+                <td>{row.carts}</td>
+                <td>{row.opened}</td>
+                <td>{row.paid}</td>
+                <td>{row.failed}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : <p>No campaign or direct visits recorded in this window.</p>}
+      <h2>Most interest</h2>
+      {report.interest?.length ? (
+        <table className="audience-table">
+          <thead>
+            <tr><th>Product</th><th>Views</th><th>Bags</th><th>Checkout</th><th>Paid</th></tr>
+          </thead>
+          <tbody>
+            {report.interest.map((row) => (
+              <tr key={row.name}>
+                <td>{row.name}</td>
+                <td>{row.views}</td>
+                <td>{row.carts}</td>
+                <td>{row.checkouts}</td>
+                <td>{row.paid}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : <p>No product interest in the last 24 hours.</p>}
+      <h2>People</h2>
+      <p className="muted">Anyone who reached checkout in the last 7 days. Earlier steps, before an email is entered, stay anonymous in the activity list.</p>
+      {report.people?.length ? (
+        <table className="audience-table">
+          <thead>
+            <tr><th>When</th><th>Person</th><th>Place</th><th>From</th><th>Step</th><th>Order</th></tr>
+          </thead>
+          <tbody>
+            {report.people.map((person) => (
+              <tr key={person.number}>
+                <td>{new Date(person.at).toLocaleString()}</td>
+                <td>{person.name}<br />{person.email}{person.phone ? <><br />{person.phone}</> : null}</td>
+                <td>{[person.city, person.state, person.country].filter(Boolean).join(", ")}</td>
+                <td>{person.source || "direct"}{person.campaign ? ` / ${person.campaign}` : ""}</td>
+                <td>{person.step}</td>
+                <td>{person.number}<br />{person.products}{person.total != null ? <><br />{person.total} {person.currency}</> : null}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : <p>No checkout yet.</p>}
+      <h2>Activity</h2>
+      {report.activity?.length ? (
+        <table className="audience-table">
+          <thead>
+            <tr><th>When</th><th>Event</th><th>Product</th><th>From</th><th>Device</th></tr>
+          </thead>
+          <tbody>
+            {report.activity.map((event, index) => (
+              <tr key={`${event.at}-${event.name}-${index}`}>
+                <td>{new Date(event.at).toLocaleString()}</td>
+                <td>{event.name}</td>
+                <td>{event.products}</td>
+                <td>{event.source || "direct"}{event.campaign ? ` / ${event.campaign}` : ""}</td>
+                <td>{event.device}{event.session ? ` · ${event.session}` : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : <p>No measured visits in the last 24 hours. Visits are stored after cookie choices are accepted.</p>}
     </>
   );
 }

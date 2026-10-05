@@ -7,8 +7,8 @@ import { LiveColors } from "@/components/live-colors";
 import { AppDownload } from "@/components/app-download";
 import type { AppDownloadLinks } from "@/lib/app-links";
 import type { CartInput } from "@/components/cart-provider";
+import { Price } from "@/components/commerce";
 import { deviceOffering, product } from "@/lib/product";
-import { useMoney } from "@/components/market";
 import type { TrioFamilyName } from "@/lib/trio-images";
 
 const shot = { objectFit: "contain" as const, objectPosition: "center center" };
@@ -208,8 +208,8 @@ export function HomePage({
   modelImages?: string[];
   appLinks: AppDownloadLinks;
 }) {
-  const money = useMoney();
-  const price = money(offer?.price ?? product.price);
+  const price = offer?.price ?? product.price;
+  const compareAt = offer ? offer.compareAt ?? null : product.compareAtPrice;
 
   return (
     <main id="main" className="mk">
@@ -225,7 +225,9 @@ export function HomePage({
           <h1 id="what-title">Rouge Sur Mesure</h1>
           <p className="mk-kicker">Custom lip color creator</p>
           <p>Your color, created by technology. Choose your cartridge trio, create your personalized shade, and apply it with the precision brush.</p>
-          <p className="mk-price">{price}</p>
+          <div className="mk-price">
+            <Price amount={price} compareAt={compareAt} />
+          </div>
           <div className="mk-hero__actions">
             <Link className="btn btn-gold" href="/product/rouge-sur-mesure">Discover Rouge Sur Mesure →</Link>
           </div>
@@ -256,7 +258,9 @@ export function HomePage({
           <div className="mk-box__lead">
             <p className="mk-kicker">What comes in the box</p>
             <h2 id="box-title">The device purchase.</h2>
-            <p className="mk-price">{price}</p>
+            <div className="mk-price">
+            <Price amount={price} compareAt={compareAt} />
+          </div>
           </div>
           <div className="mk-intro__shot mk-intro__shot--set">
             <Image src="/images/device-purchase.jpg" alt="The Rouge Sur Mesure device in its open presentation box, with the retractable lip brush, cable, accessory case, and nine cartridges." fill sizes="(max-width: 899px) 92vw, 520px" style={shot} />

@@ -3,7 +3,19 @@ import { canSendMarketingEvent, type ConsentChoice } from "@/lib/analytics/conse
 import { db } from "@/lib/db";
 import { logError, logInfo } from "@/lib/logger";
 
-type UserData = { email?: string; phone?: string; externalId?: string; ip?: string; userAgent?: string; fbp?: string; fbc?: string };
+type UserData = {
+  email?: string;
+  phone?: string;
+  externalId?: string;
+  ip?: string;
+  userAgent?: string;
+  fbp?: string;
+  fbc?: string;
+  city?: string;
+  region?: string;
+  postcode?: string;
+  country?: string;
+};
 
 type ServerEvent = {
   eventName: string;
@@ -32,6 +44,25 @@ function sha256(value: string) {
 function hashEmail(email: string) {
   const normalized = email.trim().toLowerCase();
   return normalized ? sha256(normalized) : "";
+}
+
+function countryCode(value: string) {
+  const text = value.trim().toLowerCase();
+  const named: Record<string, string> = {
+    india: "in",
+    "united states": "us",
+    "united states of america": "us",
+    usa: "us",
+    "united kingdom": "gb",
+    uk: "gb",
+    canada: "ca",
+    australia: "au",
+    "united arab emirates": "ae",
+    uae: "ae",
+    singapore: "sg",
+  };
+  if (named[text]) return named[text];
+  return text.length === 2 ? text : text;
 }
 
 function hashPhone(phone: string) {
@@ -96,6 +127,10 @@ async function deliver(event: ServerEvent, env: ReturnType<typeof metaEnv>) {
   if (event.userData?.userAgent) userData.client_user_agent = event.userData.userAgent.slice(0, 300);
   if (event.userData?.fbp) userData.fbp = event.userData.fbp;
   if (event.userData?.fbc) userData.fbc = event.userData.fbc;
+  if (event.userData?.city) userData.ct = hashEmail(event.userData.city);
+  if (event.userData?.region) userData.st = hashEmail(event.userData.region);
+  if (event.userData?.postcode) userData.zp = hashEmail(event.userData.postcode.replace(/\s/g, ""));
+  if (event.userData?.country) userData.country = hashEmail(countryCode(event.userData.country));
   const body: Record<string, unknown> = {
     data: [{
       event_name: event.eventName,

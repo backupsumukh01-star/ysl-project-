@@ -26,6 +26,7 @@ function cartOf(product: CatalogProduct, extra?: Partial<ShelfSwatch["cart"]> & 
     slug: product.slug,
     name: product.name,
     price: product.price,
+    compareAt: product.compareAt,
     sku: extra?.sku || product.sku,
     variantId: extra?.variantId,
     variantName: extra?.variantName,
@@ -51,6 +52,7 @@ export async function BuyGrid({ title }: { title?: string }) {
       key: "device",
       title: "Device",
       price: device.price,
+      compareAt: device.compareAt,
       start: 0,
       lead: true,
       cta: { href: "/product/rouge-sur-mesure#trios", label: "Choose 3 trios" },
@@ -80,7 +82,7 @@ export async function BuyGrid({ title }: { title?: string }) {
       }];
     });
     const start = Math.max(0, swatches.findIndex((swatch) => swatch.href.endsWith("/cartridge-trio-red")));
-    if (swatches.length) cards.push({ key: "trio", title: "Cartridge trio", group: "Color options", price: trios[0].price, start, swatches });
+    if (swatches.length) cards.push({ key: "trio", title: "Cartridge trio", group: "Color options", price: trios[0].price, compareAt: trios[0].compareAt, start, swatches });
   }
 
   if (refill) {
@@ -102,7 +104,7 @@ export async function BuyGrid({ title }: { title?: string }) {
       }];
     }).sort((a, b) => soldCartridgeOrder.indexOf(a.code as (typeof soldCartridgeOrder)[number]) - soldCartridgeOrder.indexOf(b.code as (typeof soldCartridgeOrder)[number]));
     const start = Math.max(0, swatches.findIndex((swatch) => swatch.label.startsWith("R3")));
-    if (swatches.length) cards.push({ key: "refill", title: "Cartridge refill", group: "Single refill", price: refill.price, start, swatches });
+    if (swatches.length) cards.push({ key: "refill", title: "Cartridge refill", group: "Single refill", price: refill.price, compareAt: refill.compareAt, start, swatches });
   }
 
   return (

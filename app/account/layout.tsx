@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AccountNav } from "@/components/account-nav";
+import { AccountFrame } from "@/components/account-nav";
 import "../quiet.css";
 import "./account.css";
 
@@ -11,8 +11,7 @@ export const metadata: Metadata = {
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return (
     <main id="main" className="page quiet-page account-shell">
-      <AccountNav />
-      {children}
+      <AccountFrame>{children}</AccountFrame>
     </main>
   );
 }

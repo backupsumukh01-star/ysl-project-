@@ -29,6 +29,7 @@ export type TrioOffer = {
   slug: string;
   name: string;
   price: number | null;
+  compareAt?: number | null;
   sku: string;
   shortDescription: string;
   description: string;
@@ -46,6 +47,7 @@ export type TrioRelated = {
   slug: string;
   name: string;
   price: number | null;
+  compareAt?: number | null;
   sku: string;
   image?: string;
   imageAlt?: string;
@@ -78,6 +80,7 @@ export function TrioPurchase({ product: initial, offers = [], related }: { produ
     slug: product.slug,
     name: product.name,
     price: product.price,
+    compareAt: product.compareAt ?? null,
     sku: product.sku,
     image: product.image || undefined,
   };
@@ -174,7 +177,7 @@ export function TrioPurchase({ product: initial, offers = [], related }: { produ
         </header>
         <div className="trio-buy">
           <p className="trio-lede">Create custom lip shades in pink, orange, red and nude. Cartridges are removable and interchangeable in your Rouge Sur Mesure Custom Lip Color Creator.</p>
-          <Price amount={product.price} compare={false} />
+          <Price amount={product.price} compareAt={product.compareAt ?? null} />
           {familyName ? (
             <div className="trio-picks">
               <div role="listbox" aria-label="Cartridge trio colors">
@@ -294,7 +297,7 @@ export function TrioPurchase({ product: initial, offers = [], related }: { produ
                   )}
                   <span className="trio-related__name">{entry.name}</span>
                 </Link>
-                <Price amount={entry.price} compare={false} />
+                <Price amount={entry.price} compareAt={entry.compareAt ?? null} />
                 <Link className="btn btn-ghost" href={`/product/${entry.slug}`}>
                   View product
                 </Link>
@@ -311,7 +314,7 @@ export function TrioPurchase({ product: initial, offers = [], related }: { produ
         <div className="sticky-buy">
           <div>
             <p>{product.name}</p>
-            <Price amount={product.price} compare={false} />
+            <Price amount={product.price} compareAt={product.compareAt ?? null} />
           </div>
           <AddToCartButton item={item} />
         </div>

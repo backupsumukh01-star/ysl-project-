@@ -7,7 +7,6 @@ import { AddToCartButton, BuyNowButton, Price, QuantitySelector } from "@/compon
 import type { CatalogProduct } from "@/lib/catalog";
 import { ApiError, api } from "@/lib/api-client";
 import { shadeNotes } from "@/lib/product";
-import { useMoney } from "@/components/market";
 import { trioPreviewSrc } from "@/lib/trio-images";
 import { RefillMark, refillSwatch } from "@/components/refill-mark";
 import { publishedPrices } from "@/lib/pricing";
@@ -23,7 +22,6 @@ export function CatalogProductView({
   const [quantity, setQuantity] = useState(1);
   const [variantId, setVariantId] = useState(product.variants[0]?.id || "");
   const variant = product.variants.find((item) => item.id === variantId);
-  const money = useMoney();
   const price = variant?.price ?? product.price;
   const refill = product.slug === "cartridge-refill";
   const image = refill
@@ -34,6 +32,7 @@ export function CatalogProductView({
     slug: product.slug,
     name: product.name,
     price,
+    compareAt: product.compareAt,
     sku: variant?.sku || product.sku,
     image,
     variantId: variant?.id,
@@ -129,7 +128,7 @@ export function CatalogProductView({
         <div className="sticky-buy">
           <div>
             <p>{product.name}</p>
-            <p className="muted">{money(price)}</p>
+            <Price amount={price} compareAt={product.compareAt} />
           </div>
           <AddToCartButton item={item} />
         </div>

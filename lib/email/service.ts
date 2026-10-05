@@ -9,6 +9,7 @@ export type EmailMessage = {
   type: string;
   dedupeKey?: string;
   text?: string;
+  replyTo?: string;
 };
 
 type SendResult = { delivered: boolean; provider: string; providerId: string; error: string };
@@ -45,6 +46,7 @@ async function deliver(message: EmailMessage): Promise<SendResult> {
           to: [message.to],
           subject: message.subject,
           html: message.html,
+          ...(replyAddress(message.replyTo) ? { reply_to: replyAddress(message.replyTo) } : {}),
         }),
       });
       const payload = (await response.json().catch(() => ({}))) as { id?: string; message?: string };
@@ -63,6 +65,7 @@ async function deliver(message: EmailMessage): Promise<SendResult> {
     const info = await transport.sendMail({
       from: fromAddress(),
       to: message.to,
+      replyTo: replyAddress(message.replyTo) || undefined,
       subject: message.subject,
       html: message.html,
       text: message.text,
@@ -72,6 +75,11 @@ async function deliver(message: EmailMessage): Promise<SendResult> {
     const reason = error instanceof Error ? error.message : "Email send failed";
     return { delivered: false, provider, providerId: "", error: reason };
   }
+}
+
+function replyAddress(value: string | undefined) {
+  const email = publishedEmail(value);
+  return email || undefined;
 }
 
 function fromAddress() {

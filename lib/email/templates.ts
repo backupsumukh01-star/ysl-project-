@@ -7,7 +7,7 @@ function shell(title: string, body: string) {
     <p style="letter-spacing:.18em;text-transform:uppercase;font-size:12px;color:#c8a46a;">Rouge Sur Mesure</p>
     <h1 style="font-weight:500;font-size:32px;line-height:1.2;">${title}</h1>
     <div style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#f7f3ec;">${body}</div>
-    <p style="font-family:Helvetica,Arial,sans-serif;font-size:13px;color:#aaa39a;">${publishedEmail(email) ? `Questions: <a style="color:#d8b477;" href="mailto:${escapeHtml(publishedEmail(email))}">${escapeHtml(publishedEmail(email))}</a>` : "Support email will be published shortly."}</p>
+    <p style="font-family:Helvetica,Arial,sans-serif;font-size:13px;color:#aaa39a;">${publishedEmail(email) ? `Questions: <a style="color:#d8b477;" href="mailto:${escapeHtml(publishedEmail(email))}">${escapeHtml(publishedEmail(email))}</a>` : "Reply to the email you received, or use the contact form on the site."}</p>
     <p style="font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#aaa39a;">Yves Saint Laurent and related trademarks are the property of their respective owner. This message is about your account or order. Marketing mail is not sent without consent.</p>
   </div></body></html>`;
 }
@@ -84,15 +84,28 @@ export function supportCustomerEmail(input: { number: string; subject: string; m
     subject: `We received your request ${input.number}`,
     html: shell(
       "We received your support request.",
-      `<p>Ticket ${escapeHtml(input.number)}</p><p>Subject: ${escapeHtml(input.subject)}</p><p>${escapeHtml(input.message)}</p><p>The next step is a reply from support. ${publishedEmail(siteConfig.supportEmail) ? `Contact ${escapeHtml(siteConfig.supportEmail)} if you need to add something.` : "Support email will be published shortly."}</p>`,
+      `<p>Request ${escapeHtml(input.number)}</p><p>Subject: ${escapeHtml(input.subject)}</p><p>${escapeHtml(input.message)}</p><p>We'll reply to this email address.</p>`,
     ),
   };
 }
 
-export function supportAdminEmail(input: { number: string; subject: string; email: string }) {
+export function supportAdminEmail(input: { number: string; subject: string; email: string; name: string; phone: string; orderRef: string; message: string }) {
   return {
-    subject: `Support ${input.number}`,
-    html: shell("New support request", `<p>${escapeHtml(input.number)} from ${escapeHtml(input.email)}</p><p>${escapeHtml(input.subject)}</p>`),
+    subject: `Order request ${input.number} from ${input.name || input.email}`,
+    html: shell(
+      "New customer message",
+      `<p>Reply to this email to write directly to ${escapeHtml(input.email)}.</p><p>${escapeHtml(input.number)}<br>${escapeHtml(input.name)}<br>${escapeHtml(input.email)}${input.phone ? `<br>${escapeHtml(input.phone)}` : ""}${input.orderRef ? `<br>Order ${escapeHtml(input.orderRef)}` : ""}</p><p>Subject: ${escapeHtml(input.subject)}</p><p>${escapeHtml(input.message)}</p>`,
+    ),
+  };
+}
+
+export function passwordResetEmail(link: string) {
+  return {
+    subject: "Reset your password",
+    html: shell(
+      "Reset your password",
+      `<p>Use the link below to choose a new password. It expires in one hour and works once.</p><p><a style="color:#d8b477;" href="${escapeHtml(link)}">Choose a new password</a></p><p>If you did not ask for this, you can ignore the message. Your current password stays as it is.</p>`,
+    ),
   };
 }
 

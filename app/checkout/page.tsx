@@ -214,7 +214,7 @@ export default function CheckoutPage() {
             clear();
             router.push(`/order-success/${order.orderId}`);
           } catch {
-            trackInternal("PaymentFailed");
+            trackInternal("PaymentFailed", order.orderId);
             pendingRef.current = false;
             setPending(false);
             setMessage("We couldn't confirm this payment. Your bag is still saved.");
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
         },
         modal: {
           ondismiss: () => {
-            trackInternal("PaymentCancelled");
+            trackInternal("PaymentCancelled", order.orderId);
             pendingRef.current = false;
             setPending(false);
             setMessage("Payment was cancelled. Your items are still in your bag.");
@@ -329,6 +329,31 @@ export default function CheckoutPage() {
                 {accountPending ? "Saving" : accountMode === "register" ? "Create account" : "Sign in"}
               </button>
             </form>
+            {accountMode === "login" ? (
+              <button
+                type="button"
+                className="pay-switch"
+                disabled={accountPending}
+                onClick={async () => {
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(accountEmail.trim())) {
+                    setAccountError("Enter the email on the account, then use Forgot password.");
+                    return;
+                  }
+                  setAccountPending(true);
+                  setAccountError("");
+                  try {
+                    await api("/api/auth/password-reset", { method: "POST", body: JSON.stringify({ email: accountEmail.trim() }) });
+                    setAccountError("If that email has an account, a reset link is on its way.");
+                  } catch (error) {
+                    setAccountError(error instanceof ApiError ? error.message : "The reset link could not be sent.");
+                  } finally {
+                    setAccountPending(false);
+                  }
+                }}
+              >
+                Forgot password
+              </button>
+            ) : null}
             <button
               type="button"
               className="pay-switch"

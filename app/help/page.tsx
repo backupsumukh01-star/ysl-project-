@@ -31,7 +31,7 @@ const groups = [
     label: "Account",
     sections: [
       ["Account", "Sign in with Google, with an email and password, or with a one-time email code. Orders, addresses, and support stay on the account.", "/account"],
-      ["Support", siteConfig.supportEmail ? `Write to ${siteConfig.supportEmail}. Tickets are listed in the account after you sign in.` : "Use the contact form. Support email will be published shortly. Tickets are listed in the account after you sign in.", "/contact"],
+      ["Support", siteConfig.supportEmail ? `Write to ${siteConfig.supportEmail}.` : "Use the contact form. Replies are sent to the email you enter.", "/contact"],
     ],
   },
 ];

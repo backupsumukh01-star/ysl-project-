@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCart, lineKey } from "@/components/cart-provider";
-import { QuantitySelector } from "@/components/commerce";
+import { Price, QuantitySelector } from "@/components/commerce";
 import { lineKind, shippingChargeLabel } from "@/lib/product";
 import { useMoney } from "@/components/market";
 import { CartLineImage } from "@/components/refill-mark";
@@ -22,9 +22,10 @@ export default function CartPage() {
       <h1>Your bag.</h1>
       {!ready && !items.length ? null : !items.length ? (
         <div className="empty bag-empty">
-          <p>Your bag is empty.</p>
+          <p className="bag-empty__title">Your bag is empty.</p>
+          <p className="bag-empty__note">The device, a cartridge trio, and a single refill.</p>
           <Link className="btn btn-gold" href="/shop">
-            Continue shopping
+            Shop now
           </Link>
         </div>
       ) : (
@@ -42,7 +43,7 @@ export default function CartPage() {
                     <p className="muted">{line.variantName}</p>
                   ) : null}
                   {line.sku ? <p className="bag-sku">{line.sku}</p> : null}
-                  <p className="bag-price">{money(line.price)}</p>
+                  <Price amount={line.price} compareAt={line.compareAt} />
                   <div className="bag-actions">
                     <QuantitySelector value={line.quantity} onChange={(quantity) => setQuantity(lineKey(line), quantity)} />
                     <button type="button" className="bag-remove" onClick={() => removeItem(lineKey(line))}>
@@ -77,9 +78,9 @@ export default function CartPage() {
               </div>
             </div>
             <Link className="btn btn-gold btn-full" href="/checkout">
-              Place order
+              Checkout
             </Link>
-            {quote && !shippingKnown ? <p className="muted">Place order stays closed until a shipping price is set. No charge is made.</p> : null}
+            {quote && !shippingKnown ? <p className="muted">Checkout stays closed until a shipping price is set. No charge is made.</p> : null}
             <Link className="bag-link" href="/shop">
               Continue shopping
             </Link>
@@ -90,7 +91,7 @@ export default function CartPage() {
               <span>{money(subtotal)}</span>
             </p>
             <Link className="btn btn-gold btn-full" href="/checkout">
-              Place order
+              Checkout
             </Link>
           </div>
         </div>

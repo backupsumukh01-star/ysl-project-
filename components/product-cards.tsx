@@ -30,6 +30,7 @@ export function ProductCards({ products }: { products: CatalogProduct[] }) {
                     slug: item.slug,
                     name: item.name,
                     price: item.price,
+                    compareAt: item.compareAt,
                     sku: item.sku,
                     image: src,
                   }}

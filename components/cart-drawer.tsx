@@ -6,7 +6,7 @@ import { useBagQuote } from "@/components/bag-quote";
 import { lineKind, shippingChargeLabel } from "@/lib/product";
 import { useMoney } from "@/components/market";
 import { chosenTrios } from "@/components/set-contains";
-import { QuantitySelector } from "@/components/commerce";
+import { Price, QuantitySelector } from "@/components/commerce";
 import { CartLineImage } from "@/components/refill-mark";
 import { trioDots, type TrioFamilyName } from "@/lib/trio-images";
 
@@ -36,8 +36,11 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <div className="bag-sheet__body">
           {addedNote ? <p className="drawer-note" role="status">{addedNote}</p> : null}
           {!items.length ? (
-            <div className="empty">
-              <p>Your bag is empty.</p>
+            <div className="bag-empty">
+              <div className="bag-empty__copy">
+                <p className="bag-empty__title">Your bag is empty.</p>
+                <p className="bag-empty__note">The device, a cartridge trio, and a single refill.</p>
+              </div>
               <Link className="btn btn-gold" href="/shop" onClick={onClose}>
                 Shop now
               </Link>
@@ -53,7 +56,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <div className="bag-card__main">
                     <div className="bag-card__top">
                       <h2>{line.name}</h2>
-                      <p>{money(line.price)}</p>
+                      <Price amount={line.price} compareAt={line.compareAt} />
                     </div>
                     {trios.length === 3 ? null : lineKind(line.sku) ? <p className="bag-card__kind">{lineKind(line.sku)}</p> : null}
                     {trios.length === 3 ? null : line.slug === "rouge-sur-mesure" ? (

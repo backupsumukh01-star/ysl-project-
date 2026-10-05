@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { emailField } from "@/lib/validators";
 import { ticketNumber } from "@/lib/crypto";
 import { supportAdminEmail, supportCustomerEmail } from "@/lib/email/templates";
-import { sendEmail } from "@/lib/email/service";
+import { ownerRecipient, sendEmail } from "@/lib/email/service";
 import { publishedEmail } from "@/lib/config";
 import { getSettings } from "@/lib/settings";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
@@ -53,13 +53,22 @@ export async function POST(request: Request) {
     dedupeKey: `support:${ticket.id}`,
     ...supportCustomerEmail({ number: ticket.number, subject: ticket.subject, message: ticket.message.slice(0, 400) }),
   });
-  const supportInbox = publishedEmail(settings.supportEmail);
+  const supportInbox = ownerRecipient() || publishedEmail(settings.supportEmail);
   if (supportInbox) {
     await sendEmail({
       to: supportInbox,
+      replyTo: ticket.email,
       type: "support_admin",
       dedupeKey: `support-admin:${ticket.id}`,
-      ...supportAdminEmail({ number: ticket.number, subject: ticket.subject, email: ticket.email }),
+      ...supportAdminEmail({
+        number: ticket.number,
+        subject: ticket.subject,
+        email: ticket.email,
+        name: ticket.name,
+        phone: ticket.phone,
+        orderRef: ticket.orderRef,
+        message: ticket.message,
+      }),
     });
   }
   logInfo("support_ticket", { ticket: ticket.number });

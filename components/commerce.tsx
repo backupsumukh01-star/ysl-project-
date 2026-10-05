@@ -7,6 +7,11 @@ import { product } from "@/lib/product";
 import { useMoney } from "@/components/market";
 import { track } from "@/lib/analytics";
 
+export function discountOff(price: number | null | undefined, compareAt: number | null | undefined) {
+  if (price == null || compareAt == null || !(compareAt > price) || compareAt <= 0) return null;
+  return Math.round(((compareAt - price) / compareAt) * 100);
+}
+
 export function Price({
   amount,
   compareAt,
@@ -18,11 +23,17 @@ export function Price({
 }) {
   const money = useMoney();
   const price = amount === undefined ? product.price : amount;
-  const comparePrice = compareAt === undefined ? product.compareAtPrice : compareAt;
+  const comparePrice = !compare ? null : compareAt === undefined ? product.compareAtPrice : compareAt;
+  const off = discountOff(price, comparePrice);
   return (
     <p className="price">
-      {money(price)}
-      {compare && comparePrice != null && price != null && comparePrice > price ? <s>{money(comparePrice)}</s> : null}
+      <span className="price__now">{money(price)}</span>
+      {off != null && comparePrice != null ? (
+        <>
+          <s>{money(comparePrice)}</s>
+          <span className="price__off">{off}% off</span>
+        </>
+      ) : null}
     </p>
   );
 }

@@ -120,13 +120,14 @@ export async function issueOtp(email: string) {
   const prisma = db();
   if (!prisma) throw new Error("DATABASE_URL is not configured");
   const config = otpConfig();
-  const latest = await prisma.otpCode.findFirst({ where: { email }, orderBy: { createdAt: "desc" } });
+  const loginCodes = { email, NOT: { salt: { startsWith: "reset:" } } };
+  const latest = await prisma.otpCode.findFirst({ where: loginCodes, orderBy: { createdAt: "desc" } });
   if (latest && Date.now() - latest.createdAt.getTime() < config.resendSeconds * 1000) {
     return { ok: false as const, code: "OTP_COOLDOWN", waitSeconds: config.resendSeconds };
   }
   const code = createOtpCode();
   const salt = otpSalt();
-  await prisma.otpCode.updateMany({ where: { email, usedAt: null }, data: { usedAt: new Date() } });
+  await prisma.otpCode.updateMany({ where: { ...loginCodes, usedAt: null }, data: { usedAt: new Date() } });
   const row = await prisma.otpCode.create({
     data: {
       email,
@@ -143,7 +144,7 @@ export async function consumeOtp(email: string, code: string) {
   if (!prisma) return { ok: false as const, reason: "unavailable" };
   const config = otpConfig();
   const row = await prisma.otpCode.findFirst({
-    where: { email, usedAt: null },
+    where: { email, usedAt: null, NOT: { salt: { startsWith: "reset:" } } },
     orderBy: { createdAt: "desc" },
   });
   if (!row) return { ok: false as const, reason: "missing" };

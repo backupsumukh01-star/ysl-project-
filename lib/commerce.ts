@@ -6,7 +6,7 @@ import { getSettings, type StoreSettings } from "@/lib/settings";
 import { receiptFromOrder } from "@/lib/email/order-notice";
 import { sendEmail, sendOwnerEmail } from "@/lib/email/service";
 import { createRazorpayOrder, createRazorpayRefund } from "@/lib/payments/razorpay";
-import { purchasePayload, sendVerifiedPurchase } from "@/lib/analytics/purchase";
+import { purchasePayload, recordPaymentOutcome, sendVerifiedPurchase } from "@/lib/analytics/purchase";
 import { reserveInventory, releaseInventory } from "@/lib/inventory";
 import { authoritativeMinor } from "@/lib/pricing";
 import { convertUsdMinor, fromMinor, marketFor, type Market } from "@/lib/fx";
@@ -532,7 +532,8 @@ export async function markOrderPaid(input: { razorpayOrderId: string; razorpayPa
     await sendOwnerEmail({
       type: "admin_paid_order",
       dedupeKey: `admin_paid_order:${paid.id}`,
-      ...receiptFromOrder(paid, { title: "Paid order", note: "A payment was verified. Fulfillment has not been assigned to a courier." }),
+      replyTo: paid.email,
+      ...receiptFromOrder(paid, { title: "Paid order", note: "A payment was verified. Reply to this email to write to the customer. Fulfillment has not been assigned to a courier." }),
     });
     await sendVerifiedPurchase(paid, input.request);
   }
@@ -550,6 +551,7 @@ export async function markPaymentFailed(razorpayOrderId: string) {
   const notice = receiptFromOrder({ ...order, paymentStatus: "FAILED" }, { title: "Payment was not completed", note: "Your bag is still saved. No successful charge was recorded." });
   await sendEmail({ to: order.email, type: "payment_failed", dedupeKey: `payment_failed:${order.id}`, ...notice });
   await sendOwnerEmail({ type: "admin_payment_failed", dedupeKey: `admin_payment_failed:${order.id}`, ...notice });
+  await recordPaymentOutcome({ orderId: order.id, eventName: "PaymentFailed", eventId: `payment_failed_${order.id}` });
 }
 
 export async function markVerificationFailed(orderId: string) {
