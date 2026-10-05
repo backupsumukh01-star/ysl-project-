@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import { product } from "@/lib/product";
 import { cartridgePhotoSrc } from "@/lib/cartridge-photos";
 import { siteConfig } from "@/lib/config";
-import { catalogMajorForSlug } from "@/lib/pricing";
+import { catalogCompareForSlug, catalogMajorForSlug } from "@/lib/pricing";
 import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics/meta";
 import { api } from "@/lib/api-client";
 
@@ -98,7 +98,7 @@ function normalize(input: number | CartInput | undefined): CartLine {
     variantName: input.variantName || "",
     sku: input.sku || "",
     price: catalogPrice(input.slug, input.id, input.price),
-    compareAt: input.compareAt ?? null,
+    compareAt: catalogCompareForSlug(input.slug) ?? input.compareAt ?? null,
     image: input.slug === "cartridge-refill" ? input.image || cartridgePhotoSrc(input.variantName) : input.image || product.images.showcase.src,
   };
 }
@@ -123,7 +123,7 @@ function readStored(): CartLine[] {
         variantName: line.variantName || "",
         sku: line.sku || "",
         price: catalogPrice(line.slug || "", line.id, typeof line.price === "number" || line.price === null ? line.price : known ? product.price : null),
-        compareAt: typeof line.compareAt === "number" ? line.compareAt : null,
+        compareAt: catalogCompareForSlug(line.slug || (known ? product.slug : "")) ?? (typeof line.compareAt === "number" ? line.compareAt : null),
         image: (line.slug || "") === "cartridge-refill" ? line.image || cartridgePhotoSrc(line.variantName) : line.image || (known ? product.images.showcase.src : "/images/showcase.png"),
       }];
     });

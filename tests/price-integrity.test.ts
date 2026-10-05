@@ -6,36 +6,36 @@ import { lineSchema } from "@/lib/validators";
 import { createCheckoutOrder, previewCheckout } from "@/lib/commerce";
 
 const expected = [
-  ["rouge-sur-mesure", "Rouge Sur Mesure", "DEVICE", 350],
-  ["cartridge-trio-red", "Cartridge Trio — Red", "CARTRIDGE_TRIO", 89],
-  ["cartridge-trio-pink", "Cartridge Trio — Pink", "CARTRIDGE_TRIO", 89],
-  ["cartridge-trio-orange", "Cartridge Trio — Orange", "CARTRIDGE_TRIO", 89],
-  ["cartridge-trio-nude", "Cartridge Trio — Nude", "CARTRIDGE_TRIO", 89],
-  ["cartridge-trio-warm-red", "Cartridge Trio — Warm Red", "CARTRIDGE_TRIO", 89],
-  ["cartridge-trio-warm-nude", "Cartridge Trio — Warm Nude", "CARTRIDGE_TRIO", 89],
-  ["cartridge-trio-cool-nude", "Cartridge Trio — Cool Nude", "CARTRIDGE_TRIO", 89],
-  ["cartridge-refill", "Cartridge refill", "REFILL", 31],
-  ["rouge-sur-mesure-bundle", "Rouge Sur Mesure bundle", "BUNDLE", 350],
+  ["rouge-sur-mesure", "Rouge Sur Mesure", "DEVICE", 101.5],
+  ["cartridge-trio-red", "Cartridge Trio — Red", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-trio-pink", "Cartridge Trio — Pink", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-trio-orange", "Cartridge Trio — Orange", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-trio-nude", "Cartridge Trio — Nude", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-trio-warm-red", "Cartridge Trio — Warm Red", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-trio-warm-nude", "Cartridge Trio — Warm Nude", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-trio-cool-nude", "Cartridge Trio — Cool Nude", "CARTRIDGE_TRIO", 25.81],
+  ["cartridge-refill", "Cartridge refill", "REFILL", 103.72],
+  ["rouge-sur-mesure-bundle", "Rouge Sur Mesure bundle", "BUNDLE", 101.5],
 ] as const;
 
 test("catalog file is the only published price table", () => {
   assert.equal(publishedPrices.currency, "USD");
-  assert.equal(publishedPrices.device, 350);
-  assert.equal(publishedPrices.cartridgeTrio, 89);
-  assert.equal(publishedPrices.refill, 31);
-  assert.equal(publishedPrices.bundle, 350);
+  assert.equal(publishedPrices.device, 101.5);
+  assert.equal(publishedPrices.cartridgeTrio, 25.81);
+  assert.equal(publishedPrices.refill, 103.72);
+  assert.equal(publishedPrices.bundle, 101.5);
   assert.equal(new Set(expected.map((row) => catalogMajorForSlug(row[0]))).size, 3);
   for (const [slug, , , price] of expected) assert.equal(catalogMajorForSlug(slug), price);
 });
 
 test("a stored or browser amount cannot replace a catalog price", () => {
-  assert.equal(authoritativeMinor("DEVICE", 100), 35000);
-  assert.equal(authoritativeMinor("CARTRIDGE_TRIO", 500), 8900);
-  assert.equal(authoritativeMinor("REFILL", 0), 3100);
-  assert.equal(authoritativeMinor("BUNDLE", 1), 35000);
-  assert.equal(350 * 1, 350);
-  assert.equal(89 * 2, 178);
-  assert.equal(31 * 2, 62);
+  assert.equal(authoritativeMinor("DEVICE", 100), 10150);
+  assert.equal(authoritativeMinor("CARTRIDGE_TRIO", 500), 2581);
+  assert.equal(authoritativeMinor("REFILL", 0), 10372);
+  assert.equal(authoritativeMinor("BUNDLE", 1), 10150);
+  assert.equal(101.5 * 1, 101.5);
+  assert.equal(25.81 * 2, 51.62);
+  assert.equal(103.72 * 2, 207.44);
 });
 
 test("checkout line schema does not accept a client price", () => {
@@ -56,7 +56,7 @@ test("database catalog matches the published prices and orders are left untouche
       assert.equal(row.name, name);
       assert.equal(row.type, type);
       assert.equal(row.active, true);
-      assert.equal(row.priceMinor, price * 100);
+      assert.equal(row.priceMinor, Math.round(price * 100));
     }
     const inactive = products.find((item) => item.slug === "accessory-to-be-confirmed");
     assert.equal(inactive?.active, false);
@@ -90,19 +90,19 @@ test("server quote ignores a drifted database price and a tampered client amount
     assert.equal(quoted.ok, true);
     if (!quoted.ok) return;
     const byName = new Map(quoted.preview.lines.map((line) => [line.name, line]));
-    assert.equal(byName.get("Rouge Sur Mesure")?.unitMinor, 35000);
+    assert.equal(byName.get("Rouge Sur Mesure")?.unitMinor, 10150);
     assert.equal(byName.get("Rouge Sur Mesure")?.variantName, "Red · Nude · Pink");
     const missing = await previewCheckout({ lines: [{ productId: device.id, quantity: 1 }] });
     assert.equal(missing.ok, false);
     if (!missing.ok) assert.equal(missing.code, "SELECTION_REQUIRED");
-    assert.equal(byName.get("Cartridge Trio — Red")?.unitMinor, 8900);
+    assert.equal(byName.get("Cartridge Trio — Red")?.unitMinor, 2581);
     assert.equal(byName.get("Cartridge Trio — Red")?.quantity, 2);
-    assert.equal(byName.get("Cartridge refill")?.unitMinor, 3100);
-    assert.equal(quoted.preview.subtotalMinor, 35000 + 8900 * 2 + 3100 * 2);
+    assert.equal(byName.get("Cartridge refill")?.unitMinor, 10372);
+    assert.equal(quoted.preview.subtotalMinor, 10150 + 2581 * 2 + 10372 * 2);
   } finally {
-    await prisma.product.update({ where: { id: device.id }, data: { priceMinor: 35000 } });
-    await prisma.product.update({ where: { id: trio.id }, data: { priceMinor: 8900 } });
-    await prisma.product.update({ where: { id: refill.id }, data: { priceMinor: 3100 } });
+    await prisma.product.update({ where: { id: device.id }, data: { priceMinor: 10150 } });
+    await prisma.product.update({ where: { id: trio.id }, data: { priceMinor: 2581 } });
+    await prisma.product.update({ where: { id: refill.id }, data: { priceMinor: 10372 } });
     if (variant) await prisma.productVariant.update({ where: { id: variant.id }, data: { priceMinor: null } });
     await prisma.$disconnect();
   }

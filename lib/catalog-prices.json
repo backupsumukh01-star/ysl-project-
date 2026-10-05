@@ -1,7 +1,10 @@
 {
   "currency": "USD",
-  "device": 350,
-  "cartridgeTrio": 89,
-  "refill": 31,
-  "bundle": 350
+  "device": 101.5,
+  "deviceCompareAt": 350,
+  "cartridgeTrio": 25.81,
+  "cartridgeTrioCompareAt": 89,
+  "refill": 103.72,
+  "bundle": 101.5,
+  "bundleCompareAt": 350
 }
