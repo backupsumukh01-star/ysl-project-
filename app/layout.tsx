@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Fraunces, Outfit } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { siteConfig } from "@/lib/config";
 import { CartProvider } from "@/components/cart-provider";
 import { ToastProvider } from "@/components/toast-provider";
@@ -97,6 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <AnalyticsListener />
             </Suspense>
             <MetaPixel />
+            <Analytics />
           </ToastProvider>
         </CartProvider>
         </MarketProvider>
