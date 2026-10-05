@@ -128,7 +128,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ orderI
             <dt>Subtotal</dt>
             <dd>{formatMoney(view.subtotal, view.currency)}</dd>
           </div>
-          {view.discount > 0 ? (
+          {(view.discount ?? 0) > 0 ? (
             <div>
               <dt>Discount{view.couponCode ? ` · ${view.couponCode}` : ""}</dt>
               <dd>{formatMoney(view.discount, view.currency)}</dd>
