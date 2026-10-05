@@ -5,6 +5,7 @@
 .manual-app {
   width: min(100%, 680px);
   color: #161616;
+  counter-reset: guide-step;
 }
 
 .manual-page .kicker {
@@ -116,7 +117,6 @@
   list-style: none;
   margin: 12px 0 0;
   padding: 0;
-  counter-reset: guide-step;
 }
 
 .manual-app .guide-steps > li {
