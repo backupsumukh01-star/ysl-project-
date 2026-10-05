@@ -9,6 +9,34 @@ type StateRow = { iso: string; name: string };
 type Option = { id: string; label: string; hint?: string };
 type FieldKey = "region" | "city" | "postal";
 
+export type SavedCheckoutDetails = {
+  name: string;
+  phone: string;
+  line1: string;
+  line2: string;
+  city: string;
+  region: string;
+  postcode: string;
+  country: string;
+};
+
+function countryMatch(rows: CountryRow[], country: string) {
+  const wanted = country.trim().toLowerCase();
+  if (!wanted) return undefined;
+  return rows.find((row) => row.iso.toLowerCase() === wanted || row.name.toLowerCase() === wanted);
+}
+
+function splitSavedPhone(phone: string, rows: CountryRow[], preferIso: string) {
+  const compact = phone.replace(/\s/g, "");
+  const preferred = rows.find((row) => row.iso === preferIso);
+  if (preferred && compact.startsWith(preferred.dial)) {
+    return { dialIso: preferred.iso, national: compact.slice(preferred.dial.length).replace(/\D/g, "").slice(0, 15) };
+  }
+  const match = [...rows].sort((a, b) => b.dial.length - a.dial.length).find((row) => row.dial && compact.startsWith(row.dial));
+  if (!match) return { dialIso: preferIso, national: compact.replace(/\D/g, "").slice(0, 15) };
+  return { dialIso: match.iso, national: compact.slice(match.dial.length).replace(/\D/g, "").slice(0, 15) };
+}
+
 const EUROPE = new Set(["DE", "FR", "IT", "ES", "NL", "BE", "AT", "CH", "SE", "NO", "DK", "FI", "PT", "PL", "CZ", "HU", "GR", "RO", "IE"]);
 
 function remainingFields(order: FieldKey[], fields: Record<FieldKey, ReactNode>) {
@@ -51,6 +79,10 @@ export function CheckoutAddress({
   shippingEstimate,
   couponNotice,
   onCountry,
+  savedAddresses = [],
+  savedFrom = "account",
+  contact,
+  detailsReady = false,
 }: {
   defaultCountry: string;
   coupon: string;
@@ -59,6 +91,10 @@ export function CheckoutAddress({
   shippingEstimate?: string;
   couponNotice?: string;
   onCountry?: (country: string, iso: string) => void;
+  savedAddresses?: SavedCheckoutDetails[];
+  savedFrom?: "account" | "device";
+  contact?: { name: string; phone: string };
+  detailsReady?: boolean;
 }) {
   const [countries, setCountries] = useState<CountryRow[] | null>(null);
   const [countryIso, setCountryIso] = useState("");
@@ -66,6 +102,7 @@ export function CheckoutAddress({
   const [dialTouched, setDialTouched] = useState(false);
   const [national, setNational] = useState("");
   const [states, setStates] = useState<StateRow[] | null>(null);
+  const [statesFor, setStatesFor] = useState("");
   const [regionIso, setRegionIso] = useState("");
   const [regionText, setRegionText] = useState("");
   const [cities, setCities] = useState<string[] | null>(null);
@@ -76,6 +113,9 @@ export function CheckoutAddress({
   const [recipient, setRecipient] = useState("");
   const [open, setOpen] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [addressChoice, setAddressChoice] = useState("0");
+  const filled = useRef(false);
+  const pendingRegion = useRef<{ region: string; country: string } | null>(null);
 
   useEffect(() => {
     let cancel = false;
@@ -106,12 +146,17 @@ export function CheckoutAddress({
     if (!countryIso) return;
     let cancel = false;
     setStates(null);
+    setStatesFor("");
     api<StateRow[]>(`/api/places?kind=states&country=${countryIso}`)
       .then((rows) => {
-        if (!cancel) setStates(rows);
+        if (cancel) return;
+        setStates(rows);
+        setStatesFor(countryIso);
       })
       .catch(() => {
-        if (!cancel) setStates([]);
+        if (cancel) return;
+        setStates([]);
+        setStatesFor(countryIso);
       });
     return () => {
       cancel = true;
@@ -137,6 +182,24 @@ export function CheckoutAddress({
     };
   }, [countryIso, regionIso]);
 
+  useEffect(() => {
+    if (filled.current || !detailsReady || !countries?.length) return;
+    const first = savedAddresses[0];
+    if (!first && !contact?.name && !contact?.phone) return;
+    filled.current = true;
+    if (first) {
+      fillSaved(first, countries);
+      return;
+    }
+    if (contact?.name) setRecipient(contact.name);
+    if (contact?.phone) {
+      const phone = splitSavedPhone(contact.phone, countries, countryIso);
+      setDialIso(phone.dialIso);
+      setDialTouched(true);
+      setNational(phone.national);
+    }
+  }, [countries, savedAddresses, contact, countryIso, detailsReady]);
+
   const country = countries?.find((row) => row.iso === countryIso);
 
   useEffect(() => {
@@ -144,6 +207,24 @@ export function CheckoutAddress({
     rememberCountry(country.iso, country.name);
     onCountry?.(country.name, country.iso);
   }, [country, onCountry]);
+
+  useEffect(() => {
+    const next = pendingRegion.current;
+    if (!next || !states || statesFor !== countryIso || !country) return;
+    const same =
+      country.name.toLowerCase() === next.country.trim().toLowerCase() ||
+      country.iso.toLowerCase() === next.country.trim().toLowerCase();
+    if (!same) return;
+    pendingRegion.current = null;
+    if (!states.length) return;
+    const match = states.find(
+      (row) => row.name.toLowerCase() === next.region.trim().toLowerCase() || row.iso.toLowerCase() === next.region.trim().toLowerCase(),
+    );
+    if (match) {
+      setRegionIso(match.iso);
+      setRegionText(match.name);
+    }
+  }, [states, statesFor, countryIso, country]);
   const dial = countries?.find((row) => row.iso === dialIso);
   const layout = addressLayout(countryIso || "US");
   const regionName = states?.length
@@ -155,13 +236,70 @@ export function CheckoutAddress({
   const regionIsList = (states?.length || 0) > 0;
   const cityLocked = states === null || (regionIsList && !regionIso && !regionText) || (Boolean(regionIso) && cities === null);
 
+  function fillSaved(details: SavedCheckoutDetails, rows: CountryRow[]) {
+    if (details.name) setRecipient(details.name);
+    setStreet(details.line1);
+    setStreet2(details.line2);
+    setPostal(details.postcode);
+    setCity(details.city);
+    setRegionIso("");
+    setRegionText(details.region);
+    const match = countryMatch(rows, details.country);
+    const countryName = match?.name || details.country;
+    pendingRegion.current = details.region ? { region: details.region, country: countryName } : null;
+    if (details.region && match && statesFor === match.iso && states?.length) {
+      const region = states.find(
+        (row) => row.name.toLowerCase() === details.region.trim().toLowerCase() || row.iso.toLowerCase() === details.region.trim().toLowerCase(),
+      );
+      if (region) {
+        setRegionIso(region.iso);
+        setRegionText(region.name);
+        pendingRegion.current = null;
+      }
+    }
+    if (match) {
+      setCountryIso(match.iso);
+      if (details.phone) {
+        const phone = splitSavedPhone(details.phone, rows, match.iso);
+        setDialIso(phone.dialIso);
+        setDialTouched(true);
+        setNational(phone.national);
+      } else if (!dialTouched) {
+        setDialIso(match.iso);
+      }
+    } else if (details.phone) {
+      const phone = splitSavedPhone(details.phone, rows, countryIso);
+      setDialIso(phone.dialIso);
+      setDialTouched(true);
+      setNational(phone.national);
+    }
+  }
+
   function chooseCountry(iso: string) {
+    pendingRegion.current = null;
     setCountryIso(iso);
     if (!dialTouched) setDialIso(iso);
     setRegionIso("");
     setRegionText("");
     setCity("");
     setOpen(null);
+  }
+
+  function chooseSaved(value: string) {
+    setAddressChoice(value);
+    if (!countries) return;
+    if (value === "new") {
+      pendingRegion.current = null;
+      setStreet("");
+      setStreet2("");
+      setPostal("");
+      setCity("");
+      setRegionIso("");
+      setRegionText("");
+      return;
+    }
+    const details = savedAddresses[Number(value)];
+    if (details) fillSaved(details, countries);
   }
 
   function chooseRegion(iso: string, name: string) {
@@ -281,6 +419,26 @@ export function CheckoutAddress({
         </div>
       </div>
       <h2>Shipping address</h2>
+      {savedAddresses.length ? (
+        <label className="field">
+          <span>Saved address</span>
+          <select value={addressChoice} onChange={(event) => chooseSaved(event.target.value)}>
+            {savedAddresses.map((address, index) => (
+              <option key={`${address.line1}-${address.postcode}-${index}`} value={String(index)}>
+                {[address.line1, address.city, address.country].filter(Boolean).join(", ")}
+              </option>
+            ))}
+            <option value="new">Add a new address</option>
+          </select>
+        </label>
+      ) : null}
+      {savedAddresses.length && addressChoice !== "new" ? (
+        <p className="muted">
+          {savedFrom === "device"
+            ? "Filled from your last order on this device. Change any field, or add a new address."
+            : "Filled from your account. Change any field, or add a new address."}
+        </p>
+      ) : null}
       <TextField label="Full name" name="name" autoComplete="name" value={recipient} onChange={setRecipient} />
       <TextField label="Address line 1" name="address" autoComplete="address-line1" value={street} onChange={setStreet} />
       <TextField label="Address line 2" name="address2" autoComplete="address-line2" value={street2} onChange={setStreet2} optional />

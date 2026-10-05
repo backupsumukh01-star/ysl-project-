@@ -296,6 +296,53 @@ async function applyCoupon(
   return { ok: true, discountMinor: discount, code: coupon.code, couponId: coupon.id };
 }
 
+async function rememberCustomerDetails(userId: string, address: AddressInput) {
+  const prisma = db();
+  if (!prisma) return;
+  const line1 = [address.line1.trim(), address.line2?.trim() || ""].filter(Boolean).join("\n").slice(0, 200);
+  try {
+    const existing = await prisma.address.findMany({ where: { userId } });
+    const match = existing.find(
+      (row) => row.line1 === line1 && row.city === address.city && row.postcode === address.postcode && row.country === address.country,
+    );
+    await prisma.$transaction(async (tx) => {
+      if (address.name || address.phone) {
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            ...(address.name ? { name: address.name.slice(0, 120) } : {}),
+            ...(address.phone ? { phone: address.phone.slice(0, 30) } : {}),
+          },
+        });
+      }
+      if (!line1 || !address.city || !address.region || !address.postcode || !address.country) return;
+      await tx.address.updateMany({ where: { userId }, data: { isDefault: false } });
+      const fields = {
+        name: address.name.slice(0, 120),
+        phone: (address.phone || "").slice(0, 30),
+        region: address.region.slice(0, 80),
+        isDefault: true,
+      };
+      if (match) {
+        await tx.address.update({ where: { id: match.id }, data: fields });
+      } else {
+        await tx.address.create({
+          data: {
+            ...fields,
+            userId,
+            line1,
+            city: address.city.slice(0, 80),
+            postcode: address.postcode.slice(0, 20),
+            country: address.country.slice(0, 80),
+          },
+        });
+      }
+    });
+  } catch {
+    logError("address_saved", { status: "failed" });
+  }
+}
+
 export async function createCheckoutOrder(input: {
   lines: LineInput[];
   address: AddressInput;
@@ -309,7 +356,10 @@ export async function createCheckoutOrder(input: {
   const prisma = db();
   if (!prisma) return { ok: false as const, code: "DATABASE_UNAVAILABLE", message: "Orders are not available yet." };
   const existing = await prisma.order.findUnique({ where: { idempotencyKey: input.idempotencyKey }, include: { items: true, payments: true } });
-  if (existing) return attachRazorpay(existing);
+  if (existing) {
+    if (input.userId) await rememberCustomerDetails(input.userId, input.address);
+    return attachRazorpay(existing);
+  }
   const quoted = await quoteCart({ lines: input.lines, email: input.address.email, couponCode: input.couponCode, country: input.address.country });
   if (!quoted.ok) return quoted;
   const quote = quoted.quote;
@@ -370,6 +420,7 @@ export async function createCheckoutOrder(input: {
     createdId = created.id;
     await reserveInventory(created.id);
     if (input.userId) {
+      await rememberCustomerDetails(input.userId, input.address);
       await prisma.cart.updateMany({
         where: { userId: input.userId, status: { in: ["ACTIVE", "ABANDONED"] } },
         data: { status: "CHECKOUT", checkoutStartedAt: new Date(), abandonedAt: null },

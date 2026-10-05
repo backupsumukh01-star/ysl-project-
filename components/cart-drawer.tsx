@@ -136,8 +136,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 function BagSet({ trios }: { trios: TrioFamilyName[] }) {
   return (
     <div className="bag-set-wrap">
-      <p className="bag-set__label">Your 3 complimentary sets</p>
-      <ul className="bag-set" aria-label="Your 3 complimentary sets">
+      <p className="bag-set__label">Included with your device</p>
+      <ul className="bag-set" aria-label="Included with your device">
       <li>
         <span className="bag-set__swatch bag-set__swatch--device is-selected" aria-hidden="true" />
         <span>Device</span>

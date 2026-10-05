@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { checkoutLinePayload, lineKey, useCart, type CartLine } from "@/components/cart-provider";
 import { GoogleAuthChoices } from "@/components/google-auth";
 import { CartLineImage } from "@/components/refill-mark";
-import { CheckoutAddress } from "@/components/checkout-address";
+import { CheckoutAddress, type SavedCheckoutDetails } from "@/components/checkout-address";
 import { useMarket, useMoney } from "@/components/market";
 import { bagShelf } from "@/components/bag-quote";
 import { siteConfig } from "@/lib/config";
@@ -21,6 +21,55 @@ type RazorpayCheckout = { open: () => void };
 type RazorpayWindow = Window & { Razorpay?: new (options: Record<string, unknown>) => RazorpayCheckout };
 
 const seenCheckout = new Set<string>();
+const CHECKOUT_DETAILS = "rsm-checkout-details";
+
+type AccountAddress = {
+  name: string;
+  phone: string;
+  line1: string;
+  city: string;
+  region: string;
+  postcode: string;
+  country: string;
+};
+
+function savedFromAddress(address: AccountAddress): SavedCheckoutDetails {
+  const [line1, ...rest] = address.line1.split("\n");
+  return {
+    name: address.name || "",
+    phone: address.phone || "",
+    line1: line1 || "",
+    line2: rest.join("\n").trim(),
+    city: address.city || "",
+    region: address.region || "",
+    postcode: address.postcode || "",
+    country: address.country || "",
+  };
+}
+
+function readDeviceDetails(): { email: string; details: SavedCheckoutDetails } | null {
+  try {
+    const raw = localStorage.getItem(CHECKOUT_DETAILS);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<SavedCheckoutDetails & { email: string }>;
+    if (!parsed.line1 && !parsed.name && !parsed.email) return null;
+    return {
+      email: parsed.email || "",
+      details: {
+        name: parsed.name || "",
+        phone: parsed.phone || "",
+        line1: parsed.line1 || "",
+        line2: parsed.line2 || "",
+        city: parsed.city || "",
+        region: parsed.region || "",
+        postcode: parsed.postcode || "",
+        country: parsed.country || "",
+      },
+    };
+  } catch {
+    return null;
+  }
+}
 
 type ServerQuote = {
   currency: string;
@@ -64,6 +113,10 @@ export default function CheckoutPage() {
   const [quote, setQuote] = useState<ServerQuote | null>(null);
   const [quoteNotice, setQuoteNotice] = useState("");
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<SavedCheckoutDetails[]>([]);
+  const [savedFrom, setSavedFrom] = useState<"account" | "device">("account");
+  const [contact, setContact] = useState<{ name: string; phone: string } | undefined>();
+  const [detailsReady, setDetailsReady] = useState(false);
   const [guest, setGuest] = useState(false);
   const [accountMode, setAccountMode] = useState<"register" | "login">("register");
   const [accountEmail, setAccountEmail] = useState("");
@@ -96,13 +149,69 @@ export default function CheckoutPage() {
       .then((result) => setConfigured(result.configured))
       .catch(() => setConfigured(false))
       .finally(() => setPaymentsReady(true));
-    api<{ user: { email: string } | null }>("/api/auth/session")
-      .then((result) => {
-        setEmail(result.user?.email || "");
-        setSignedIn(Boolean(result.user));
+    let cancel = false;
+    api<{ user: { email: string; name: string; phone: string } | null }>("/api/auth/session")
+      .then(async (result) => {
+        if (cancel) return;
+        if (!result.user) {
+          const device = readDeviceDetails();
+          if (device?.email) setEmail(device.email);
+          if (device && (device.details.line1 || device.details.name)) {
+            setSavedAddresses(device.details.line1 ? [device.details] : []);
+            setSavedFrom("device");
+            setContact({ name: device.details.name, phone: device.details.phone });
+          }
+          setSignedIn(false);
+          setDetailsReady(true);
+          return;
+        }
+        setEmail(result.user.email);
+        if (result.user.name || result.user.phone) setContact({ name: result.user.name, phone: result.user.phone });
+        try {
+          const listed = await api<{ addresses: AccountAddress[] }>("/api/account/addresses");
+          if (cancel) return;
+          if (listed.addresses.length) {
+            setSavedAddresses(listed.addresses.map(savedFromAddress));
+            setSavedFrom("account");
+          } else {
+            const device = readDeviceDetails();
+            if (device?.details.line1) {
+              setSavedAddresses([device.details]);
+              setSavedFrom("device");
+            }
+          }
+        } catch {
+          // A missing address book still leaves the name and phone from the profile.
+        }
+        if (cancel) return;
+        setSignedIn(true);
+        setDetailsReady(true);
       })
-      .catch(() => setSignedIn(false));
+      .catch(() => {
+        if (!cancel) {
+          setSignedIn(false);
+          setDetailsReady(true);
+        }
+      });
+    return () => {
+      cancel = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (signedIn !== true) return;
+    let cancel = false;
+    api<{ addresses: AccountAddress[] }>("/api/account/addresses")
+      .then((listed) => {
+        if (cancel || !listed.addresses.length) return;
+        setSavedAddresses(listed.addresses.map(savedFromAddress));
+        setSavedFrom("account");
+      })
+      .catch(() => undefined);
+    return () => {
+      cancel = true;
+    };
+  }, [signedIn]);
 
   useEffect(() => {
     if (!ready || !items.length) return;
@@ -148,6 +257,24 @@ export default function CheckoutPage() {
       return;
     }
     const data = new FormData(event.currentTarget);
+    try {
+      localStorage.setItem(
+        CHECKOUT_DETAILS,
+        JSON.stringify({
+          email: String(data.get("email") || ""),
+          name: String(data.get("name") || ""),
+          phone: String(data.get("phone") || ""),
+          line1: String(data.get("address") || ""),
+          line2: String(data.get("address2") || ""),
+          city: String(data.get("city") || ""),
+          region: String(data.get("state") || ""),
+          postcode: String(data.get("postcode") || ""),
+          country: String(data.get("country") || ""),
+        }),
+      );
+    } catch {
+      // Remembering details on this device is optional.
+    }
     setPending(true);
     setMessage(configured ? "Opening secure payment." : "");
     try {
@@ -402,6 +529,7 @@ export default function CheckoutPage() {
             <Field key={email || "account-email"} name="email" label="Email" type="email" autoComplete="email" defaultValue={email} readOnly />
           )}
           <CheckoutAddress
+            key={`${savedFrom}:${savedAddresses.map((item) => `${item.line1}|${item.postcode}`).join(";")}`}
             defaultCountry={market.country || siteConfig.defaultCountry}
             coupon={coupon}
             onCoupon={setCoupon}
@@ -409,6 +537,10 @@ export default function CheckoutPage() {
             shippingEstimate={quote?.shippingEstimate}
             couponNotice={quoteNotice}
             onCountry={onCountry}
+            savedAddresses={savedAddresses}
+            savedFrom={savedFrom}
+            contact={contact}
+            detailsReady={detailsReady}
           />
         </div>
         <div className="checkout-pay">

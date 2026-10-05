@@ -84,21 +84,21 @@ export function LoginScreen() {
   }
 
   return (
-    <>
+    <div className="account-auth">
       <p className="kicker">Account</p>
       <h1>{mode === "register" ? "Create an account" : "Sign in"}</h1>
       <p className="lede">Continue with Google, or use your email and a password.</p>
       <GoogleAuthChoices onSignedIn={finish} onError={setMessage} />
-      {message ? <p className="notice">{message}</p> : null}
-      <p className="auth-or">or</p>
-      <div className="pay-account-switch">
-        <button type="button" className={mode === "register" ? "is-on" : undefined} onClick={() => { setMode("register"); setMessage(""); }}>
+      <p className="auth-or"><span>or</span></p>
+      <div className="account-mode" role="tablist" aria-label="Account">
+        <button type="button" role="tab" aria-selected={mode === "register"} className={mode === "register" ? "is-on" : undefined} onClick={() => { setMode("register"); setMessage(""); }}>
           Create account
         </button>
-        <button type="button" className={mode === "login" ? "is-on" : undefined} onClick={() => { setMode("login"); setMessage(""); }}>
+        <button type="button" role="tab" aria-selected={mode === "login"} className={mode === "login" ? "is-on" : undefined} onClick={() => { setMode("login"); setMessage(""); }}>
           Sign in
         </button>
       </div>
+      {message ? <p className="notice" role="status">{message}</p> : null}
       <form onSubmit={onPassword} className="stack-form">
         <label className="field">
           <span>Email</span>
@@ -108,17 +108,17 @@ export function LoginScreen() {
           <span>Password</span>
           <input name="password" type="password" autoComplete={mode === "register" ? "new-password" : "current-password"} minLength={8} required />
         </label>
+        {mode === "login" ? (
+          <button type="button" className="auth-code" onClick={() => { setResetOpen((open) => !open); setMessage(""); }}>
+            Forgot password
+          </button>
+        ) : null}
         <button className="btn btn-gold" type="submit" disabled={pending}>
           {pending ? "Saving" : mode === "register" ? "Create account" : "Sign in"}
         </button>
       </form>
-      {mode === "login" ? (
-        <button type="button" className="bag-link auth-code" onClick={() => { setResetOpen((open) => !open); setMessage(""); }}>
-          Forgot password
-        </button>
-      ) : null}
-      {resetOpen ? (
-        <form onSubmit={onReset} className="stack-form">
+      {mode === "login" && resetOpen ? (
+        <form onSubmit={onReset} className="stack-form account-auth__extra">
           <label className="field">
             <span>Email</span>
             <input name="reset-email" type="email" autoComplete="email" required />
@@ -128,21 +128,24 @@ export function LoginScreen() {
           </button>
         </form>
       ) : null}
-      <button type="button" className="bag-link auth-code" onClick={() => { setCodeOpen((open) => !open); setMessage(""); }}>
-        Email me a code
-      </button>
-      {codeOpen ? (
-        <form onSubmit={onCode} className="stack-form">
-          <label className="field">
-            <span>Email</span>
-            <input name="code-email" type="email" autoComplete="email" required />
-          </label>
-          <button className="btn btn-dark" type="submit" disabled={pending}>
-            {pending ? "Sending code" : "Send code"}
-          </button>
-        </form>
-      ) : null}
-    </>
+      <div className="account-auth__alt">
+        <p className="auth-or"><span>or</span></p>
+        <button type="button" className="auth-code" onClick={() => { setCodeOpen((open) => !open); setMessage(""); }}>
+          Email me a code
+        </button>
+        {codeOpen ? (
+          <form onSubmit={onCode} className="stack-form">
+            <label className="field">
+              <span>Email</span>
+              <input name="code-email" type="email" autoComplete="email" required />
+            </label>
+            <button className="btn btn-dark" type="submit" disabled={pending}>
+              {pending ? "Sending code" : "Send code"}
+            </button>
+          </form>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
