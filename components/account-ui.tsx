@@ -44,7 +44,7 @@ export function LoginScreen() {
     setMessage("");
     try {
       await api("/api/auth/password", { method: "POST", body: JSON.stringify({ mode, email, password }) });
-      finish(email);
+      finish();
     } catch (error) {
       setMessage(error instanceof ApiError ? error.message : "The account could not be saved.");
       setPending(false);
