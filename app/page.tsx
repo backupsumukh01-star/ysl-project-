@@ -9,20 +9,23 @@ import { availableTrioImages } from "@/lib/trio-images.server";
 function modelImages() {
   const sourceDir = path.join(process.cwd(), "img", "model");
   const destDir = path.join(process.cwd(), "public", "images", "model");
-  if (!fs.existsSync(sourceDir)) return [];
-  fs.mkdirSync(destDir, { recursive: true });
-  return fs
-    .readdirSync(sourceDir)
-    .filter((name) => /\.(png|jpe?g|webp|avif)$/i.test(name))
-    .sort((a, b) => a.localeCompare(b, "en"))
-    .map((name) => {
+  if (fs.existsSync(sourceDir)) {
+    fs.mkdirSync(destDir, { recursive: true });
+    for (const name of fs.readdirSync(sourceDir)) {
+      if (!/\.(png|jpe?g|webp|avif)$/i.test(name)) continue;
       const from = path.join(sourceDir, name);
       const to = path.join(destDir, name);
       if (!fs.existsSync(to) || fs.statSync(from).mtimeMs > fs.statSync(to).mtimeMs) {
         fs.copyFileSync(from, to);
       }
-      return `/images/model/${name}`;
-    });
+    }
+  }
+  if (!fs.existsSync(destDir)) return [];
+  return fs
+    .readdirSync(destDir)
+    .filter((name) => /\.(png|jpe?g|webp|avif)$/i.test(name))
+    .sort((a, b) => a.localeCompare(b, "en"))
+    .map((name) => `/images/model/${name}`);
 }
 
 export const dynamic = "force-dynamic";
