@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   formatReviewAverage,
@@ -249,7 +250,7 @@ export function ReviewBrowser({ productId, initialSummary }: { productId: string
       <aside className="journal-write">
         <h3>Have your own Rouge story?</h3>
         <p>Share your experience with Rouge Sur Mesure from a paid order.</p>
-        <a href="/account/orders">Write a review</a>
+        <Link href="/account/orders">Write a review</Link>
       </aside>
     </div>
   );
