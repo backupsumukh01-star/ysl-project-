@@ -1285,7 +1285,7 @@ details {
     align-items: center;
   }
 
-  .mk-intro { min-height: calc(100svh - var(--header)); padding-top: calc(var(--header) + 8px); padding-bottom: 48px; }
+  .mk-intro { min-height: 0; padding-top: calc(var(--header) + 12px); padding-bottom: 40px; }
 
   .mk-intro__shot { width: 100%; max-height: min(72vh, 680px); }
 
@@ -1588,8 +1588,8 @@ details {
   .mk-intro {
     width: min(1240px, calc(100% - 64px));
     grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.78fr);
-    gap: 56px;
-    align-items: end;
+    gap: 48px;
+    align-items: center;
   }
 
   .mk-intro__shot {
@@ -1598,7 +1598,7 @@ details {
     background: transparent;
   }
 
-  .mk-intro__copy h1 { font-size: clamp(60px, 4.6vw, 80px); }
+  .mk-intro__copy h1 { font-size: clamp(42px, 3.5vw, 64px); text-wrap: balance; }
 
   .mk-still {
     width: 100%;
@@ -1824,7 +1824,7 @@ details {
   }
 
   .mk-intro .mk-intro__shot--hero {
-    width: min(100%, 320px);
+    width: 100%;
     aspect-ratio: 1221 / 1289;
     max-height: none;
     margin-inline: auto;
@@ -1842,6 +1842,78 @@ details {
   height: 100%;
   object-fit: contain;
   object-position: center center;
+}
+
+.mk-intro .mk-kicker {
+  margin: 0 0 6px;
+  color: #8a847c;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.mk-intro__copy p.mk-lead {
+  margin: 8px 0 0;
+  max-width: 26em;
+  color: #5c5854;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.mk-launch { margin: 14px 0 0; }
+
+.mk-launch .price {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  justify-content: start;
+  column-gap: 12px;
+  row-gap: 2px;
+  margin: 0;
+  max-width: none;
+  color: #161616;
+  line-height: 1;
+}
+
+.mk-launch .price s {
+  grid-column: 1 / -1;
+  color: #8a847c;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
+.mk-launch .price__now {
+  font-family: var(--sans);
+  font-size: clamp(28px, 7vw, 36px);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.mk-launch .price__off {
+  color: #9a1f33;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.mk-intro .mk-hero__actions { margin-top: 16px; }
+
+.mk-intro .btn-gold {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.mk-intro .btn-gold:active { transform: scale(0.985); }
+
+@media (min-width: 900px) {
+  .mk-intro .btn-gold { width: auto; min-width: 280px; }
+  .mk-launch .price__now { font-size: 36px; }
 }
 
 @media (max-width: 899px) {
@@ -1918,7 +1990,7 @@ body:has(.mk) .mk-intro,
   body:has(.mk) .mk-intro {
     width: 100%;
     margin: 0;
-    padding: calc(var(--header) + 10px) 16px 64px;
+    padding: calc(var(--header) + 8px) 16px 28px;
     background: #f5f1e8;
   }
 

@@ -43,3 +43,75 @@ export function catalogCompareForSlug(slug: string): number | null {
   if (slug.startsWith("cartridge-trio-")) return publishedPrices.cartridgeTrioCompareAt;
   return null;
 }
+
+const INR = publishedPrices.inr;
+
+export function indiaMajorForType(type: string): number | null {
+  if (type === "DEVICE") return INR.device;
+  if (type === "CARTRIDGE_TRIO") return INR.cartridgeTrio;
+  if (type === "REFILL") return INR.refill;
+  if (type === "BUNDLE") return INR.bundle;
+  return null;
+}
+
+export function indiaCompareForType(type: string): number | null {
+  if (type === "DEVICE") return INR.deviceCompareAt;
+  if (type === "CARTRIDGE_TRIO") return INR.cartridgeTrioCompareAt;
+  if (type === "REFILL") return INR.refillCompareAt;
+  if (type === "BUNDLE") return INR.bundleCompareAt;
+  return null;
+}
+
+export function indiaMinorForType(type: string): number | null {
+  const major = indiaMajorForType(type);
+  return major == null ? null : major * 100;
+}
+
+export function indiaMajorForSlug(slug: string): number | null {
+  if (slug === "rouge-sur-mesure") return INR.device;
+  if (slug === "rouge-sur-mesure-bundle") return INR.bundle;
+  if (slug === "cartridge-refill") return INR.refill;
+  if (slug.startsWith("cartridge-trio-")) return INR.cartridgeTrio;
+  return null;
+}
+
+function cents(usd: number) {
+  return Math.round(usd * 100);
+}
+
+/** A catalog dollar amount, selling or reference, as its published whole-rupee price. */
+export function indiaListedMajor(usd: number | null | undefined): number | null {
+  if (usd == null) return null;
+  const key = cents(usd);
+  if (key === cents(publishedPrices.device) || key === cents(publishedPrices.bundle)) return INR.device;
+  if (key === cents(publishedPrices.cartridgeTrio)) return INR.cartridgeTrio;
+  if (key === cents(publishedPrices.refill)) return INR.refill;
+  if (key === cents(publishedPrices.deviceCompareAt) || key === cents(publishedPrices.bundleCompareAt)) return INR.deviceCompareAt;
+  if (key === cents(publishedPrices.cartridgeTrioCompareAt)) return INR.cartridgeTrioCompareAt;
+  return null;
+}
+
+/** Reference rupee price for a selling dollar amount when no compare-at was passed. */
+export function indiaSubtotalMajor(items: { slug: string; quantity: number }[]): number | null {
+  let sum = 0;
+  for (const item of items) {
+    const major = indiaMajorForSlug(item.slug);
+    if (major == null) return null;
+    sum += major * item.quantity;
+  }
+  return sum;
+}
+
+export function offerForCurrency(type: string, currency: string): { price: number | null; currency: string } {
+  if (currency === "INR") return { price: indiaMajorForType(type), currency: "INR" };
+  return { price: publishedMajor(type), currency: publishedPrices.currency };
+}
+
+export function indiaCompareForSellUsd(usd: number | null | undefined): number | null {
+  if (usd == null) return null;
+  const key = cents(usd);
+  if (key === cents(publishedPrices.device) || key === cents(publishedPrices.bundle)) return INR.deviceCompareAt;
+  if (key === cents(publishedPrices.cartridgeTrio)) return INR.cartridgeTrioCompareAt;
+  if (key === cents(publishedPrices.refill)) return INR.refillCompareAt;
+  return null;
+}

@@ -4,6 +4,7 @@ import { Fraunces, Outfit } from "next/font/google";
 import { siteConfig } from "@/lib/config";
 import { CartProvider } from "@/components/cart-provider";
 import { ToastProvider } from "@/components/toast-provider";
+import { AnnouncementBar } from "@/components/announcement-bar";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { RouteProgress } from "@/components/route-progress";
@@ -11,6 +12,7 @@ import { HelpLink, ScrollTop, StickyBuyBar } from "@/components/chrome";
 import { AnalyticsListener } from "@/components/analytics-listener";
 import { ConsentBanner } from "@/components/consent-banner";
 import { MetaPixel } from "@/components/meta-pixel";
+import { VercelMetrics } from "@/components/vercel-metrics";
 import { cookies, headers } from "next/headers";
 import { getSettings } from "@/lib/settings";
 import { getProductBySlug } from "@/lib/catalog";
@@ -76,6 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to content
         </a>
         {settings.announcement ? <p className="announcement">{settings.announcement}</p> : null}
+        <AnnouncementBar />
         <MarketProvider initial={{ ...market, country: place.iso }}>
         <CartProvider>
           <ToastProvider>
@@ -97,6 +100,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <AnalyticsListener />
             </Suspense>
             <MetaPixel />
+            <VercelMetrics />
           </ToastProvider>
         </CartProvider>
         </MarketProvider>

@@ -188,10 +188,12 @@ export function shippingChargeLabel(amount: number | null | undefined, currency 
 
 export function formatMoney(amount: number | null, currency = publishedPrices.currency): string {
   if (amount == null) return "Price to be confirmed";
-  return new Intl.NumberFormat("en", {
+  const wholeRupee = currency === "INR" && Math.abs(amount - Math.round(amount)) < 0.001;
+  return new Intl.NumberFormat(wholeRupee ? "en-IN" : "en", {
     style: "currency",
     currency,
-  }).format(amount);
+    ...(wholeRupee ? { minimumFractionDigits: 0, maximumFractionDigits: 0 } : {}),
+  }).format(wholeRupee ? Math.round(amount) : amount);
 }
 
 export function lineTotal(quantity: number): number | null {

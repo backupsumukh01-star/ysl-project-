@@ -1,5 +1,5 @@
 #cartridges,
-#refills { scroll-margin-top: calc(var(--header) + 16px); }
+#refills { scroll-margin-top: calc(var(--header) + var(--announce) + 16px); }
 
 .shop-house .qty { margin-top: 14px; }
 

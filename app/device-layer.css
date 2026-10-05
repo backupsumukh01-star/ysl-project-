@@ -483,7 +483,7 @@
 .device-page .device-story .section {
   padding-top: clamp(40px, 6vw, 84px);
   padding-bottom: clamp(12px, 2vw, 20px);
-  scroll-margin-top: calc(var(--header) + 12px);
+  scroll-margin-top: calc(var(--header) + var(--announce) + 12px);
 }
 .device-page .device-story h2 {
   font-family: var(--serif);

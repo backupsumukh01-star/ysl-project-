@@ -12,7 +12,7 @@
   align-items: stretch;
   gap: 18px;
   position: sticky;
-  top: var(--header);
+  top: calc(var(--header) + var(--announce));
   z-index: 2;
   margin: 0 calc(var(--pad) * -1) 4px;
   padding: 0 var(--pad);

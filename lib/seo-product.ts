@@ -25,7 +25,7 @@ export function productJsonLd(input: {
         : {
             "@type": "Offer",
             priceCurrency: input.currency,
-            price: input.price.toFixed(2),
+            price: Number.isInteger(input.price) ? String(input.price) : input.price.toFixed(2),
             availability: input.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             url: `${siteConfig.siteUrl}${input.path}`,
           },

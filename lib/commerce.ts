@@ -8,7 +8,7 @@ import { sendEmail, sendOwnerEmail } from "@/lib/email/service";
 import { createRazorpayOrder, createRazorpayRefund } from "@/lib/payments/razorpay";
 import { purchasePayload, recordPaymentOutcome, sendVerifiedPurchase } from "@/lib/analytics/purchase";
 import { reserveInventory, releaseInventory } from "@/lib/inventory";
-import { authoritativeMinor } from "@/lib/pricing";
+import { authoritativeMinor, indiaMinorForType } from "@/lib/pricing";
 import { convertUsdMinor, fromMinor, marketFor, type Market } from "@/lib/fx";
 import { deviceFamilySelection } from "@/lib/trio-images";
 
@@ -38,6 +38,7 @@ type QuoteLine = {
   trackInventory: boolean;
   allowBackorder: boolean;
   stock: number;
+  type: string;
 };
 
 export type Quote = {
@@ -154,6 +155,7 @@ async function priceCart(input: { lines: LineInput[]; email?: string; couponCode
       trackInventory: product.trackInventory,
       allowBackorder: product.allowBackorder,
       stock,
+      type: product.type,
     });
   }
   const subtotalMinor = lines.reduce((sum, line) => sum + line.unitMinor * line.quantity, 0);
@@ -174,12 +176,15 @@ async function priceCart(input: { lines: LineInput[]; email?: string; couponCode
   };
 }
 
-function presentInMarket<T extends { unitMinor: number; quantity: number }>(
+function presentInMarket<T extends { unitMinor: number; quantity: number; type?: string }>(
   market: Market,
   lines: T[],
   amounts: { discountMinor: number; shippingMinor: number | null; taxMinor: number },
 ) {
-  const nextLines = lines.map((line) => ({ ...line, unitMinor: convertUsdMinor(line.unitMinor, market) }));
+  const nextLines = lines.map((line) => {
+    const listed = market.currency === "INR" ? indiaMinorForType(line.type || "") : null;
+    return { ...line, unitMinor: listed ?? convertUsdMinor(line.unitMinor, market) };
+  });
   const subtotalMinor = nextLines.reduce((sum, line) => sum + line.unitMinor * line.quantity, 0);
   const discountMinor = Math.min(subtotalMinor, convertUsdMinor(amounts.discountMinor, market));
   const shippingMinor = amounts.shippingMinor == null ? null : convertUsdMinor(amounts.shippingMinor, market);

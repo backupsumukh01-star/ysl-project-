@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import { useCart, lineKey } from "@/components/cart-provider";
-import { useBagQuote } from "@/components/bag-quote";
+import { bagSubtotalLabel, bagTotalLabel, useBagQuote } from "@/components/bag-quote";
 import { lineKind, shippingChargeLabel } from "@/lib/product";
-import { useMoney } from "@/components/market";
+import { useMarket, useMoney } from "@/components/market";
 import { chosenTrios } from "@/components/set-contains";
 import { Price, QuantitySelector } from "@/components/commerce";
 import { CartLineImage } from "@/components/refill-mark";
 import { trioDots, type TrioFamilyName } from "@/lib/trio-images";
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const market = useMarket();
   const money = useMoney();
   const { items, ready, subtotal, setQuantity, removeItem, clear, addedNote } = useCart();
   const quote = useBagQuote(items, ready);
+  const subtotalLabel = bagSubtotalLabel(market.currency, money, items, subtotal, quote);
+  const totalLabel = bagTotalLabel(money, quote);
   const shippingKnown = quote?.shippingConfigured === true && quote.shipping != null;
   if (!open) return null;
   const count = items.reduce((sum, line) => sum + line.quantity, 0);
@@ -82,7 +85,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             <div className="bag-sheet__sums">
               <p>
                 <span>Subtotal</span>
-                <span>{money(subtotal)}</span>
+                <span>{subtotalLabel}</span>
               </p>
               <p>
                 <span>Shipping</span>
@@ -90,7 +93,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </p>
               <p className="bag-sheet__total">
                 <span>Total</span>
-                <span>{shippingKnown && quote ? money(quote.total) : "—"}</span>
+                <span>{shippingKnown && totalLabel ? totalLabel : "—"}</span>
               </p>
             </div>
             {quote && !shippingKnown ? <p className="bag-sheet__wait">Checkout stays closed until a shipping price is set.</p> : null}

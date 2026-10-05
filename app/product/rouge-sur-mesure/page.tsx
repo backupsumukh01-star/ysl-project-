@@ -1,5 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { currencyForPlace } from "@/lib/fx";
+import { offerForCurrency } from "@/lib/pricing";
 import { product } from "@/lib/product";
 import { DeviceStory } from "@/components/device-story";
 import { ProductView } from "@/components/product-view";
@@ -29,12 +32,13 @@ async function ProductReviews({ productId }: { productId: string }) {
 export default async function ProductPage() {
   const catalog = await getProductBySlug("rouge-sur-mesure");
   const stockLimit = catalog?.trackInventory ? Math.max(0, catalog.stock - catalog.reserved) : 10;
+  const offer = offerForCurrency("DEVICE", currencyForPlace((await cookies()).get("rsm-country")?.value));
   const jsonLd = productJsonLd({
     name: product.name,
     description: product.description,
     sku: catalog?.sku,
-    price: catalog?.price ?? product.price,
-    currency: product.currency,
+    price: offer.price ?? catalog?.price ?? product.price,
+    currency: offer.currency,
     image: product.images.hero.src,
     path: "/product/rouge-sur-mesure",
     inStock: catalog ? catalog.inStock : true,

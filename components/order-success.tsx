@@ -114,7 +114,7 @@ export function OrderSuccess({ id }: { id: string }) {
       </div>
       {!signedIn ? <p>This confirmation stays on this device. Create an account with the same email to see later orders.</p> : null}
       <p>
-        <Link href={`/invoice/${order.id}`}>Invoice</Link>
+        <Link href={`/invoice/${order.id}`}>Download invoice</Link>
       </p>
     </main>
   );

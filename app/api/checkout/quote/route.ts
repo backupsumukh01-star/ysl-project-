@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { fail, guardOrigin, ok, readJson } from "@/lib/http";
 import { previewCheckout } from "@/lib/commerce";
 import { fromMinor } from "@/lib/fx";
@@ -21,7 +22,8 @@ export async function POST(request: Request) {
   }
   const parsed = schema.safeParse(await readJson(request));
   if (!parsed.success) return fail("VALIDATION", "Check the items in your bag.");
-  const result = await previewCheckout({ lines: parsed.data.lines, couponCode: parsed.data.couponCode, country: parsed.data.country });
+  const country = parsed.data.country || (await cookies()).get("rsm-country")?.value || "";
+  const result = await previewCheckout({ lines: parsed.data.lines, couponCode: parsed.data.couponCode, country });
   if (!result.ok) return fail(result.code, result.message);
   const preview = result.preview;
   return ok({

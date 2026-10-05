@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { currencyForPlace } from "@/lib/fx";
 import { TrioPurchase, type TrioOffer } from "@/components/trio-purchase";
 import { getProductBySlug, listProductsByType, type CatalogProduct } from "@/lib/catalog";
-import { publishedPrices } from "@/lib/pricing";
+import { offerForCurrency } from "@/lib/pricing";
 import { productJsonLd } from "@/lib/seo-product";
 import { trioImageFiles, type TrioFamilyName } from "@/lib/trio-images";
 import { availableTrioImages } from "@/lib/trio-images.server";
@@ -41,12 +43,13 @@ export async function TrioStory({ slug }: { slug: string }) {
     .filter((item): item is CatalogProduct => Boolean(item))
     .map((item) => toOffer(item, photos));
   const product = offers.find((item) => item.slug === current.slug) ?? toOffer(current, photos);
+  const offer = offerForCurrency("CARTRIDGE_TRIO", currencyForPlace((await cookies()).get("rsm-country")?.value));
   const jsonLd = productJsonLd({
     name: product.name,
     description: product.description,
     sku: product.sku,
-    price: product.price,
-    currency: publishedPrices.currency,
+    price: offer.price,
+    currency: offer.currency,
     image: product.image || undefined,
     path: `/product/${slug}`,
     inStock: product.inStock,

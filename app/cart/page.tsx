@@ -4,16 +4,19 @@ import Link from "next/link";
 import { useCart, lineKey } from "@/components/cart-provider";
 import { Price, QuantitySelector } from "@/components/commerce";
 import { lineKind, shippingChargeLabel } from "@/lib/product";
-import { useMoney } from "@/components/market";
 import { CartLineImage } from "@/components/refill-mark";
 import { chosenTrios, SetContains } from "@/components/set-contains";
-import { useBagQuote } from "@/components/bag-quote";
+import { bagSubtotalLabel, bagTotalLabel, useBagQuote } from "@/components/bag-quote";
+import { useMarket, useMoney } from "@/components/market";
 import "./cart.css";
 
 export default function CartPage() {
+  const market = useMarket();
   const money = useMoney();
   const { items, ready, subtotal, setQuantity, removeItem, clear } = useCart();
   const quote = useBagQuote(items, ready);
+  const subtotalLabel = bagSubtotalLabel(market.currency, money, items, subtotal, quote);
+  const totalLabel = bagTotalLabel(money, quote);
   const shippingKnown = quote?.shippingConfigured === true && quote.shipping != null;
 
   return (
@@ -66,7 +69,7 @@ export default function CartPage() {
             <div className="totals">
               <div>
                 <span>Subtotal</span>
-                <span>{money(subtotal)}</span>
+                <span>{subtotalLabel}</span>
               </div>
               <div>
                 <span>Shipping</span>
@@ -74,7 +77,7 @@ export default function CartPage() {
               </div>
               <div>
                 <span>Total</span>
-                <span>{shippingKnown && quote ? money(quote.total) : "Unavailable"}</span>
+                <span>{shippingKnown && totalLabel ? totalLabel : "Unavailable"}</span>
               </div>
             </div>
             <Link className="btn btn-gold btn-full" href="/checkout">
@@ -88,7 +91,7 @@ export default function CartPage() {
           <div className="bag-pay">
             <p>
               <span>Subtotal</span>
-              <span>{money(subtotal)}</span>
+              <span>{subtotalLabel}</span>
             </p>
             <Link className="btn btn-gold btn-full" href="/checkout">
               Checkout

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { currencyForPlace } from "@/lib/fx";
 import { getProductBySlug } from "@/lib/catalog";
 import { formatMoney } from "@/lib/product";
 import { getSettings } from "@/lib/settings";
 import { CatalogProductView } from "@/components/catalog-product";
 import { RefillPurchase } from "@/components/refill-purchase";
 import { cartridgeColor, cartridgeCode, cartridgeFamily, cartridgeLabel, cartridgePhotoSrc, cartridgeShade, soldCartridgeOrder } from "@/lib/cartridge-photos";
-import { publishedPrices } from "@/lib/pricing";
+import { offerForCurrency } from "@/lib/pricing";
 import { productJsonLd } from "@/lib/seo-product";
 import "../../quiet.css";
 
@@ -58,12 +60,13 @@ export default async function ProductSlugPage({
       });
     const maxQuantity = product.trackInventory ? Math.max(1, Math.min(10, product.stock - product.reserved)) : 10;
     const photo = options.find((option) => option.code === cartridgeCode(query.cartridge))?.image || options[0]?.image;
+    const offer = offerForCurrency(product.type, currencyForPlace((await cookies()).get("rsm-country")?.value));
     const jsonLd = productJsonLd({
       name: product.name,
       description: product.description,
       sku: product.sku,
-      price: product.price,
-      currency: publishedPrices.currency,
+      price: offer.price,
+      currency: offer.currency,
       image: photo,
       path: `/product/${product.slug}`,
       inStock: product.inStock,
@@ -87,12 +90,13 @@ export default async function ProductSlugPage({
       : `Shipping is ${formatMoney(settings.shippingFlatMinor! / 100, settings.currency)}.`
     : "A shipping price has not been published yet.";
   const photo = product.images.find((image) => image.src && !image.src.includes("swatches"));
+  const offer = offerForCurrency(product.type, currencyForPlace((await cookies()).get("rsm-country")?.value));
   const jsonLd = productJsonLd({
     name: product.name,
     description: product.description,
     sku: product.sku,
-    price: product.price,
-    currency: publishedPrices.currency,
+    price: offer.price,
+    currency: offer.currency,
     image: photo?.src,
     path: `/product/${product.slug}`,
     inStock: product.inStock,

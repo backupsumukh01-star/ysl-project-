@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PrismaClient } from "@prisma/client";
-import { authoritativeMinor, catalogMajorForSlug, publishedPrices } from "@/lib/pricing";
+import { authoritativeMinor, catalogMajorForSlug, indiaMinorForType, publishedPrices } from "@/lib/pricing";
 import { lineSchema } from "@/lib/validators";
 import { createCheckoutOrder, previewCheckout } from "@/lib/commerce";
 
@@ -104,6 +104,46 @@ test("server quote ignores a drifted database price and a tampered client amount
     await prisma.product.update({ where: { id: trio.id }, data: { priceMinor: 2581 } });
     await prisma.product.update({ where: { id: refill.id }, data: { priceMinor: 10372 } });
     if (variant) await prisma.productVariant.update({ where: { id: variant.id }, data: { priceMinor: null } });
+    await prisma.$disconnect();
+  }
+});
+
+test("India checkout charges the published rupee prices", async () => {
+  assert.equal(publishedPrices.inr.device, 9999);
+  assert.equal(publishedPrices.inr.cartridgeTrio, 1999);
+  assert.equal(publishedPrices.inr.refill, 799);
+  assert.equal(Math.round(((35000 - 9999) / 35000) * 100), 71);
+  assert.equal(Math.round(((8999 - 1999) / 8999) * 100), 78);
+  assert.equal(Math.round(((2999 - 799) / 2999) * 100), 73);
+  assert.equal(9999 + 1999 + 799, 12797);
+  assert.equal(indiaMinorForType("DEVICE"), 999900);
+  assert.equal(indiaMinorForType("CARTRIDGE_TRIO"), 199900);
+  assert.equal(indiaMinorForType("REFILL"), 79900);
+
+  const prisma = new PrismaClient();
+  const device = await prisma.product.findUnique({ where: { slug: "rouge-sur-mesure" } });
+  const trio = await prisma.product.findUnique({ where: { slug: "cartridge-trio-pink" } });
+  const refill = await prisma.product.findUnique({ where: { slug: "cartridge-refill" }, include: { variants: true } });
+  assert.ok(device && trio && refill);
+  try {
+    const quoted = await previewCheckout({
+      country: "IN",
+      lines: [
+        { productId: device.id, quantity: 1, price: 1, selection: "Red · Nude · Pink" } as never,
+        { productId: trio.slug, quantity: 1, price: 5 } as never,
+        { productId: refill.slug, variantId: refill.variants[0]?.id, quantity: 1, price: 0 } as never,
+      ],
+    });
+    assert.equal(quoted.ok, true);
+    if (!quoted.ok) return;
+    assert.equal(quoted.preview.currency, "INR");
+    const byName = new Map(quoted.preview.lines.map((line) => [line.name, line]));
+    assert.equal(byName.get("Rouge Sur Mesure")?.unitMinor, 999900);
+    assert.equal(byName.get("Cartridge Trio — Pink")?.unitMinor, 199900);
+    assert.equal(byName.get("Cartridge refill")?.unitMinor, 79900);
+    assert.equal(quoted.preview.subtotalMinor, 1279700);
+    assert.equal(quoted.preview.totalMinor, 1279700);
+  } finally {
     await prisma.$disconnect();
   }
 });

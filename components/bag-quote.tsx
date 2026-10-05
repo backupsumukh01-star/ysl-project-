@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api-client";
 import { checkoutLinePayload, type CartLine } from "@/components/cart-provider";
+import { formatMoney } from "@/lib/product";
+import { indiaSubtotalMajor } from "@/lib/pricing";
 
 export type BagQuote = {
   subtotal: number;
@@ -43,4 +45,26 @@ export function useBagQuote(items: CartLine[], ready: boolean) {
   }, [ready, signature]);
 
   return quote;
+}
+
+export function bagSubtotalLabel(
+  marketCurrency: string,
+  money: (usd: number | null) => string,
+  items: { slug: string; quantity: number }[],
+  usdSubtotal: number | null,
+  quote: BagQuote | null,
+) {
+  if (marketCurrency === "INR") {
+    const listed = indiaSubtotalMajor(items);
+    if (listed != null) return formatMoney(listed, "INR");
+    if (quote?.currency === "INR") return formatMoney(quote.subtotal, "INR");
+  }
+  if (quote && quote.currency !== "USD") return formatMoney(quote.subtotal, quote.currency);
+  return money(usdSubtotal);
+}
+
+export function bagTotalLabel(money: (usd: number | null) => string, quote: BagQuote | null) {
+  if (!quote || quote.total == null) return "";
+  if (quote.currency !== "USD") return formatMoney(quote.total, quote.currency);
+  return money(quote.total);
 }

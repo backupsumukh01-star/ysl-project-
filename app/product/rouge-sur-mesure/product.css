@@ -652,7 +652,7 @@
 }
 
 .device-page #app {
-  scroll-margin-top: calc(var(--header) + 16px);
+  scroll-margin-top: calc(var(--header) + var(--announce) + 16px);
 }
 
 .device-page #app p a {
@@ -1321,7 +1321,7 @@ body:has(.device-page) .sticky-buy .btn {
 
 .device-page .journal-bar {
   position: sticky;
-  top: var(--header);
+  top: calc(var(--header) + var(--announce));
   z-index: 5;
   display: flex;
   flex-wrap: wrap;

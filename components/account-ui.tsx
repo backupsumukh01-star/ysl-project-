@@ -229,7 +229,11 @@ export function DashboardScreen() {
           <h2>Order {order.number}</h2>
           <p>{statusLine(order.status, order.paymentStatus)}</p>
           <p className="order-card__total">{formatMoney(order.total, order.currency)}</p>
-          <Link href={`/account/orders/${order.id}`}>View order</Link>
+          <p className="order-links">
+            <Link href={`/account/orders/${order.id}`}>View order</Link>
+            {" · "}
+            <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+          </p>
         </article>
       ) : (
         <div className="account-empty">
@@ -306,7 +310,11 @@ export function OrdersScreen() {
           <p>{statusLine(order.status, order.paymentStatus)}</p>
           <p className="order-card__total">{formatMoney(order.total, order.currency)}</p>
           <p>{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
-          <Link href={`/account/orders/${order.id}`}>View order</Link>
+          <p className="order-links">
+            <Link href={`/account/orders/${order.id}`}>View order</Link>
+            {" · "}
+            <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+          </p>
         </article>
       ))}
     </>
@@ -442,7 +450,7 @@ export function OrderDetailScreen({ id }: { id: string }) {
         </p>
       ) : null}
       <p className="order-links">
-        <Link href={`/invoice/${order.id}`}>View invoice</Link>
+        <Link href={`/invoice/${order.id}`}>Download invoice</Link>
         {" · "}
         <Link href={`/account/orders/${order.id}/return`}>Request a return</Link>
         {" · "}

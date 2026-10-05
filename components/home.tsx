@@ -8,10 +8,19 @@ import { AppDownload } from "@/components/app-download";
 import type { AppDownloadLinks } from "@/lib/app-links";
 import type { CartInput } from "@/components/cart-provider";
 import { Price } from "@/components/commerce";
+import { publishedPrices } from "@/lib/pricing";
 import { deviceOffering, product } from "@/lib/product";
 import type { TrioFamilyName } from "@/lib/trio-images";
 
 const shot = { objectFit: "contain" as const, objectPosition: "center center" };
+
+function LaunchPrice() {
+  return (
+    <div className="mk-launch">
+      <Price amount={publishedPrices.device} compareAt={publishedPrices.deviceCompareAt} />
+    </div>
+  );
+}
 
 function ApplyVideo({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -198,7 +207,6 @@ function ShadeReel({ images }: { images: string[] }) {
 
 export function HomePage({
   trioImages = {},
-  offer = null,
   modelImages = [],
   appLinks,
 }: {
@@ -208,9 +216,6 @@ export function HomePage({
   modelImages?: string[];
   appLinks: AppDownloadLinks;
 }) {
-  const price = offer?.price ?? product.price;
-  const compareAt = offer ? offer.compareAt ?? null : product.compareAtPrice;
-
   return (
     <main id="main" className="mk">
       <section className="mk-intro" aria-labelledby="what-title">
@@ -223,11 +228,8 @@ export function HomePage({
         <div className="mk-intro__copy">
           <p className="mk-kicker">YSL Beauté</p>
           <h1 id="what-title">Rouge Sur Mesure</h1>
-          <p className="mk-kicker">Custom lip color creator</p>
-          <p>Your color, created by technology. Choose your cartridge trio, create your personalized shade, and apply it with the precision brush.</p>
-          <div className="mk-price">
-            <Price amount={price} compareAt={compareAt} />
-          </div>
+          <p className="mk-lead">Create personalized lip color with YSL beauty technology.</p>
+          <LaunchPrice />
           <div className="mk-hero__actions">
             <Link className="btn btn-gold" href="/product/rouge-sur-mesure">Discover Rouge Sur Mesure →</Link>
           </div>
@@ -247,6 +249,7 @@ export function HomePage({
         <div className="mk-block__head">
           <p className="mk-kicker">How to use</p>
           <h2 id="how-title">How it works.</h2>
+          <p>Your color, created by technology. Choose your cartridge trio, create your personalized shade, and apply it with the precision brush.</p>
         </div>
         <figure className="mk-film">
           <ApplyVideo src="/videos/how-it-works.mp4" />
@@ -258,9 +261,7 @@ export function HomePage({
           <div className="mk-box__lead">
             <p className="mk-kicker">What comes in the box</p>
             <h2 id="box-title">The device purchase.</h2>
-            <div className="mk-price">
-            <Price amount={price} compareAt={compareAt} />
-          </div>
+            <LaunchPrice />
           </div>
           <div className="mk-intro__shot mk-intro__shot--set">
             <Image src="/images/device-purchase.jpg" alt="The Rouge Sur Mesure device in its open presentation box, with the retractable lip brush, cable, accessory case, and nine cartridges." fill sizes="(max-width: 899px) 92vw, 520px" style={shot} />

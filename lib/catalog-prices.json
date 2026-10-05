@@ -6,5 +6,15 @@
   "cartridgeTrioCompareAt": 89,
   "refill": 103.72,
   "bundle": 101.5,
-  "bundleCompareAt": 350
+  "bundleCompareAt": 350,
+  "inr": {
+    "device": 9999,
+    "deviceCompareAt": 35000,
+    "cartridgeTrio": 1999,
+    "cartridgeTrioCompareAt": 8999,
+    "refill": 799,
+    "refillCompareAt": 2999,
+    "bundle": 9999,
+    "bundleCompareAt": 35000
+  }
 }
