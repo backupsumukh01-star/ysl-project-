@@ -99,7 +99,7 @@ function normalize(input: number | CartInput | undefined): CartLine {
     sku: input.sku || "",
     price: catalogPrice(input.slug, input.id, input.price),
     compareAt: catalogCompareForSlug(input.slug) ?? input.compareAt ?? null,
-    image: input.slug === "cartridge-refill" ? cartridgePhotoSrc(input.variantName) || input.image : input.image || product.images.showcase.src,
+    image: input.slug === "cartridge-refill" ? cartridgePhotoSrc(input.variantName) || input.image || "" : input.image || product.images.showcase.src,
   };
 }
 
