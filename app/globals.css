@@ -2534,10 +2534,30 @@ details summary { cursor: pointer; min-height: 44px; display: flex; align-items:
 .trio-page .trio-ingredients summary {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   min-height: 48px;
   cursor: pointer;
+  list-style: none;
   color: #161616;
   font-size: 15px;
+}
+.trio-page .trio-ingredients summary::-webkit-details-marker,
+.trio-page .trio-ingredients summary::marker {
+  display: none;
+  content: "";
+}
+.trio-page .trio-ingredients summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #161616;
+  border-bottom: 1.5px solid #161616;
+  transform: rotate(45deg) translateY(-2px);
+  flex: 0 0 auto;
+}
+.trio-page .trio-ingredients details[open] summary::after {
+  transform: rotate(-135deg) translateY(-1px);
 }
 .trio-page .trio-ingredients p {
   margin: 0 0 14px;

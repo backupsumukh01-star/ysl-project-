@@ -3,73 +3,92 @@
   gap: 28px;
 }
 
-.account-panel__who {
-  margin: 0;
-  color: #161616;
-  font-family: var(--serif);
-  font-size: 28px;
-  font-weight: 500;
-  line-height: 1.15;
+.account-shell.page {
+  padding-top: calc(var(--header) + 8px);
 }
 
-.account-panel__mail {
-  margin: 6px 0 8px;
-  color: #6a6560;
-  font-size: 14px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
+.account-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  position: sticky;
+  top: var(--header);
+  z-index: 2;
+  margin: 0 calc(var(--pad) * -1) 4px;
+  padding: 0 var(--pad);
+  background: #fffaf8;
+  border-bottom: 1px solid #ece7e1;
 }
 
 .account-shell .account-nav {
-  display: grid;
-  gap: 0;
-  margin: 12px 0 0;
+  display: flex;
+  flex: 1;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 22px;
+  margin: 0;
   padding: 0;
   border: 0;
-  overflow: visible;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
+.account-shell .account-nav::-webkit-scrollbar { display: none; }
+
 .account-shell .account-nav a {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  min-height: 46px;
+  flex: 0 0 auto;
+  min-height: 40px;
   padding: 0;
   border: 0;
-  border-top: 1px solid #ece7e1;
   border-radius: 0;
   background: transparent;
-  color: #161616;
+  color: #6a6560;
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
-}
-
-.account-shell .account-nav a:last-child {
-  border-bottom: 1px solid #ece7e1;
+  text-decoration: none;
 }
 
 .account-shell .account-nav a[aria-current="page"] {
   background: transparent;
-  border-color: #ece7e1;
-  color: #9a1f33;
+  color: #161616;
+  text-decoration: underline;
+  text-decoration-color: #9a1f33;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 7px;
 }
 
 .account-logout {
-  margin-top: 18px;
-  min-height: 44px;
+  flex: 0 0 auto;
+  margin: 0;
+  min-height: 40px;
   padding: 0;
   border: 0;
   background: transparent;
   color: #6a6560;
   font-family: var(--sans);
-  font-size: 15px;
-  text-align: left;
+  font-size: 14px;
   cursor: pointer;
 }
 
 .account-logout:hover { color: #161616; }
+
+.account-shell h1 {
+  font-size: clamp(34px, 7vw, 52px);
+}
+
+.account-empty {
+  display: grid;
+  gap: 18px;
+  max-width: 28rem;
+  margin-top: 8px;
+}
+
+.account-empty p { margin: 0; }
 
 .account-panel__main .stack-form,
 .account-panel__main .address-form {
@@ -148,18 +167,6 @@
   }
 }
 
-@media (min-width: 900px) {
-  .account-panel {
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 56px;
-    align-items: start;
-  }
-
-  .account-panel__side {
-    position: sticky;
-    top: calc(var(--header) + 20px);
-  }
-}
 
 .account-shell .stack-form,
 .account-shell .address-form {

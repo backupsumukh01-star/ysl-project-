@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, api } from "@/lib/api-client";
-import { formatMoney, lineKind } from "@/lib/product";
+import { formatMoney } from "@/lib/product";
 import { useCart } from "@/components/cart-provider";
 import { GoogleAuthChoices } from "@/components/google-auth";
 import { track } from "@/lib/analytics";
@@ -195,7 +195,7 @@ export function VerifyScreen({ email }: { email: string }) {
 }
 
 export function DashboardScreen() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [orders, setOrders] = useState<OrderCard[]>([]);
 
   useEffect(() => {
@@ -205,6 +205,7 @@ export function DashboardScreen() {
       .catch(() => setOrders([]));
   }, []);
 
+  if (user === undefined) return <p>Loading.</p>;
   if (!user) {
     return (
       <>
@@ -218,33 +219,23 @@ export function DashboardScreen() {
     );
   }
 
-  const paid = orders.filter((order) => order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED");
-  const owned = paid.flatMap((order) => order.items);
-  const devices = owned.filter((item) => lineKind(item.sku || "") === "Device");
-  const trios = owned.filter((item) => lineKind(item.sku || "") === "Cartridge trio" || lineKind(item.sku || "") === "Bundle");
-  const refills = owned.filter((item) => lineKind(item.sku || "") === "Refill");
-  const first = user.name.split(" ")[0] || "there";
   const order = orders[0];
   return (
     <>
-      <p className="kicker">Account</p>
-      <h1>Hello, {first}</h1>
-      <p className="lede">Paid orders appear here. A bag is not an order until payment is completed.</p>
-      <h2>My device</h2>
-      <p>{devices.length ? devices.map((item) => item.name).join(", ") : "No device on a paid order yet."}</p>
-      <h2>My cartridges</h2>
-      <p>{trios.length ? trios.map((item) => item.name).join(", ") : "No cartridge trio on a paid order yet."}</p>
-      <h2>My refills</h2>
-      <p>{refills.length ? refills.map((item) => item.name).join(", ") : "No refill on a paid order yet."}</p>
+      <h1>{user.name || "Your account"}</h1>
+      <p className="lede">{user.email}</p>
       {order ? (
         <article className="order-card">
           <h2>Order {order.number}</h2>
-          <p>{orderStatusLabel(order.status)} · {paymentLabel(order.paymentStatus)}</p>
+          <p>{statusLine(order.status, order.paymentStatus)}</p>
           <p className="order-card__total">{formatMoney(order.total, order.currency)}</p>
           <Link href={`/account/orders/${order.id}`}>View order</Link>
         </article>
       ) : (
-        <p>No orders yet.</p>
+        <div className="account-empty">
+          <p>Orders appear here after payment.</p>
+          <Link className="btn btn-gold" href="/shop">Shop the collection</Link>
+        </div>
       )}
     </>
   );
@@ -264,6 +255,14 @@ const STATUS_LABELS: Record<string, string> = {
   FAILED: "Failed",
   PARTIALLY_REFUNDED: "Partially refunded",
 };
+
+function statusLine(status: string, payment: string) {
+  const order = orderStatusLabel(status);
+  const paid = paymentLabel(payment);
+  if (order === paid) return order;
+  if (status === "PENDING" || status === "PENDING_PAYMENT") return paid;
+  return `${order} · ${paid}`;
+}
 
 export function orderStatusLabel(status: string) {
   return STATUS_LABELS[status] || status;
@@ -287,7 +286,6 @@ export function OrdersScreen() {
 
   return (
     <>
-      <p className="kicker">Account</p>
       <h1>Orders</h1>
       {message ? <p className="notice">{message}</p> : null}
       {message?.startsWith("Sign in") ? (
@@ -295,12 +293,17 @@ export function OrdersScreen() {
           Sign in
         </Link>
       ) : null}
-      {orders && !orders.length ? <p className="lede">No orders yet.</p> : null}
+      {orders && !orders.length ? (
+        <div className="account-empty">
+          <p className="lede">Nothing has been paid yet.</p>
+          <Link className="btn btn-gold" href="/shop">Shop the collection</Link>
+        </div>
+      ) : null}
       {orders?.map((order) => (
         <article className="order-card" key={order.id}>
           <h2>Order {order.number}</h2>
           <p>{new Date(order.createdAt).toLocaleDateString()}</p>
-          <p>{orderStatusLabel(order.status)} · {paymentLabel(order.paymentStatus)}</p>
+          <p>{statusLine(order.status, order.paymentStatus)}</p>
           <p className="order-card__total">{formatMoney(order.total, order.currency)}</p>
           <p>{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
           <Link href={`/account/orders/${order.id}`}>View order</Link>
@@ -339,7 +342,6 @@ export function OrderDetailScreen({ id }: { id: string }) {
   if (!order) {
     return (
       <>
-        <p className="kicker">Account</p>
         <h1>Order</h1>
         <p>{message || "Loading order."}</p>
       </>
@@ -350,7 +352,6 @@ export function OrderDetailScreen({ id }: { id: string }) {
 
   return (
     <>
-      <p className="kicker">Account</p>
       <h1>Order {order.number}</h1>
       <p className="lede">{new Date(order.createdAt).toLocaleDateString()} · {paymentLabel(order.paymentStatus)}</p>
       {stepIndex >= 0 ? (
@@ -480,7 +481,6 @@ export function ProfileScreen() {
   if (!user) {
     return (
       <>
-        <p className="kicker">Account</p>
         <h1>Profile</h1>
         <p>Sign in to edit your profile.</p>
         <Link className="btn btn-gold" href="/account/login">
@@ -512,7 +512,6 @@ export function ProfileScreen() {
         }
       }}
     >
-      <p className="kicker">Account</p>
       <h1>Profile</h1>
       <p className="lede">{user.email}</p>
       <label className="field">
@@ -523,7 +522,6 @@ export function ProfileScreen() {
         <span>Phone</span>
         <input name="phone" defaultValue={user.phone} />
       </label>
-      <p>Email stays the sign-in address. A different email needs its own sign-in code.</p>
       <label className="account-check">
         <input type="checkbox" name="marketingEmail" defaultChecked={user.marketingEmail} /> Marketing email
       </label>
@@ -573,7 +571,6 @@ export function AddressesScreen() {
   if (session !== "in") {
     return (
       <>
-        <p className="kicker">Account</p>
         <h1>Addresses</h1>
         <p>{session === "checking" ? "Loading your addresses." : "Sign in to see saved addresses."}</p>
         {session === "out" ? (
@@ -587,9 +584,8 @@ export function AddressesScreen() {
 
   return (
     <>
-      <p className="kicker">Account</p>
       <h1>Addresses</h1>
-      <p className="lede">Save a delivery address here. Checkout can still use a different one.</p>
+      <p className="lede">Saved here for the next order. Checkout can still use another address.</p>
       {addresses.length ? (
         <div className="support-list">
           {addresses.map((address) => (
@@ -696,7 +692,6 @@ export function SecurityScreen() {
   if (!user) {
     return (
       <>
-        <p className="kicker">Account</p>
         <h1>Security</h1>
         <p>{user === undefined ? "Loading security settings." : "Sign in to manage sign-in and this account."}</p>
         {user === null ? (
@@ -710,7 +705,6 @@ export function SecurityScreen() {
 
   return (
     <>
-      <p className="kicker">Account</p>
       <h1>Security</h1>
       <p className="lede">Sign out of this browser, or end every session for this account.</p>
       <p className="lede">Log out of this browser from the account menu. These actions apply to every signed-in browser.</p>

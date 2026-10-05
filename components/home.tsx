@@ -221,7 +221,7 @@ export function HomePage({
           </picture>
         </div>
         <div className="mk-intro__copy">
-          <p className="mk-kicker">YSL Beauté · By L’Oréal</p>
+          <p className="mk-kicker">YSL Beauté</p>
           <h1 id="what-title">Rouge Sur Mesure</h1>
           <p className="mk-kicker">Custom lip color creator</p>
           <p>Your color, created by technology. Choose your cartridge trio, create your personalized shade, and apply it with the precision brush.</p>

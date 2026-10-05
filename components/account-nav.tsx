@@ -29,6 +29,12 @@ export function AccountFrame({ children }: { children: ReactNode }) {
     api<{ user: { email: string; name: string } | null }>("/api/auth/session")
       .then((result) => setWho(result.user ? { name: result.user.name, email: result.user.email } : null))
       .catch(() => setWho(null));
+    const current = document.querySelector<HTMLElement>('.account-nav a[aria-current="page"]');
+    const nav = current?.parentElement;
+    if (current && nav) {
+      const delta = current.getBoundingClientRect().left - nav.getBoundingClientRect().left;
+      nav.scrollLeft += delta - 4;
+    }
   }, [bare, pathname]);
 
   if (bare) return <>{children}</>;
@@ -41,10 +47,7 @@ export function AccountFrame({ children }: { children: ReactNode }) {
 
   return (
     <div className="account-panel">
-      <aside className="account-panel__side">
-        <p className="kicker">Account</p>
-        {who ? <p className="account-panel__who">{who.name || "Your account"}</p> : null}
-        {who?.email ? <p className="account-panel__mail">{who.email}</p> : null}
+      <div className="account-bar">
         <nav className="account-nav" aria-label="Account">
           {links.map(([href, label]) => {
             const current = href === "/account" ? pathname === "/account" : pathname === href || pathname.startsWith(`${href}/`);
@@ -60,7 +63,7 @@ export function AccountFrame({ children }: { children: ReactNode }) {
             Log out
           </button>
         ) : null}
-      </aside>
+      </div>
       <div className="account-panel__main">{children}</div>
     </div>
   );

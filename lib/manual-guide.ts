@@ -367,18 +367,6 @@ export const manualGroups: ManualGroup[] = [
     title: "Tips & Tricks",
     articles: [
       {
-        id: "navigation-help",
-        title: "Navigation Help",
-        preview: "For help on app navigation basics, follow the App Navigation Tour.",
-        parts: [{ kind: "p", text: "For help on app navigation basics, follow the App Navigation Tour." }],
-      },
-      {
-        id: "color-creator-tour",
-        title: "Color Creator",
-        preview: "For help to master the Color Creation features, follow the Color Creator Tour.",
-        parts: [{ kind: "p", text: "For help to master the Color Creation features, follow the Color Creator Tour." }],
-      },
-      {
         id: "last-recipe",
         title: "Quickly dispense your last recipe",
         preview: "You can dispense you last shade recipe by quickly double pressing the power button. Make sure the device is turned on (one quick press to wake-up the device when in standby mode, 3 seconds press to turn the device on).",

@@ -59,7 +59,6 @@ export default function SupportPage() {
 
   return (
     <>
-      <p className="kicker">Account</p>
       <h1>Support</h1>
       <p className="lede">Write about an order or anything else. We reply by email only.</p>
       {user === undefined ? <p>Loading.</p> : user ? (

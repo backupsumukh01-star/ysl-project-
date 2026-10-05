@@ -39,7 +39,6 @@ export default function ReturnPage() {
 
   return (
     <>
-      <p className="kicker">Account</p>
       <h1>Request a return</h1>
       <p className="lede">{siteConfig.returnsMessage} This form records the request. A refund is not issued until it is reviewed.</p>
       <form className="stack-form" onSubmit={onSubmit}>
