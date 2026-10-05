@@ -2548,16 +2548,21 @@ details summary { cursor: pointer; min-height: 44px; display: flex; align-items:
   content: "";
 }
 .trio-page .trio-ingredients summary::after {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid #161616;
-  border-bottom: 1.5px solid #161616;
-  transform: rotate(45deg) translateY(-2px);
+  content: "+";
+  width: auto;
+  height: auto;
+  border: 0;
+  transform: none;
+  color: #161616;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
   flex: 0 0 auto;
 }
 .trio-page .trio-ingredients details[open] summary::after {
-  transform: rotate(-135deg) translateY(-1px);
+  content: "–";
+  transform: none;
 }
 .trio-page .trio-ingredients p {
   margin: 0 0 14px;
