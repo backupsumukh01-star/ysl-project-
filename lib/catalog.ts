@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { minorToMajor } from "@/lib/crypto";
-import { authoritativeMinor } from "@/lib/pricing";
+import { authoritativeMinor, markedOriginal } from "@/lib/pricing";
 
 const productInclude = {
   images: { where: { active: true }, orderBy: { sortOrder: "asc" as const } },
@@ -77,7 +77,7 @@ export function toCatalogProduct(product: ProductRow): CatalogProduct {
     shortDescription: product.shortDescription,
     description: product.description,
     price: minorToMajor(authoritativeMinor(product.type, product.priceMinor)),
-    compareAt: minorToMajor(product.compareAtMinor),
+    compareAt: markedOriginal(minorToMajor(authoritativeMinor(product.type, product.priceMinor))),
     sku: product.sku,
     type: product.type,
     category: product.category?.name || "",

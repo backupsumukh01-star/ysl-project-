@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, type CartInput } from "@/components/cart-provider";
 import { product } from "@/lib/product";
+import { markedOriginal } from "@/lib/pricing";
 import { useMoney } from "@/components/market";
 import { track } from "@/lib/analytics";
 
@@ -23,7 +24,8 @@ export function Price({
 }) {
   const money = useMoney();
   const price = amount === undefined ? product.price : amount;
-  const comparePrice = !compare ? null : compareAt === undefined ? product.compareAtPrice : compareAt;
+  const explicit = compareAt === undefined ? product.compareAtPrice : compareAt;
+  const comparePrice = !compare ? null : explicit != null && price != null && explicit > price ? explicit : markedOriginal(price);
   const off = discountOff(price, comparePrice);
   return (
     <p className="price">
