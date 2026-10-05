@@ -34,7 +34,7 @@ export async function readUserCart(userId: string): Promise<SavedLine[]> {
       name: product.name,
       quantity: item.quantity,
       variantId: variant?.id || "",
-      variantName: variant?.name || item.selection || "",
+      variantName: variant?.name || storedSelection(item),
       sku: variant?.sku || product.sku,
       price: minorToMajor(authoritativeMinor(product.type, product.priceMinor)),
       image: product.images[0]?.src || "",
@@ -43,6 +43,11 @@ export async function readUserCart(userId: string): Promise<SavedLine[]> {
 }
 
 type SavedInput = { productId: string; variantId?: string; quantity: number; selection?: string };
+
+function storedSelection(line: { id: string }): string {
+  const value = (line as { selection?: string }).selection;
+  return value || "";
+}
 
 function savedKey(item: { productId: string; variantId: string; selection: string }) {
   return `${item.productId}:${item.variantId}:${item.selection}`;
@@ -75,7 +80,7 @@ export async function mergeUserCart(userId: string, items: SavedInput[]) {
   for (const item of items) {
     const variantId = item.variantId || "";
     const selection = item.selection || "";
-    const existing = cart.items.find((line) => line.productId === item.productId && line.variantId === variantId && line.selection === selection);
+    const existing = cart.items.find((line) => line.productId === item.productId && line.variantId === variantId && storedSelection(line) === selection);
     if (existing) {
       const quantity = Math.min(10, existing.quantity + item.quantity);
       await prisma.cartItem.update({ where: { id: existing.id }, data: { quantity } });

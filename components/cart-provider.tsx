@@ -99,7 +99,7 @@ function normalize(input: number | CartInput | undefined): CartLine {
     sku: input.sku || "",
     price: catalogPrice(input.slug, input.id, input.price),
     compareAt: catalogCompareForSlug(input.slug) ?? input.compareAt ?? null,
-    image: input.slug === "cartridge-refill" ? input.image || cartridgePhotoSrc(input.variantName) : input.image || product.images.showcase.src,
+    image: input.slug === "cartridge-refill" ? cartridgePhotoSrc(input.variantName) || input.image : input.image || product.images.showcase.src,
   };
 }
 
@@ -124,7 +124,7 @@ function readStored(): CartLine[] {
         sku: line.sku || "",
         price: catalogPrice(line.slug || "", line.id, typeof line.price === "number" || line.price === null ? line.price : known ? product.price : null),
         compareAt: catalogCompareForSlug(line.slug || (known ? product.slug : "")) ?? (typeof line.compareAt === "number" ? line.compareAt : null),
-        image: (line.slug || "") === "cartridge-refill" ? line.image || cartridgePhotoSrc(line.variantName) : line.image || (known ? product.images.showcase.src : "/images/showcase.png"),
+        image: (line.slug || "") === "cartridge-refill" ? cartridgePhotoSrc(line.variantName) || line.image || "" : line.image || (known ? product.images.showcase.src : "/images/showcase.png"),
       }];
     });
   } catch {

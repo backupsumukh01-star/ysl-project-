@@ -177,6 +177,35 @@ export async function searchProducts(query: string) {
   );
 }
 
+function publishedReview(row: {
+  id: string;
+  rating: number;
+  title: string;
+  comment: string;
+  imageUrl: string;
+  createdAt: Date;
+  orderId: string | null;
+  user: { name: string } | null;
+}) {
+  const stored = row as typeof row & {
+    reviewerName?: string;
+    reviewDate?: Date;
+    verifiedPurchase?: boolean;
+    isDemo?: boolean;
+  };
+  const when = stored.reviewDate instanceof Date ? stored.reviewDate : stored.createdAt;
+  return {
+    id: stored.id,
+    rating: stored.rating,
+    title: stored.title,
+    comment: stored.comment,
+    name: stored.reviewerName || stored.user?.name || "Reviewer",
+    createdAt: when.toISOString(),
+    imageUrl: stored.imageUrl,
+    verified: Boolean(stored.orderId) && Boolean(stored.verifiedPurchase) && !stored.isDemo,
+  };
+}
+
 export async function approvedReviews(productId: string) {
   const prisma = db();
   if (!prisma) return [];
@@ -187,16 +216,7 @@ export async function approvedReviews(productId: string) {
       take: 20,
       include: { user: { select: { name: true } } },
     });
-    return rows.map((row) => ({
-      id: row.id,
-      rating: row.rating,
-      title: row.title,
-      comment: row.comment,
-      name: row.reviewerName || row.user?.name || "Reviewer",
-      createdAt: row.reviewDate.toISOString(),
-      imageUrl: row.imageUrl,
-      verified: Boolean(row.orderId) && row.verifiedPurchase && !row.isDemo,
-    }));
+    return rows.map((row) => publishedReview(row));
   } catch {
     return [];
   }

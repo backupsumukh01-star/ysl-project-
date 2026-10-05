@@ -7,7 +7,8 @@ import { checkoutLinePayload, lineKey, useCart, type CartLine } from "@/componen
 import { GoogleAuthChoices } from "@/components/google-auth";
 import { CartLineImage } from "@/components/refill-mark";
 import { CheckoutAddress } from "@/components/checkout-address";
-import { useMarket } from "@/components/market";
+import { useMarket, useMoney } from "@/components/market";
+import { bagShelf } from "@/components/bag-quote";
 import { siteConfig } from "@/lib/config";
 import { formatMoney, shippingChargeLabel } from "@/lib/product";
 import { trackAddPaymentInfo, trackInitiateCheckout, trackInternal } from "@/lib/analytics/meta";
@@ -457,6 +458,9 @@ function lineAmount(item: CartLine, quote: ServerQuote | null) {
 }
 
 function OrderSummary({ items, quote, pay }: { items: CartLine[]; quote: ServerQuote | null; pay?: ReactNode }) {
+  const market = useMarket();
+  const money = useMoney();
+  const shelf = bagShelf(market.currency, money, items, quote);
   const shippingKnown = quote?.shippingConfigured === true && quote.shipping != null;
   const [orderOpen, setOrderOpen] = useState(false);
   useEffect(() => {
@@ -485,7 +489,7 @@ function OrderSummary({ items, quote, pay }: { items: CartLine[]; quote: ServerQ
         {items.map((item) => (
           <li key={lineKey(item)}>
             <span className="pay-order__shot">
-              <CartLineImage slug={item.slug} image={item.image} size={160} />
+              <CartLineImage slug={item.slug} image={item.image} label={item.variantName} size={160} />
             </span>
             <span>
               <strong>{item.name}</strong>
@@ -505,15 +509,28 @@ function OrderSummary({ items, quote, pay }: { items: CartLine[]; quote: ServerQ
           </li>
         ))}
       </ul>
-      <div className="totals">
-        <div>
-          <span>Subtotal</span>
-          <span>{quote ? formatMoney(quote.subtotal, quote.currency) : "Calculating"}</span>
-        </div>
-        {quote && quote.discount > 0 ? (
+      <div className="totals bag-sums">
+        {shelf.mrp ? (
+          <div>
+            <span>Total MRP</span>
+            <span>{shelf.mrp}</span>
+          </div>
+        ) : (
+          <div>
+            <span>Subtotal</span>
+            <span>{quote ? formatMoney(quote.subtotal, quote.currency) : "Calculating"}</span>
+          </div>
+        )}
+        {shelf.discount ? (
           <div>
             <span>Discount</span>
-            <span>{formatMoney(quote.discount, quote.currency)}</span>
+            <span className="bag-sums__off">{shelf.discount}</span>
+          </div>
+        ) : null}
+        {shelf.coupon ? (
+          <div>
+            <span>Coupon</span>
+            <span className="bag-sums__off">{shelf.coupon}</span>
           </div>
         ) : null}
         <div>
@@ -529,6 +546,7 @@ function OrderSummary({ items, quote, pay }: { items: CartLine[]; quote: ServerQ
           <span>{shippingKnown && quote?.total != null ? formatMoney(quote.total, quote.currency) : "—"}</span>
         </div>
       </div>
+      {shelf.saving ? <p className="bag-sums__saving">You&apos;re saving {shelf.saving} on this order</p> : null}
       {pay}
       {pay ? null : (
         <p className="muted">

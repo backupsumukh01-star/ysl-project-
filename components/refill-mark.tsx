@@ -14,8 +14,9 @@ export function RefillMark({ color = "#8d6b56", compact = false }: { color?: str
   );
 }
 
-export function CartLineImage({ slug, image, size }: { slug: string; image: string; size: number }) {
-  const refillSrc = slug === "cartridge-refill" ? image || cartridgePhotoSrc(image) : "";
+export function CartLineImage({ slug, image, size, label = "" }: { slug: string; image: string; size: number; label?: string }) {
+  const cartridgeSrc = cartridgePhotoSrc(label) || cartridgePhotoSrc(image);
+  const refillSrc = slug === "cartridge-refill" ? cartridgeSrc || (image.endsWith("/swatches.png") ? "" : image) : "";
   if (slug === "cartridge-refill" && !refillSrc) return <RefillMark compact />;
   if (refillSrc) {
     return (

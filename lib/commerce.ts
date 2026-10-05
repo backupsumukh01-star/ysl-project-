@@ -575,9 +575,9 @@ export async function markVerificationFailed(orderId: string) {
 
 const fulfillmentEmail: Record<string, { type: string; title: string; note: string }> = {
   PROCESSING: { type: "order_processing", title: "Order processing", note: "Your order is being prepared." },
-  PACKED: { type: "order_packed", title: "Order packed", note: "Your order has been packed. A delivery date has not been promised." },
-  SHIPPED: { type: "order_shipped", title: "Order shipped", note: "Your order has been marked shipped. A delivery date has not been promised." },
-  OUT_FOR_DELIVERY: { type: "order_out_for_delivery", title: "Out for delivery", note: "Your order was marked out for delivery. A delivery time has not been promised." },
+  PACKED: { type: "order_packed", title: "Order packed", note: "Your order has been packed." },
+  SHIPPED: { type: "order_shipped", title: "Order shipped", note: "Your order has been marked shipped." },
+  OUT_FOR_DELIVERY: { type: "order_out_for_delivery", title: "Out for delivery", note: "Your order was marked out for delivery." },
   DELIVERED: { type: "order_delivered", title: "Order delivered", note: "Your order has been marked delivered." },
   CANCELLED: { type: "order_cancelled", title: "Order cancelled", note: "Your order was cancelled." },
 };

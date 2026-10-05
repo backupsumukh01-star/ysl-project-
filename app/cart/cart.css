@@ -270,6 +270,16 @@
     white-space: nowrap;
   }
 
+  .bag-page .bag-pay small {
+    display: block;
+    margin-top: 2px;
+    color: #2f6b45;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
   .bag-page {
     padding-bottom: calc(200px + env(safe-area-inset-bottom));
   }

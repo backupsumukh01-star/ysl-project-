@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCart, lineKey } from "@/components/cart-provider";
-import { bagSubtotalLabel, bagTotalLabel, useBagQuote } from "@/components/bag-quote";
+import { bagShelf, bagSubtotalLabel, bagTotalLabel, useBagQuote } from "@/components/bag-quote";
 import { lineKind, shippingChargeLabel } from "@/lib/product";
 import { useMarket, useMoney } from "@/components/market";
 import { chosenTrios } from "@/components/set-contains";
@@ -17,6 +17,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const quote = useBagQuote(items, ready);
   const subtotalLabel = bagSubtotalLabel(market.currency, money, items, subtotal, quote);
   const totalLabel = bagTotalLabel(money, quote);
+  const shelf = bagShelf(market.currency, money, items, quote);
   const shippingKnown = quote?.shippingConfigured === true && quote.shipping != null;
   if (!open) return null;
   const count = items.reduce((sum, line) => sum + line.quantity, 0);
@@ -54,27 +55,22 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               return (
                 <article className="bag-card" key={lineKey(line)}>
                   <span className="bag-card__shot">
-                    <CartLineImage slug={line.slug} image={line.image} size={88} />
+                    <CartLineImage slug={line.slug} image={line.image} label={line.variantName} size={88} />
                   </span>
                   <div className="bag-card__main">
-                    <div className="bag-card__top">
-                      <h2>{line.name}</h2>
-                      <Price amount={line.price} compareAt={line.compareAt} />
-                    </div>
-                    {trios.length === 3 ? null : lineKind(line.sku) ? <p className="bag-card__kind">{lineKind(line.sku)}</p> : null}
-                    {trios.length === 3 ? null : line.slug === "rouge-sur-mesure" ? (
+                    <h2>{line.name}</h2>
+                    {line.variantName ? <p className="bag-card__kind">{line.variantName}</p> : line.slug === "rouge-sur-mesure" ? (
                       <p className="bag-card__kind"><Link href="/product/rouge-sur-mesure#trios" onClick={onClose}>Choose any 3 trios</Link></p>
-                    ) : line.variantName ? (
-                      <p className="bag-card__kind">{line.variantName}</p>
-                    ) : null}
+                    ) : lineKind(line.sku) ? <p className="bag-card__kind">{lineKind(line.sku)}</p> : null}
+                    <div className="bag-card__tools">
+                      <QuantitySelector value={line.quantity} onChange={(quantity) => setQuantity(lineKey(line), quantity)} />
+                    </div>
+                    <Price amount={line.price} compareAt={line.compareAt} />
                     <button className="bag-card__remove" type="button" onClick={() => removeItem(lineKey(line))}>
                       Remove
                     </button>
                   </div>
                   {trios.length === 3 ? <BagSet trios={trios} /> : null}
-                  <div className="bag-card__tools">
-                    <QuantitySelector value={line.quantity} onChange={(quantity) => setQuantity(lineKey(line), quantity)} />
-                  </div>
                 </article>
               );
             })
@@ -82,27 +78,50 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         </div>
         {items.length ? (
           <div className="bag-sheet__foot">
-            <div className="bag-sheet__sums">
-              <p>
-                <span>Subtotal</span>
-                <span>{subtotalLabel}</span>
-              </p>
-              <p>
+            <div className="bag-foot">
+              {shelf.mrp ? (
+                <p className="bag-foot__mrp">
+                  <span>Regular price</span>
+                  <s>{shelf.mrp}</s>
+                </p>
+              ) : (
+                <p className="bag-foot__mrp">
+                  <span>Subtotal</span>
+                  <span>{subtotalLabel}</span>
+                </p>
+              )}
+              {shelf.discount ? (
+                <p className="bag-foot__discount">
+                  <span>Discount</span>
+                  <span className="bag-foot__off">{shelf.discount}</span>
+                </p>
+              ) : null}
+              {shelf.coupon ? (
+                <p className="bag-foot__discount">
+                  <span>Coupon</span>
+                  <span className="bag-foot__off">{shelf.coupon}</span>
+                </p>
+              ) : null}
+              <p className="bag-foot__row">
                 <span>Shipping</span>
-                <span>{!quote ? "Confirming" : shippingKnown ? shippingChargeLabel(quote.shipping) : "Not published"}</span>
+                <span className={shippingKnown && quote?.shipping === 0 ? "bag-foot__ship" : undefined}>
+                  {!quote ? "Confirming" : shippingKnown ? (quote.shipping === 0 ? "Free" : shippingChargeLabel(quote.shipping, quote.currency)) : "Not published"}
+                </span>
               </p>
-              <p className="bag-sheet__total">
+              <p className="bag-foot__total">
                 <span>Total</span>
                 <span>{shippingKnown && totalLabel ? totalLabel : "—"}</span>
               </p>
+              {shelf.saving ? <p className="bag-foot__save">You save {shelf.saving}</p> : null}
+              {shippingKnown && quote?.shipping === 0 ? <p className="bag-foot__note">Complimentary shipping included</p> : null}
             </div>
             {quote && !shippingKnown ? <p className="bag-sheet__wait">Checkout stays closed until a shipping price is set.</p> : null}
-            <Link className="btn btn-gold btn-full" href="/checkout" onClick={onClose}>
-              Checkout
+            <Link className="btn btn-gold btn-full" href="/checkout">
+              {shippingKnown && totalLabel ? `Checkout — ${totalLabel}` : "Checkout"}
             </Link>
             <p className="bag-sheet__links">
-              <Link href="/cart" onClick={onClose}>View bag</Link>
-              <Link href="/shop" onClick={onClose}>Continue shopping</Link>
+              <Link href="/cart">View full bag</Link>
+              <Link className="bag-sheet__continue" href="/shop">Continue shopping</Link>
               {items.length > 1 ? (
                 <button type="button" onClick={clear}>Remove all</button>
               ) : null}
@@ -116,7 +135,9 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
 function BagSet({ trios }: { trios: TrioFamilyName[] }) {
   return (
-    <ul className="bag-set" aria-label="This set contains">
+    <div className="bag-set-wrap">
+      <p className="bag-set__label">Your 3 complimentary sets</p>
+      <ul className="bag-set" aria-label="Your 3 complimentary sets">
       <li>
         <span className="bag-set__swatch bag-set__swatch--device is-selected" aria-hidden="true" />
         <span>Device</span>
@@ -131,6 +152,7 @@ function BagSet({ trios }: { trios: TrioFamilyName[] }) {
           <span>{family}</span>
         </li>
       ))}
-    </ul>
+      </ul>
+    </div>
   );
 }

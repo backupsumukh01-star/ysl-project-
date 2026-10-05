@@ -102,6 +102,24 @@ export function indiaSubtotalMajor(items: { slug: string; quantity: number }[]):
   return sum;
 }
 
+export function indiaReferenceForSlug(slug: string): number | null {
+  if (slug === "rouge-sur-mesure") return INR.deviceCompareAt;
+  if (slug === "rouge-sur-mesure-bundle") return INR.bundleCompareAt;
+  if (slug === "cartridge-refill") return INR.refillCompareAt;
+  if (slug.startsWith("cartridge-trio-")) return INR.cartridgeTrioCompareAt;
+  return null;
+}
+
+export function indiaReferenceSubtotalMajor(items: { slug: string; quantity: number }[]): number | null {
+  let sum = 0;
+  for (const item of items) {
+    const major = indiaReferenceForSlug(item.slug);
+    if (major == null) return null;
+    sum += major * item.quantity;
+  }
+  return sum;
+}
+
 export function offerForCurrency(type: string, currency: string): { price: number | null; currency: string } {
   if (currency === "INR") return { price: indiaMajorForType(type), currency: "INR" };
   return { price: publishedMajor(type), currency: publishedPrices.currency };

@@ -6,7 +6,7 @@ import { Price, QuantitySelector } from "@/components/commerce";
 import { lineKind, shippingChargeLabel } from "@/lib/product";
 import { CartLineImage } from "@/components/refill-mark";
 import { chosenTrios, SetContains } from "@/components/set-contains";
-import { bagSubtotalLabel, bagTotalLabel, useBagQuote } from "@/components/bag-quote";
+import { BagPriceList, bagShelf, bagSubtotalLabel, bagTotalLabel, useBagQuote } from "@/components/bag-quote";
 import { useMarket, useMoney } from "@/components/market";
 import "./cart.css";
 
@@ -17,6 +17,7 @@ export default function CartPage() {
   const quote = useBagQuote(items, ready);
   const subtotalLabel = bagSubtotalLabel(market.currency, money, items, subtotal, quote);
   const totalLabel = bagTotalLabel(money, quote);
+  const shelf = bagShelf(market.currency, money, items, quote);
   const shippingKnown = quote?.shippingConfigured === true && quote.shipping != null;
 
   return (
@@ -36,7 +37,7 @@ export default function CartPage() {
           <div>
             {items.map((line) => (
               <article className="line" key={lineKey(line)}>
-                <CartLineImage slug={line.slug} image={line.image} size={160} />
+                <CartLineImage slug={line.slug} image={line.image} label={line.variantName} size={160} />
                 <div>
                   <h2>{line.name}</h2>
                   {lineKind(line.sku) ? <p className="muted">{lineKind(line.sku)}</p> : null}
@@ -66,20 +67,12 @@ export default function CartPage() {
             </button>
           </div>
           <aside className="bag-summary">
-            <div className="totals">
-              <div>
-                <span>Subtotal</span>
-                <span>{subtotalLabel}</span>
-              </div>
-              <div>
-                <span>Shipping</span>
-                <span>{!quote ? "Checking" : shippingKnown ? shippingChargeLabel(quote.shipping) : "Not published"}</span>
-              </div>
-              <div>
-                <span>Total</span>
-                <span>{shippingKnown && totalLabel ? totalLabel : "Unavailable"}</span>
-              </div>
-            </div>
+            <BagPriceList
+              shelf={shelf}
+              subtotal={subtotalLabel}
+              shipping={!quote ? "Checking" : shippingKnown ? shippingChargeLabel(quote.shipping, quote.currency) : "Not published"}
+              total={shippingKnown && totalLabel ? totalLabel : ""}
+            />
             <Link className="btn btn-gold btn-full" href="/checkout">
               Checkout
             </Link>
@@ -90,8 +83,11 @@ export default function CartPage() {
           </aside>
           <div className="bag-pay">
             <p>
-              <span>Subtotal</span>
-              <span>{subtotalLabel}</span>
+              <span>
+                Total
+                {shelf.saving ? <small>Saving {shelf.saving}</small> : null}
+              </span>
+              <span>{shippingKnown && totalLabel ? totalLabel : subtotalLabel}</span>
             </p>
             <Link className="btn btn-gold btn-full" href="/checkout">
               Checkout
