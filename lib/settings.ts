@@ -1,4 +1,4 @@
-import { publishedEmail, siteConfig } from "@/lib/config";
+import { publishedEmail, publishedReturns, siteConfig } from "@/lib/config";
 import { db } from "@/lib/db";
 
 export type StoreSettings = {
@@ -78,7 +78,7 @@ export async function getSettings(): Promise<StoreSettings> {
       shippingEstimate: map.has("shippingEstimate") ? read("shippingEstimate") || "" : defaults.shippingEstimate,
       taxRateBps: map.has("taxRateBps") && (read("taxRateBps") || "").trim() !== "" ? Number(read("taxRateBps")) || 0 : defaults.taxRateBps,
       shippingMessage: read("shippingMessage") || defaults.shippingMessage,
-      returnsMessage: read("returnsMessage") || defaults.returnsMessage,
+      returnsMessage: publishedReturns(read("returnsMessage") || defaults.returnsMessage),
       supportEmail: publishedEmail(read("supportEmail") || defaults.supportEmail),
       sellerName: read("sellerName") || defaults.sellerName,
       announcement: read("announcement") || "",

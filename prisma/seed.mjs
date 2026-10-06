@@ -247,7 +247,7 @@ async function main() {
     shippingEnabled: "true",
     shippingFlatMinor: "0",
     shippingMessage: "Shipping is included in the product price. There is no separate shipping charge.",
-    returnsMessage: "You can return or replace a product within 10 days of delivery.",
+    returnsMessage: "An order cannot be cancelled after it is placed. Replacement and refund rules are on the Terms page.",
     supportEmail: (process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "").includes("@example.") ? "" : process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "",
     currency: process.env.NEXT_PUBLIC_CURRENCY || "INR",
     reviewsPublicWithoutModeration: "false",

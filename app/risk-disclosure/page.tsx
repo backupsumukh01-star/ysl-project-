@@ -17,7 +17,7 @@ export default function RiskPage() {
       </p>
       <p>
         A completed sale is an order whose payment Razorpay has captured and this server has verified. Until that
-        verification, the order stays unpaid. A return window has not been published.
+        verification, the order stays unpaid. Cancellation, replacement, and refund rules are on the terms page.
       </p>
     </main>
   );

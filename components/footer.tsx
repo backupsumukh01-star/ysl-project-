@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PrivacyChoices } from "@/components/consent-banner";
 import { FooterMenus } from "@/components/footer-menus";
 import { siteConfig } from "@/lib/config";
@@ -60,7 +61,7 @@ export async function Footer() {
         </div>
         <div className="footer-base">
           <div className="footer-note">
-            <p>Sold by {settings.sellerName}. {settings.shippingMessage} {settings.returnsMessage}</p>
+            <p>Sold by {settings.sellerName}. {settings.shippingMessage} {linkTerms(settings.returnsMessage)}</p>
             <p>Payment is completed at checkout in Razorpay&apos;s secure window. Adding this to your bag does not charge you.</p>
           </div>
           {socials.length ? (
@@ -88,5 +89,18 @@ export async function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function linkTerms(message: string) {
+  const marker = "Terms";
+  const index = message.indexOf(marker);
+  if (index < 0) return message;
+  return (
+    <>
+      {message.slice(0, index)}
+      <Link href="/terms">Terms</Link>
+      {message.slice(index + marker.length)}
+    </>
   );
 }

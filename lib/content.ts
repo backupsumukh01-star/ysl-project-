@@ -1,4 +1,4 @@
-import { siteConfig } from "@/lib/config";
+import { siteConfig, returnsPolicy } from "@/lib/config";
 import { deviceOffering } from "@/lib/product";
 
 export type FaqItem = {
@@ -65,7 +65,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "What is the return policy?",
-    answer: siteConfig.returnsMessage,
+    answer: returnsPolicy,
   },
   {
     question: "Who sells this shop?",
@@ -77,7 +77,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How do I return or replace a product?",
-    answer: `${siteConfig.returnsMessage} Start a return or replacement from your order, or write from the contact page.`,
+    answer: `${returnsPolicy} Start a request from your order, or write from the contact page.`,
     href: "/returns",
     hrefLabel: "Read the returns page",
   },

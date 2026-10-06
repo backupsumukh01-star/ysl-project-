@@ -12,6 +12,22 @@ function optionalText(value: string | undefined, fallback = ""): string {
   return text ? text : fallback;
 }
 
+const previousReturnsMessage = "You can return or replace a product within 10 days of delivery.";
+
+/** Shown in the footer, on invoices, and wherever the short store setting is used. */
+export const returnsSummary =
+  "An order cannot be cancelled after it is placed. Replacement and refund rules are on the Terms page.";
+
+/** The replacement and refund rule. The old 10-day return line is no longer used. */
+export const returnsPolicy =
+  "An order cannot be cancelled after it is placed. A faulty product can be replaced. If a second replacement is also not right, you can ask for a refund. If an order has not shipped within 20 days of the order date, you can ask for a refund. An approved refund takes 7 to 15 days.";
+
+export function publishedReturns(value: string | undefined | null): string {
+  const text = value?.trim() || "";
+  if (!text || text === previousReturnsMessage || text === returnsPolicy) return returnsSummary;
+  return text;
+}
+
 /** A real mailbox. Example domains are treated as unpublished. */
 export function publishedEmail(value: string | undefined | null): string {
   const text = value?.trim() || "";
@@ -34,10 +50,7 @@ export const siteConfig = {
     process.env.NEXT_PUBLIC_SHIPPING_MESSAGE,
     "Shipping is included in the product price. There is no separate shipping charge.",
   ),
-  returnsMessage: optionalText(
-    process.env.NEXT_PUBLIC_RETURNS_MESSAGE,
-    "You can return or replace a product within 10 days of delivery.",
-  ),
+  returnsMessage: publishedReturns(process.env.NEXT_PUBLIC_RETURNS_MESSAGE),
   productPrice: optionalNumber(process.env.NEXT_PUBLIC_PRODUCT_PRICE),
   productComparePrice: optionalNumber(process.env.NEXT_PUBLIC_PRODUCT_COMPARE_PRICE),
   shippingFlat: optionalNumber(process.env.NEXT_PUBLIC_SHIPPING_FLAT),

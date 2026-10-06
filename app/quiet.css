@@ -29,6 +29,28 @@
   margin: 0 0 16px;
 }
 
+.quiet-page.prose a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.quiet-page.prose ul {
+  margin: 0 0 16px;
+  padding-left: 1.15em;
+  max-width: 36rem;
+  color: #5c5854;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.quiet-page.prose li {
+  margin: 0 0 8px;
+}
+
+.quiet-page.prose li:last-child {
+  margin-bottom: 0;
+}
+
 .quiet-page h2 {
   margin: 32px 0 8px;
   font-family: var(--serif);
