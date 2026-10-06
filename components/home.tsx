@@ -31,14 +31,68 @@ function ApplyVideo({ src }: { src: string }) {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let started = false;
 
+    let restarting = false;
+    const nearEnd = () =>
+      Number.isFinite(video.duration) &&
+      video.duration > 0 &&
+      video.currentTime >= video.duration - 0.35;
+    const replay = () => {
+      if (motion.matches || restarting) return;
+      restarting = true;
+      let settled = false;
+      let timer = 0;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        video.removeEventListener("seeked", finish);
+        const pending = video.play();
+        if (pending) pending.then(() => { restarting = false; }, () => { restarting = false; });
+        else restarting = false;
+      };
+      if (video.currentTime < 0.05) {
+        finish();
+        return;
+      }
+      video.addEventListener("seeked", finish);
+      timer = window.setTimeout(finish, 700);
+      try {
+        video.currentTime = 0;
+      } catch {
+        finish();
+      }
+    };
+    const onEnded = () => replay();
+    const onPause = () => {
+      if (motion.matches || restarting) return;
+      if (nearEnd()) replay();
+    };
+    const onSeeked = () => {
+      if (motion.matches || restarting || !video.paused) return;
+      if (nearEnd()) replay();
+    };
+    const onTime = () => {
+      if (motion.matches || restarting || video.seeking) return;
+      if (nearEnd()) replay();
+    };
+
     const start = () => {
       if (started) return;
       started = true;
       const reduce = motion.matches;
       video.muted = true;
+      video.defaultMuted = true;
       video.playsInline = true;
-      video.loop = !reduce;
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
       video.preload = "auto";
+      if (reduce) {
+        video.loop = false;
+        video.removeAttribute("loop");
+      } else {
+        video.loop = true;
+        video.setAttribute("loop", "");
+      }
       video.src = src;
       if (reduce) {
         video.addEventListener(
@@ -51,8 +105,15 @@ function ApplyVideo({ src }: { src: string }) {
         );
         return;
       }
+      video.loop = true;
+      video.setAttribute("loop", "");
+      video.addEventListener("ended", onEnded);
+      video.addEventListener("pause", onPause);
+      video.addEventListener("seeked", onSeeked);
+      video.addEventListener("timeupdate", onTime);
       video.autoplay = true;
-      video.play().catch(() => undefined);
+      const pending = video.play();
+      if (pending) pending.catch(() => undefined);
     };
 
     const observer = new IntersectionObserver(
@@ -68,6 +129,11 @@ function ApplyVideo({ src }: { src: string }) {
       if (!started) return;
       if (motion.matches) {
         video.loop = false;
+        video.removeAttribute("loop");
+        video.removeEventListener("ended", onEnded);
+        video.removeEventListener("pause", onPause);
+        video.removeEventListener("seeked", onSeeked);
+        video.removeEventListener("timeupdate", onTime);
         video.pause();
       }
     };
@@ -75,6 +141,10 @@ function ApplyVideo({ src }: { src: string }) {
     return () => {
       observer.disconnect();
       motion.removeEventListener("change", onMotion);
+      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("timeupdate", onTime);
     };
   }, [src]);
 
