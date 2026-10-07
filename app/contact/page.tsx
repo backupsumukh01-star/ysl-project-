@@ -35,6 +35,7 @@ export default function ContactPage() {
       setNoteError(false);
       return;
     }
+    const form = event.currentTarget;
     setPending(true);
     try {
       const result = await api<{ number: string; id: string }>("/api/support", {
@@ -51,7 +52,7 @@ export default function ContactPage() {
       trackContact(result.id);
       setNote("Sent. We'll reply to the email you entered.");
       setNoteError(false);
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setNote(error instanceof ApiError ? error.message : "Message not sent. Try the form again.");
       setNoteError(true);

@@ -32,6 +32,7 @@ export default function SupportPage() {
     const data = new FormData(event.currentTarget);
     const subject = String(data.get("subject") || "");
     const body = String(data.get("message") || "");
+    const form = event.currentTarget;
     setPending(true);
     setMessage("");
     try {
@@ -47,7 +48,7 @@ export default function SupportPage() {
         }),
       });
       trackContact(result.id);
-      event.currentTarget.reset();
+      form.reset();
       setMessage("Sent. We'll reply to your email.");
       loadTickets();
     } catch (error) {

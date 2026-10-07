@@ -67,6 +67,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   if (body.data.action === "resend") {
     const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
     if (!order) return fail("NOT_FOUND", "Order not found.", 404);
+    if (order.paymentStatus !== "PAID") {
+      return fail("NOT_PAID", "A confirmation is sent only after a successful payment.", 400);
+    }
     await sendEmail({
       to: order.email,
       type: "order_confirmation",

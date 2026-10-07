@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, api } from "@/lib/api-client";
 import { formatMoney } from "@/lib/product";
+import { paymentWasCaptured } from "@/lib/order-paid";
 import { useCart } from "@/components/cart-provider";
 import { GoogleAuthChoices } from "@/components/google-auth";
 import { track } from "@/lib/analytics";
@@ -234,8 +235,12 @@ export function DashboardScreen() {
           <p className="order-card__total">{formatMoney(order.total, order.currency)}</p>
           <p className="order-links">
             <Link href={`/account/orders/${order.id}`}>View order</Link>
-            {" · "}
-            <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+            {paymentWasCaptured(order.paymentStatus) ? (
+              <>
+                {" · "}
+                <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+              </>
+            ) : null}
           </p>
         </article>
       ) : (
@@ -315,8 +320,12 @@ export function OrdersScreen() {
           <p>{order.items.map((item) => `${item.name} × ${item.quantity}`).join(", ")}</p>
           <p className="order-links">
             <Link href={`/account/orders/${order.id}`}>View order</Link>
-            {" · "}
-            <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+            {paymentWasCaptured(order.paymentStatus) ? (
+              <>
+                {" · "}
+                <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+              </>
+            ) : null}
           </p>
         </article>
       ))}
@@ -355,6 +364,16 @@ export function OrderDetailScreen({ id }: { id: string }) {
       <>
         <h1>Order</h1>
         <p>{message || "Loading order."}</p>
+      </>
+    );
+  }
+
+  if (!paymentWasCaptured(order.paymentStatus)) {
+    return (
+      <>
+        <h1>Order {order.number}</h1>
+        <p className="lede">This order is not confirmed. Payment has not been completed.</p>
+        <Link className="btn btn-gold" href="/checkout">Return to checkout</Link>
       </>
     );
   }
@@ -627,7 +646,8 @@ export function AddressesScreen() {
         className="address-form"
         onSubmit={async (event) => {
           event.preventDefault();
-          const data = new FormData(event.currentTarget);
+          const form = event.currentTarget;
+          const data = new FormData(form);
           try {
             await api("/api/account/addresses", {
               method: "POST",
@@ -641,7 +661,7 @@ export function AddressesScreen() {
                 phone: String(data.get("phone") || ""),
               }),
             });
-            event.currentTarget.reset();
+            form.reset();
             load();
           } catch (error) {
             setMessage(error instanceof ApiError ? error.message : "The address was not saved.");

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { api, ApiError } from "@/lib/api-client";
 import { orderStatusLabel, paymentLabel } from "@/components/account-ui";
 import { formatMoney } from "@/lib/product";
+import { paymentWasCaptured } from "@/lib/order-paid";
 import { trackPurchase } from "@/lib/analytics/meta";
 
 type OrderView = {
@@ -82,9 +83,27 @@ export function OrderSuccess({ id }: { id: string }) {
     );
   }
 
+  if (!paymentWasCaptured(order.paymentStatus)) {
+    return (
+      <main id="main" className="page quiet-page order-confirm">
+        <p className="kicker">Payment not completed</p>
+        <h1>This order is not confirmed.</h1>
+        <p className="lede">Order {order.number} has not been paid, so it will not be prepared.</p>
+        <div className="actions">
+          <Link className="btn btn-gold" href="/checkout">
+            Return to checkout
+          </Link>
+          <Link className="btn btn-ghost" href="/shop">
+            Continue shopping
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main id="main" className="page quiet-page order-confirm">
-      <p className="kicker">{order.paymentStatus === "PAID" ? "Order confirmed" : "Order received"}</p>
+      <p className="kicker">{order.paymentStatus === "PAID" ? "Order confirmed" : "Order"}</p>
       <h1>Thank you, {order.name}.</h1>
       <p className="lede">Order {order.number}. Payment: {paymentLabel(order.paymentStatus)}. Next step: {orderStatusLabel(order.status)}.</p>
       <ul className="order-lines">
@@ -113,9 +132,11 @@ export function OrderSuccess({ id }: { id: string }) {
         </Link>
       </div>
       {!signedIn ? <p>This confirmation stays on this device. Create an account with the same email to see later orders.</p> : null}
-      <p>
-        <Link href={`/invoice/${order.id}`}>Download invoice</Link>
-      </p>
+      {order.paymentStatus === "PAID" ? (
+        <p>
+          <Link href={`/invoice/${order.id}`}>Download invoice</Link>
+        </p>
+      ) : null}
     </main>
   );
 }

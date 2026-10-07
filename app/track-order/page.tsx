@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { ApiError, api } from "@/lib/api-client";
+import { paymentWasCaptured } from "@/lib/order-paid";
 import "../quiet.css";
 import "../account/account.css";
 
@@ -55,7 +56,13 @@ export default function TrackOrderPage() {
         <button className="btn btn-gold" type="submit">Look up</button>
       </form>
       {message ? <p className="form-note is-err">{message}</p> : null}
-      {tracking ? (
+      {tracking && !paymentWasCaptured(tracking.paymentStatus) ? (
+        <article className="track-result">
+          <p>Order {tracking.number}</p>
+          <p>This order is not confirmed. Payment has not been completed.</p>
+        </article>
+      ) : null}
+      {tracking && paymentWasCaptured(tracking.paymentStatus) ? (
         <article className="track-result">
           <p>Order {tracking.number}</p>
           <p>Status: {tracking.status}</p>

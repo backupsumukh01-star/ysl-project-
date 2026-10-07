@@ -332,10 +332,17 @@ export default function CheckoutPage() {
         prefill: { email: String(data.get("email") || ""), contact: String(data.get("phone") || ""), name: String(data.get("name") || "") },
         handler: async (response: RazorpayHandler) => {
           try {
-            const verified = await api<{ duplicate?: boolean; purchase?: { eventId: string } }>("/api/payments/verify", {
+            const verified = await api<{ paid?: boolean; duplicate?: boolean; purchase?: { eventId: string } }>("/api/payments/verify", {
               method: "POST",
               body: JSON.stringify({ orderId: order.orderId, ...response }),
             });
+            if (verified.paid !== true) {
+              trackInternal("PaymentFailed", order.orderId);
+              pendingRef.current = false;
+              setPending(false);
+              setMessage("We couldn't confirm this payment. Your bag is still saved.");
+              return;
+            }
             if (!verified.duplicate && verified.purchase) {
               sessionStorage.setItem(`rsm_purchase_${order.orderId}`, JSON.stringify(verified.purchase));
             }
@@ -351,9 +358,10 @@ export default function CheckoutPage() {
         modal: {
           ondismiss: () => {
             trackInternal("PaymentCancelled", order.orderId);
+            void api("/api/payments/abandon", { method: "POST", body: JSON.stringify({ orderId: order.orderId }) }).catch(() => undefined);
             pendingRef.current = false;
             setPending(false);
-            setMessage("Payment was cancelled. Your items are still in your bag.");
+            setMessage("Payment was cancelled. Your items are still in your bag. This order is not confirmed.");
           },
         },
       });

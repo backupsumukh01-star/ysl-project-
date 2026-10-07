@@ -46,14 +46,16 @@ export async function POST(request: Request) {
     const payment = body.payload?.payment?.entity;
     if ((eventType === "payment.captured" || eventType === "order.paid") && payment?.order_id && payment.id) {
       await requireCapturedMatch(payment.order_id, payment.id);
-      await markOrderPaid({ razorpayOrderId: payment.order_id, razorpayPaymentId: payment.id });
+      const paid = await markOrderPaid({ razorpayOrderId: payment.order_id, razorpayPaymentId: payment.id });
+      if (!paid.ok) throw new Error("payment not recorded");
     } else if (eventType === "order.paid" && body.payload?.order?.entity?.id) {
       const order = await prisma.order.findFirst({ where: { razorpayOrderId: body.payload.order.entity.id } });
       if (order) {
         const row = await prisma.payment.findFirst({ where: { orderId: order.id } });
         if (row?.razorpayPaymentId) {
           await requireCapturedMatch(order.razorpayOrderId, row.razorpayPaymentId);
-          await markOrderPaid({ razorpayOrderId: order.razorpayOrderId, razorpayPaymentId: row.razorpayPaymentId });
+          const paid = await markOrderPaid({ razorpayOrderId: order.razorpayOrderId, razorpayPaymentId: row.razorpayPaymentId });
+          if (!paid.ok) throw new Error("payment not recorded");
         }
       }
     } else if (eventType === "payment.failed" && payment?.order_id) {

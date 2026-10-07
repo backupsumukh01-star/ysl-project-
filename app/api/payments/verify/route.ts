@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   if (order.paymentStatus === "PAID") {
     const existing = await prisma.payment.findFirst({ where: { orderId: order.id, razorpayPaymentId: parsed.data.razorpay_payment_id } });
     if (!existing) return fail("PAYMENT_VERIFICATION_FAILED", "That payment does not match the recorded charge.", 400);
-    return ok({ orderId: order.id, number: order.number, duplicate: true });
+    return ok({ orderId: order.id, number: order.number, duplicate: true, paid: true });
   }
   const confirmed = await confirmCapturedPayment({
     amountMinor: order.totalMinor,
@@ -53,10 +53,15 @@ export async function POST(request: Request) {
     request,
   });
   if (!paid.ok) return fail(paid.code, "The payment could not be recorded.", 500);
+  const recorded = await prisma.order.findUnique({ where: { id: order.id } });
+  if (recorded?.paymentStatus !== "PAID") {
+    return fail("PAYMENT_VERIFICATION_FAILED", "The payment was not completed, so the order is not confirmed.", 400);
+  }
   await setReceiptCookie(order.id);
   return ok({
     orderId: order.id,
     number: order.number,
+    paid: true,
     duplicate: paid.duplicate,
     purchase: paid.duplicate ? undefined : paid.purchase,
   });

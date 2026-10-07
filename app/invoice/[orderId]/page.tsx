@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { loadOwnedOrder } from "@/lib/order-access";
+import { paymentWasCaptured } from "@/lib/order-paid";
 import { publicOrder } from "@/lib/commerce";
 import { formatMoney, shippingChargeLabel } from "@/lib/product";
 import { siteConfig } from "@/lib/config";
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ orderId: 
 export default async function InvoicePage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = await params;
   const order = await loadOwnedOrder(orderId);
-  if (!order) notFound();
+  if (!order || !paymentWasCaptured(order.paymentStatus)) notFound();
   const view = publicOrder(order);
   const address = view.address;
 

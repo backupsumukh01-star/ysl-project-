@@ -1,5 +1,7 @@
+import { randomUUID } from "crypto";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "@/lib/db";
+import { paymentWasCaptured } from "@/lib/order-paid";
 import { orderNumber } from "@/lib/crypto";
 import { logError, logInfo } from "@/lib/logger";
 import { getSettings, type StoreSettings } from "@/lib/settings";
@@ -356,10 +358,11 @@ export async function createCheckoutOrder(input: {
   const prisma = db();
   if (!prisma) return { ok: false as const, code: "DATABASE_UNAVAILABLE", message: "Orders are not available yet." };
   const existing = await prisma.order.findUnique({ where: { idempotencyKey: input.idempotencyKey }, include: { items: true, payments: true } });
-  if (existing) {
+  if (existing && existing.paymentStatus === "PENDING" && existing.status === "PENDING_PAYMENT") {
     if (input.userId) await rememberCustomerDetails(input.userId, input.address);
     return attachRazorpay(existing);
   }
+  const idempotencyKey = existing ? `${input.idempotencyKey}:${randomUUID()}` : input.idempotencyKey;
   const quoted = await quoteCart({ lines: input.lines, email: input.address.email, couponCode: input.couponCode, country: input.address.country });
   if (!quoted.ok) return quoted;
   const quote = quoted.quote;
@@ -380,7 +383,7 @@ export async function createCheckoutOrder(input: {
         totalMinor: quote.totalMinor,
         couponCode: quote.couponCode,
         addressJson: JSON.stringify(input.address),
-        idempotencyKey: input.idempotencyKey,
+        idempotencyKey,
         marketingConsent: input.marketingConsent === true,
         analyticsConsent: input.analyticsConsent === true,
         landingPage: (input.attribution?.landingPage || "").slice(0, 300),
@@ -430,11 +433,11 @@ export async function createCheckoutOrder(input: {
     if (!attached.ok) await releaseInventory(created.id);
     return attached;
   } catch {
-    const existing = await prisma.order.findUnique({
-      where: { idempotencyKey: input.idempotencyKey },
+    const raced = await prisma.order.findUnique({
+      where: { idempotencyKey },
       include: { items: true, payments: true },
     });
-    if (existing) return attachRazorpay(existing);
+    if (raced && raced.paymentStatus === "PENDING" && raced.status === "PENDING_PAYMENT") return attachRazorpay(raced);
     if (createdId) await prisma.order.delete({ where: { id: createdId } }).catch(() => undefined);
     logError("order_created", { status: "failed" });
     return { ok: false as const, code: "ORDER_FAILED", message: "The order could not be created." };
@@ -550,7 +553,7 @@ export async function markOrderPaid(input: { razorpayOrderId: string; razorpayPa
         where: { id: order.id },
         data: {
           paymentStatus: "PAID",
-          status: current.status === "PENDING_PAYMENT" ? "PAID" : current.status,
+          status: current.status === "PENDING_PAYMENT" || current.status === "CANCELLED" ? "PAID" : current.status,
           internalNote: notes.length ? `${current.internalNote}\n${notes.join(" ")}`.trim() : current.internalNote,
         },
       });
@@ -576,7 +579,8 @@ export async function markOrderPaid(input: { razorpayOrderId: string; razorpayPa
     });
   }
   const paid = await prisma.order.findUnique({ where: { id: order.id }, include: { items: true } });
-  if (paid?.paymentStatus === "PAID") {
+  if (paid?.paymentStatus !== "PAID") return { ok: false as const, code: "NOT_PAID" };
+  {
     const confirmation = receiptFromOrder(paid, { title: "Order confirmed", note: "Thank you. Your payment was verified on the server." });
     await sendEmail({ to: paid.email, type: "order_confirmation", dedupeKey: `order_confirmation:${paid.id}`, ...confirmation });
     await sendEmail({
@@ -633,6 +637,26 @@ const fulfillmentEmail: Record<string, { type: string; title: string; note: stri
   CANCELLED: { type: "order_cancelled", title: "Order cancelled", note: "Your order was cancelled." },
 };
 
+export async function abandonUnpaidOrder(orderId: string) {
+  const prisma = db();
+  if (!prisma) return { ok: false as const };
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { payments: true } });
+  if (!order || order.paymentStatus !== "PENDING" || order.status !== "PENDING_PAYMENT") {
+    return { ok: true as const, abandoned: false };
+  }
+  if (order.payments.some((payment) => payment.razorpayPaymentId || payment.status === "PAID")) {
+    return { ok: true as const, abandoned: false };
+  }
+  const updated = await prisma.order.updateMany({
+    where: { id: orderId, paymentStatus: "PENDING", status: "PENDING_PAYMENT" },
+    data: { status: "CANCELLED", paymentStatus: "FAILED" },
+  });
+  if (updated.count !== 1) return { ok: true as const, abandoned: false };
+  await releaseInventory(orderId);
+  logInfo("payment_cancelled", { orderId });
+  return { ok: true as const, abandoned: true };
+}
+
 export async function setFulfillmentStatus(orderId: string, status: string, note?: string) {
   const prisma = db();
   if (!prisma) return { ok: false as const, message: "Database is not configured" };
@@ -640,12 +664,15 @@ export async function setFulfillmentStatus(orderId: string, status: string, note
   if (!allowed.includes(status)) return { ok: false as const, message: "That status is not available." };
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
   if (!order) return { ok: false as const, message: "Order not found." };
+  if (status !== "CANCELLED" && !paymentWasCaptured(order.paymentStatus)) {
+    return { ok: false as const, message: "This order is not confirmed. Payment has not been completed." };
+  }
   await prisma.order.update({
     where: { id: orderId },
     data: { status, internalNote: note ?? order.internalNote },
   });
   const mail = fulfillmentEmail[status];
-  if (mail && order.status !== status) {
+  if (mail && order.status !== status && (status !== "CANCELLED" || paymentWasCaptured(order.paymentStatus))) {
     const current = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
     if (current) {
       await sendEmail({
