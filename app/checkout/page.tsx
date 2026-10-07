@@ -11,6 +11,7 @@ import { useMarket, useMoney } from "@/components/market";
 import { bagShelf } from "@/components/bag-quote";
 import { siteConfig } from "@/lib/config";
 import { formatMoney, shippingChargeLabel } from "@/lib/product";
+import { metaBasketAmount, metaLineAmount } from "@/lib/pricing";
 import { trackAddPaymentInfo, trackInitiateCheckout, trackInternal } from "@/lib/analytics/meta";
 import { readAttribution } from "@/lib/analytics/browser";
 import { ApiError, api } from "@/lib/api-client";
@@ -129,20 +130,22 @@ export default function CheckoutPage() {
     const signature = items.map((item) => `${item.id}:${item.quantity}`).join("|");
     if (seenCheckout.has(signature)) return;
     seenCheckout.add(signature);
-    const priced = items.every((item) => item.price != null);
+    const basket = metaBasketAmount(items, market.currency);
     trackInitiateCheckout({
       contentIds: items.map((item) => item.id),
-      contents: items.map((item) => ({
-        id: item.id,
-        quantity: item.quantity,
-        ...(item.price != null ? { item_price: item.price } : {}),
-      })),
+      contents: items.map((item) => {
+        const line = metaLineAmount(item.price, market.currency);
+        return {
+          id: item.id,
+          quantity: item.quantity,
+          ...(line.value != null ? { item_price: line.value } : {}),
+        };
+      }),
       numItems: items.reduce((sum, item) => sum + item.quantity, 0),
-      ...(priced
-        ? { value: items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0), currency: siteConfig.currency }
-        : {}),
+      currency: basket.currency,
+      ...(basket.value != null ? { value: basket.value } : {}),
     });
-  }, [ready, items]);
+  }, [ready, items, market.currency]);
 
   useEffect(() => {
     api<{ configured: boolean }>("/api/payments/config")

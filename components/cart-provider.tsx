@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import { product } from "@/lib/product";
 import { cartridgePhotoSrc } from "@/lib/cartridge-photos";
 import { siteConfig } from "@/lib/config";
-import { catalogCompareForSlug, catalogMajorForSlug } from "@/lib/pricing";
+import { catalogCompareForSlug, catalogMajorForSlug, metaLineAmount } from "@/lib/pricing";
+import { useMarket } from "@/components/market";
 import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics/meta";
 import { api } from "@/lib/api-client";
 
@@ -238,6 +239,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => window.clearTimeout(handle);
   }, [items, ready, signedIn]);
 
+  const market = useMarket();
   const addItem = useCallback((input?: number | CartInput) => {
     const line = normalize(input);
     if (!line.id || line.quantity < 1) return;
@@ -247,25 +249,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const next = { ...line, quantity };
       return existing ? current.map((item) => (lineKey(item) === lineKey(line) ? next : item)) : [...current, next];
     });
+    const money = metaLineAmount(line.price, market.currency);
     trackAddToCart({
       contentIds: [line.id],
       contentName: line.name,
       quantity: line.quantity,
-      ...(line.price != null ? { value: line.price * line.quantity, currency: siteConfig.currency } : { currency: siteConfig.currency }),
+      currency: money.currency,
+      ...(money.value != null ? { value: money.value * line.quantity } : {}),
     });
-  }, []);
+  }, [market.currency]);
 
   const removeItem = useCallback((key: string) => {
     const found = itemsRef.current.find((item) => lineKey(item) === key);
     if (!found) return;
+    const money = metaLineAmount(found.price, market.currency);
     trackRemoveFromCart({
       contentIds: [found.id],
       contentName: found.name,
       quantity: found.quantity,
-      ...(found.price != null ? { value: found.price * found.quantity, currency: siteConfig.currency } : { currency: siteConfig.currency }),
+      currency: money.currency,
+      ...(money.value != null ? { value: money.value * found.quantity } : {}),
     });
     setItems((current) => current.filter((item) => lineKey(item) !== key));
-  }, []);
+  }, [market.currency]);
 
   const setQuantity = useCallback((key: string, quantity: number) => {
     const next = Math.floor(quantity);

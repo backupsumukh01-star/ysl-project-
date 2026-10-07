@@ -6,6 +6,8 @@ import { logError, logInfo } from "@/lib/logger";
 type UserData = {
   email?: string;
   phone?: string;
+  firstName?: string;
+  lastName?: string;
   externalId?: string;
   ip?: string;
   userAgent?: string;
@@ -43,6 +45,21 @@ function sha256(value: string) {
 
 function hashEmail(email: string) {
   const normalized = email.trim().toLowerCase();
+  return normalized ? sha256(normalized) : "";
+}
+
+function hashName(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return normalized ? sha256(normalized) : "";
+}
+
+function hashCity(value: string) {
+  const normalized = value.trim().toLowerCase().replace(/[^a-z]/g, "");
+  return normalized ? sha256(normalized) : "";
+}
+
+function hashPostcode(value: string) {
+  const normalized = value.trim().toLowerCase().replace(/\s/g, "");
   return normalized ? sha256(normalized) : "";
 }
 
@@ -122,14 +139,16 @@ async function deliver(event: ServerEvent, env: ReturnType<typeof metaEnv>) {
   const userData: Record<string, string> = {};
   if (event.userData?.email) userData.em = hashEmail(event.userData.email);
   if (event.userData?.phone) userData.ph = hashPhone(event.userData.phone);
+  if (event.userData?.firstName) userData.fn = hashName(event.userData.firstName);
+  if (event.userData?.lastName) userData.ln = hashName(event.userData.lastName);
   if (event.userData?.externalId) userData.external_id = sha256(event.userData.externalId);
   if (event.userData?.ip) userData.client_ip_address = event.userData.ip;
   if (event.userData?.userAgent) userData.client_user_agent = event.userData.userAgent.slice(0, 300);
   if (event.userData?.fbp) userData.fbp = event.userData.fbp;
   if (event.userData?.fbc) userData.fbc = event.userData.fbc;
-  if (event.userData?.city) userData.ct = hashEmail(event.userData.city);
+  if (event.userData?.city) userData.ct = hashCity(event.userData.city);
   if (event.userData?.region) userData.st = hashEmail(event.userData.region);
-  if (event.userData?.postcode) userData.zp = hashEmail(event.userData.postcode.replace(/\s/g, ""));
+  if (event.userData?.postcode) userData.zp = hashPostcode(event.userData.postcode);
   if (event.userData?.country) userData.country = hashEmail(countryCode(event.userData.country));
   const body: Record<string, unknown> = {
     data: [{

@@ -11,7 +11,9 @@ type OrderLike = {
   currency: string;
   totalMinor: number;
   email: string;
+  name: string;
   phone: string;
+  addressJson: string;
   userId: string | null;
   marketingConsent: boolean;
   analyticsConsent: boolean;
@@ -40,21 +42,10 @@ export async function sendVerifiedPurchase(order: OrderLike, request?: Request) 
   const payload = purchasePayload(order);
   const consent = consentOf(order);
   try {
-    let source = "";
-    let medium = "";
-    let campaign = "";
-    let fbp = "";
-    let fbc = "";
-    try {
-      const attribution = JSON.parse(order.attributionJson) as { lastTouchSource?: string; lastTouchMedium?: string; lastTouchCampaign?: string; fbp?: string; fbc?: string };
-      source = attribution.lastTouchSource || "";
-      medium = attribution.lastTouchMedium || "";
-      campaign = attribution.lastTouchCampaign || "";
-      fbp = attribution.fbp || "";
-      fbc = attribution.fbc || "";
-    } catch {
-      /* Attribution is optional. */
-    }
+    const context = orderContext(order);
+    const source = context.source;
+    const medium = context.medium;
+    const campaign = context.campaign;
     if (canRecordAnalytics(consent)) {
       const prisma = db();
       if (prisma) {
@@ -98,11 +89,16 @@ export async function sendVerifiedPurchase(order: OrderLike, request?: Request) 
       userData: {
         email: order.email,
         phone: order.phone,
+        ...splitName(order.name),
         externalId: order.userId || undefined,
         ip,
         userAgent,
-        fbp,
-        fbc,
+        fbp: context.fbp,
+        fbc: context.fbc,
+        city: context.city,
+        region: context.region,
+        postcode: context.postcode,
+        country: context.country,
       },
     });
   } catch {
@@ -122,6 +118,13 @@ export async function retryPurchaseEvent(id: string) {
   await sendVerifiedPurchase(order);
   const updated = await prisma.metaEvent.findUnique({ where: { eventId: row.eventId } });
   return { ok: true as const, status: updated?.status || "FAILED", eventId: row.eventId };
+}
+
+function splitName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return {};
+  const lastName = parts.slice(1).join(" ");
+  return { firstName: parts[0], ...(lastName ? { lastName } : {}) };
 }
 
 function requestSignals(request?: Request) {

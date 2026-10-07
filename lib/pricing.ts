@@ -125,6 +125,32 @@ export function offerForCurrency(type: string, currency: string): { price: numbe
   return { price: publishedMajor(type), currency: publishedPrices.currency };
 }
 
+/** Meta events use the rupee amount a visitor sees, not the stored dollar catalog amount. */
+export function metaLineAmount(usdMajor: number | null | undefined, marketCurrency: string): { value?: number; currency: string } {
+  if (marketCurrency === "INR") {
+    const listed = usdMajor == null ? null : indiaListedMajor(usdMajor);
+    return listed == null ? { currency: "INR" } : { value: listed, currency: "INR" };
+  }
+  return usdMajor == null ? { currency: publishedPrices.currency } : { value: usdMajor, currency: publishedPrices.currency };
+}
+
+export function metaBasketAmount(lines: { price?: number | null; quantity: number }[], marketCurrency: string): { value?: number; currency: string } {
+  if (marketCurrency !== "INR") {
+    if (lines.some((line) => line.price == null)) return { currency: publishedPrices.currency };
+    return {
+      currency: publishedPrices.currency,
+      value: lines.reduce((sum, line) => sum + (line.price || 0) * line.quantity, 0),
+    };
+  }
+  let value = 0;
+  for (const line of lines) {
+    const listed = line.price == null ? null : indiaListedMajor(line.price);
+    if (listed == null) return { currency: "INR" };
+    value += listed * line.quantity;
+  }
+  return { value, currency: "INR" };
+}
+
 export function indiaCompareForSellUsd(usd: number | null | undefined): number | null {
   if (usd == null) return null;
   const key = cents(usd);

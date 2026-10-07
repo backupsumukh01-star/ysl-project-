@@ -11,7 +11,8 @@ import { SetContains } from "@/components/set-contains";
 import { FaqList } from "@/components/faq-list";
 import { faqItems } from "@/lib/content";
 import { trackViewContent } from "@/lib/analytics/meta";
-import { publishedPrices } from "@/lib/pricing";
+import { useMarket } from "@/components/market";
+import { metaLineAmount } from "@/lib/pricing";
 import { CrossfadeImage } from "@/components/crossfade-image";
 import { PageBack } from "@/components/page-back";
 const trioChoices = Object.keys(trioImageFiles) as TrioFamilyName[];
@@ -63,6 +64,7 @@ export function ProductView({
   const [lightbox, setLightbox] = useState(false);
   const [trios, setTrios] = useState<TrioFamilyName[]>([]);
   const [adding, setAdding] = useState(false);
+  const market = useMarket();
   const { addItem, acknowledgeAdd } = useCart();
   const router = useRouter();
   const triosReady = trios.length === 3;
@@ -80,9 +82,9 @@ export function ProductView({
     trackViewContent({
       contentIds: [offer.id],
       contentName: offer.name,
-      ...(offer.price != null ? { value: offer.price, currency: publishedPrices.currency } : {}),
+      ...metaLineAmount(offer.price, market.currency),
     });
-  }, [offer?.id, offer?.name, offer?.price]);
+  }, [offer?.id, offer?.name, offer?.price, market.currency]);
 
   useEffect(() => {
     if (!lightbox) return;

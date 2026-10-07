@@ -9,8 +9,9 @@ import { ApiError, api } from "@/lib/api-client";
 import { shadeNotes } from "@/lib/product";
 import { trioPreviewSrc } from "@/lib/trio-images";
 import { RefillMark, refillSwatch } from "@/components/refill-mark";
-import { publishedPrices } from "@/lib/pricing";
+import { metaLineAmount } from "@/lib/pricing";
 import { trackViewContent } from "@/lib/analytics/meta";
+import { useMarket } from "@/components/market";
 
 export function CatalogProductView({
   product,
@@ -19,6 +20,7 @@ export function CatalogProductView({
   product: CatalogProduct;
   shippingNote?: string;
 }) {
+  const market = useMarket();
   const [quantity, setQuantity] = useState(1);
   const [variantId, setVariantId] = useState(product.variants[0]?.id || "");
   const variant = product.variants.find((item) => item.id === variantId);
@@ -56,9 +58,9 @@ export function CatalogProductView({
     trackViewContent({
       contentIds: [product.id],
       contentName: variantName ? `${product.name} ${variantName}` : product.name,
-      ...(price != null ? { value: price, currency: publishedPrices.currency } : {}),
+      ...metaLineAmount(price, market.currency),
     });
-  }, [product.id, product.name, variantName, price]);
+  }, [product.id, product.name, variantName, price, market.currency]);
 
   return (
     <div className="product-layout">

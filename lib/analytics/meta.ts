@@ -96,16 +96,59 @@ function mirror(event: string, payload: CommercePayload) {
   }
 }
 
-function emit(event: string, payload: CommercePayload, options?: { custom?: boolean }) {
-  const eventId = payload.eventId || `${event}_${crypto.randomUUID()}`;
-  const next = { ...payload, eventId };
+type QueuedPixelEvent = {
+  command: "track" | "trackCustom";
+  event: string;
+  params: Record<string, unknown>;
+  eventId: string;
+};
+
+const pixelQueue: QueuedPixelEvent[] = [];
+let pixelFlushTimer: number | undefined;
+
+function flushPixelQueue() {
   const tracker = fbq();
-  if (tracker && advertisingAllowed()) {
+  if (!tracker) return;
+  const batch = pixelQueue.splice(0, pixelQueue.length);
+  for (const item of batch) {
     try {
-      tracker(options?.custom || !STANDARD.has(event) ? "trackCustom" : "track", event, paramsOf(next), { eventID: eventId });
+      tracker(item.command, item.event, item.params, { eventID: item.eventId });
     } catch {
       /* Pixel failure must not affect commerce. */
     }
+  }
+}
+
+function schedulePixelFlush() {
+  if (typeof window === "undefined" || pixelFlushTimer !== undefined) return;
+  let tries = 0;
+  const tick = () => {
+    flushPixelQueue();
+    tries += 1;
+    if (pixelQueue.length && tries < 24) {
+      pixelFlushTimer = window.setTimeout(tick, 250);
+      return;
+    }
+    pixelFlushTimer = undefined;
+    if (tries >= 24) pixelQueue.length = 0;
+  };
+  pixelFlushTimer = window.setTimeout(tick, 0);
+}
+
+function emit(event: string, payload: CommercePayload, options?: { custom?: boolean }) {
+  const eventId = payload.eventId || `${event}_${crypto.randomUUID()}`;
+  const next = { ...payload, eventId };
+  const command = options?.custom || !STANDARD.has(event) ? "trackCustom" : "track";
+  const tracker = fbq();
+  if (tracker && advertisingAllowed()) {
+    try {
+      tracker(command, event, paramsOf(next), { eventID: eventId });
+    } catch {
+      /* Pixel failure must not affect commerce. */
+    }
+  } else if (advertisingAllowed() && process.env.NEXT_PUBLIC_META_PIXEL_ID) {
+    pixelQueue.push({ command, event, params: paramsOf(next), eventId });
+    schedulePixelFlush();
   }
   mirror(event, next);
 }

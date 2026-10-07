@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
-import { getSettings } from "@/lib/settings";
 import { siteConfig } from "@/lib/config";
-import { authoritativeMinor } from "@/lib/pricing";
+import { authoritativeMinor, indiaCompareForType, indiaMajorForType } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +10,6 @@ function xml(value: string) {
 
 export async function GET() {
   const prisma = db();
-  const settings = await getSettings();
   if (!prisma) return new Response("Catalog is not available.", { status: 503 });
   const products = await prisma.product.findMany({
     where: { active: true },
@@ -19,8 +17,10 @@ export async function GET() {
   });
   const items = products
     .map((product) => {
+      const rupees = indiaMajorForType(product.type);
       const priceMinor = authoritativeMinor(product.type, product.priceMinor);
-      if (priceMinor == null) return "";
+      if (rupees == null || priceMinor == null) return "";
+      const compare = indiaCompareForType(product.type);
       const image = product.images[0];
       const extras = product.images.slice(1, 6);
       const availability = product.trackInventory && product.stock <= 0 ? "out of stock" : "in stock";
@@ -32,7 +32,8 @@ export async function GET() {
         <g:description>${xml(product.description || product.shortDescription)}</g:description>
         <g:availability>${availability}</g:availability>
         <g:condition>new</g:condition>
-        <g:price>${(priceMinor / 100).toFixed(2)} ${xml(settings.currency)}</g:price>
+        <g:price>${(compare != null && compare > rupees ? compare : rupees).toFixed(2)} INR</g:price>
+        ${compare != null && compare > rupees ? `<g:sale_price>${rupees.toFixed(2)} INR</g:sale_price>` : ""}
         <g:link>${xml(link)}</g:link>
         <g:image_link>${xml(imageLink)}</g:image_link>
         ${extras.map((extra) => `<g:additional_image_link>${xml(new URL(extra.src, siteConfig.siteUrl).toString())}</g:additional_image_link>`).join("")}
