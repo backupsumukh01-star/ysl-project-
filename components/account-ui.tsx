@@ -30,6 +30,7 @@ export function LoginScreen() {
   const [resetOpen, setResetOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [resetPending, setResetPending] = useState(false);
+  const [resetNote, setResetNote] = useState("");
   const [message, setMessage] = useState("");
 
   function finish() {
@@ -58,12 +59,12 @@ export function LoginScreen() {
     event.preventDefault();
     const email = String(new FormData(event.currentTarget).get("reset-email") || "");
     setResetPending(true);
-    setMessage("");
+    setResetNote("");
     try {
       await api("/api/auth/password-reset", { method: "POST", body: JSON.stringify({ email }) });
-      setMessage("If that email has an account, a reset link is on its way.");
+      setResetNote("If that email has an account, a reset link is on its way.");
     } catch (error) {
-      setMessage(error instanceof ApiError ? error.message : "The reset link could not be sent.");
+      setResetNote(error instanceof ApiError ? error.message : "The reset link could not be sent.");
     } finally {
       setResetPending(false);
     }
@@ -110,7 +111,7 @@ export function LoginScreen() {
           <input name="password" type="password" autoComplete={mode === "register" ? "new-password" : "current-password"} minLength={8} required />
         </label>
         {mode === "login" ? (
-          <button type="button" className="auth-code" onClick={() => { setResetOpen((open) => !open); setMessage(""); }}>
+          <button type="button" className="auth-code" onClick={() => { setResetOpen((open) => !open); setResetNote(""); }}>
             Forgot password
           </button>
         ) : null}
@@ -127,6 +128,7 @@ export function LoginScreen() {
           <button className="btn btn-dark" type="submit" disabled={resetPending}>
             {resetPending ? "Sending" : "Send reset link"}
           </button>
+          {resetNote ? <p className="notice" role="status">{resetNote}</p> : null}
         </form>
       ) : null}
       <div className="account-auth__alt">
