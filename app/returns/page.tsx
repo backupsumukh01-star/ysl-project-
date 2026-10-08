@@ -15,6 +15,7 @@ export default async function ReturnsPage() {
       <p className="kicker">Customer care</p>
       <h1>Returns</h1>
       <p>Sold by {settings.sellerName}. These are the only replacement and refund rules. The full agreement is on the <Link href="/terms">terms page</Link>.</p>
+      <p>You can apply for a replacement or a refund only after the order has shipped, or 20 days after the order was placed.</p>
 
       <h2>No cancellation</h2>
       <p>After an order is placed, you cannot cancel it, and you cannot cancel one product from it.</p>

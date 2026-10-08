@@ -18,13 +18,17 @@ const previousReturnsMessage = "You can return or replace a product within 10 da
 export const returnsSummary =
   "An order cannot be cancelled after it is placed. Replacement and refund rules are on the Terms page.";
 
+/** The replacement and refund rule before the application window was added. */
+const previousReturnsPolicy =
+  "An order cannot be cancelled after it is placed. A faulty product can be replaced. If a second replacement is also not right, you can ask for a refund. If an order has not shipped within 20 days of the order date, you can ask for a refund. An approved refund takes 7 to 15 days.";
+
 /** The replacement and refund rule. The old 10-day return line is no longer used. */
 export const returnsPolicy =
-  "An order cannot be cancelled after it is placed. A faulty product can be replaced. If a second replacement is also not right, you can ask for a refund. If an order has not shipped within 20 days of the order date, you can ask for a refund. An approved refund takes 7 to 15 days.";
+  "An order cannot be cancelled after it is placed. You can apply for a replacement or a refund only after the order has shipped, or 20 days after the order was placed. A faulty product can be replaced. If a second replacement is also not right, you can ask for a refund. If an order has not shipped within 20 days of the order date, you can ask for a refund. An approved refund takes 7 to 15 days.";
 
 export function publishedReturns(value: string | undefined | null): string {
   const text = value?.trim() || "";
-  if (!text || text === previousReturnsMessage || text === returnsPolicy) return returnsSummary;
+  if (!text || text === previousReturnsMessage || text === previousReturnsPolicy || text === returnsPolicy) return returnsSummary;
   return text;
 }
 

@@ -43,7 +43,7 @@ export async function PATCH(request: Request) {
   if (decision) {
     const notice = receiptFromOrder(updated.order, {
       title: `Return ${decision}`,
-      note: `The return request was marked ${decision}. This message does not publish a return policy, and it does not confirm a refund.`,
+      note: `The replacement or refund request was marked ${decision}. This message does not send a refund.`,
     });
     await sendEmail({
       to: updated.order.email,

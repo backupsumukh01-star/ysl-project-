@@ -5,6 +5,7 @@ import { receiptFromOrder } from "@/lib/email/order-notice";
 import { sendEmail, sendOwnerEmail } from "@/lib/email/service";
 import { createRazorpayRefund } from "@/lib/payments/razorpay";
 import { logError, logInfo } from "@/lib/logger";
+import { claimClosedMessage, replacementClaimOpen } from "@/lib/claim-window";
 
 const SHIPPED = new Set(["SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "RETURN_REQUESTED", "RETURNED", "FAILED_DELIVERY", "RETURN_TO_ORIGIN"]);
 const CANCELLABLE = new Set(["PAID", "PROCESSING", "PACKED"]);
@@ -106,9 +107,13 @@ export async function createReturnRequest(input: { orderId: string; userId: stri
   if (!prisma) return { ok: false as const, message: "Returns are not available." };
   const order = await prisma.order.findUnique({ where: { id: input.orderId }, include: { items: true } });
   if (!order || order.userId !== input.userId) return { ok: false as const, message: "That order was not found." };
-  if (!["SHIPPED", "DELIVERED", "OUT_FOR_DELIVERY"].includes(order.status)) {
-    return { ok: false as const, message: "A return can be requested after the order has shipped. The return policy itself has not been published yet." };
+  if (!replacementClaimOpen(order)) {
+    return { ok: false as const, message: claimClosedMessage };
   }
+  const waiting = await prisma.returnRequest.findFirst({
+    where: { orderId: order.id, status: { in: ["REQUESTED", "UNDER_REVIEW"] } },
+  });
+  if (waiting) return { ok: false as const, message: "A request for this order is already waiting for review." };
   const created = await prisma.returnRequest.create({
     data: {
       orderId: order.id,
@@ -122,7 +127,7 @@ export async function createReturnRequest(input: { orderId: string; userId: stri
   await prisma.order.update({ where: { id: order.id }, data: { status: "RETURN_REQUESTED" } });
   const notice = receiptFromOrder(order, {
     title: "Return requested",
-    note: "The request is waiting for review. A refund has not been made. A return policy has not been published yet.",
+    note: "The request is waiting for review. A replacement or refund is not made until it is approved.",
   });
   await sendEmail({ to: order.email, type: "return_requested", dedupeKey: `return_requested:${created.id}`, ...notice });
   await sendOwnerEmail({

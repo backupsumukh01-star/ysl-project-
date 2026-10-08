@@ -3,24 +3,26 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ApiError, api } from "@/lib/api-client";
-import { siteConfig } from "@/lib/config";
+import { claimClosedMessage, replacementClaimOpen } from "@/lib/claim-window";
 
 type Item = { productId: string; name: string; quantity: number };
+type ClaimOrder = { status: string; paymentStatus: string; createdAt: string; items: Item[] };
 
 export default function ReturnPage() {
   const params = useParams<{ id: string }>();
-  const [items, setItems] = useState<Item[]>([]);
+  const [order, setOrder] = useState<ClaimOrder | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    api<{ order: { items: Item[] } }>(`/api/orders/${params.id}`)
-      .then((result) => setItems(result.order.items))
+    api<{ order: ClaimOrder }>(`/api/orders/${params.id}`)
+      .then((result) => setOrder(result.order))
       .catch((error) => setMessage(error instanceof ApiError ? error.message : "That order was not found."));
   }, [params.id]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const items = order?.items || [];
     const selected = items.filter((item) => data.get(`item-${item.productId}`));
     try {
       await api(`/api/orders/${params.id}/return`, {
@@ -31,7 +33,7 @@ export default function ReturnPage() {
           items: selected.map((item) => ({ productId: item.productId, quantity: Number(data.get(`qty-${item.productId}`) || 1) })),
         }),
       });
-      setMessage("Return requested. It is not a refund until it is reviewed.");
+      setMessage("Request recorded. A replacement or refund is not made until it is reviewed.");
     } catch (error) {
       setMessage(error instanceof ApiError ? error.message : "The return was not saved.");
     }
@@ -39,10 +41,11 @@ export default function ReturnPage() {
 
   return (
     <>
-      <h1>Request a return</h1>
-      <p className="lede">{siteConfig.returnsMessage} This form records the request. A refund is not issued until it is reviewed.</p>
-      <form className="stack-form" onSubmit={onSubmit}>
-        {items.map((item) => (
+      <h1>Request a replacement or refund</h1>
+      <p className="lede">{claimClosedMessage} This form records the request. A replacement or refund is not made until it is reviewed.</p>
+      {order && !replacementClaimOpen(order) ? <p className="notice">{claimClosedMessage}</p> : null}
+      {order && replacementClaimOpen(order) ? <form className="stack-form" onSubmit={onSubmit}>
+        {order.items.map((item) => (
           <label key={item.productId}>
             <input type="checkbox" name={`item-${item.productId}`} /> {item.name}
             <input name={`qty-${item.productId}`} type="number" min={1} max={item.quantity} defaultValue={1} />
@@ -57,7 +60,7 @@ export default function ReturnPage() {
           <textarea name="description" />
         </label>
         <button className="btn btn-gold" type="submit">Submit request</button>
-      </form>
+      </form> : null}
       {message ? <p className="notice">{message}</p> : null}
     </>
   );

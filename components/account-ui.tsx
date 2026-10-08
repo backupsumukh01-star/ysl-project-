@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, api } from "@/lib/api-client";
 import { formatMoney } from "@/lib/product";
 import { paymentWasCaptured } from "@/lib/order-paid";
+import { claimClosedMessage, replacementClaimOpen } from "@/lib/claim-window";
 import { useCart } from "@/components/cart-provider";
 import { GoogleAuthChoices } from "@/components/google-auth";
 import { track } from "@/lib/analytics";
@@ -476,7 +477,11 @@ export function OrderDetailScreen({ id }: { id: string }) {
       <p className="order-links">
         <Link href={`/invoice/${order.id}`}>Download invoice</Link>
         {" · "}
-        <Link href={`/account/orders/${order.id}/return`}>Request a return</Link>
+        {replacementClaimOpen(order) ? (
+          <Link href={`/account/orders/${order.id}/return`}>Request a replacement or refund</Link>
+        ) : (
+          <span>{claimClosedMessage}</span>
+        )}
         {" · "}
         <Link href={`/contact?order=${order.number}`}>Contact support</Link>
       </p>

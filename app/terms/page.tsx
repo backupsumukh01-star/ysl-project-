@@ -77,9 +77,11 @@ export default async function TermsPage() {
 
       <h2>A faulty product</h2>
       <p>
-        If a product is faulty, you can apply for a replacement. Apply from the order in your account, or write through
-        the contact page with the order number and what is wrong. The request is recorded. A replacement is sent only
-        after the request is reviewed. This is a replacement of the faulty product, not a refund, and not a cancellation.
+        You can apply for a replacement or a refund only after the order has shipped, or 20 days after the order was placed.
+        A request before then is not accepted. If a product is faulty, you can apply for a replacement. Apply from the
+        order in your account, or write through the contact page with the order number and what is wrong. The request is
+        recorded. A replacement is sent only after the request is reviewed. This is a replacement of the faulty product,
+        not a refund, and not a cancellation.
       </p>
 
       <h2>A second replacement</h2>

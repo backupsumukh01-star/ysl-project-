@@ -156,7 +156,7 @@ export const faqs = [
   {
     question: "How do I return or replace a product?",
     answer:
-      "An order cannot be cancelled after it is placed. A faulty product can be replaced. If a second replacement is also not right, you can ask for a refund. If an order has not shipped within 20 days of the order date, you can ask for a refund. An approved refund takes 7 to 15 days. Start a request from your order, or write from the contact page.",
+      "An order cannot be cancelled after it is placed. You can apply for a replacement or a refund only after the order has shipped, or 20 days after the order was placed. A faulty product can be replaced. If a second replacement is also not right, you can ask for a refund. If an order has not shipped within 20 days of the order date, you can ask for a refund. An approved refund takes 7 to 15 days. Start a request from your order, or write from the contact page.",
   },
   {
     question: "Where is the user manual?",
