@@ -8,7 +8,7 @@ import { AppDownload } from "@/components/app-download";
 import type { AppDownloadLinks } from "@/lib/app-links";
 import type { CartInput } from "@/components/cart-provider";
 import { Price } from "@/components/commerce";
-import { publishedPrices } from "@/lib/pricing";
+import { publishedCompareMajor, publishedMajor } from "@/lib/pricing";
 import { deviceOffering, product } from "@/lib/product";
 import type { TrioFamilyName } from "@/lib/trio-images";
 
@@ -17,7 +17,7 @@ const shot = { objectFit: "contain" as const, objectPosition: "center center" };
 function LaunchPrice() {
   return (
     <div className="mk-launch">
-      <Price amount={publishedPrices.device} compareAt={publishedPrices.deviceCompareAt} />
+      <Price amount={publishedMajor("DEVICE")} compareAt={publishedCompareMajor("DEVICE")} />
     </div>
   );
 }

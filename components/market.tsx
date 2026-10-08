@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { api } from "@/lib/api-client";
+import { storeCurrency } from "@/lib/pricing";
 import { formatMoney } from "@/lib/product";
 
 export const COUNTRY_COOKIE = "rsm-country";
@@ -9,7 +10,7 @@ export const COUNTRY_EVENT = "rsm-country";
 
 export type MarketState = { currency: string; rate: number; exponent: number; country: string };
 
-const MarketContext = createContext<MarketState>({ currency: "USD", rate: 1, exponent: 2, country: "" });
+const MarketContext = createContext<MarketState>({ currency: storeCurrency, rate: 1, exponent: 2, country: "" });
 
 export function readCountryCookie() {
   if (typeof document === "undefined") return "";
@@ -56,7 +57,7 @@ export function useMarket() {
 export function useMoney() {
   return (usdMajor: number | null | undefined) => {
     if (usdMajor == null) return "Price to be confirmed";
-    return formatMoney(usdMajor, "USD");
+    return formatMoney(usdMajor, storeCurrency);
   };
 }
 

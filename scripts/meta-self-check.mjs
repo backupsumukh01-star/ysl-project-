@@ -52,7 +52,7 @@ async function main() {
   const originalPrice = device.priceMinor;
   const originalStock = device.stock;
   const originalTrack = device.trackInventory;
-  await prisma.product.update({ where: { id: device.id }, data: { priceMinor: 250000, trackInventory: true, stock: 4 } });
+  await prisma.product.update({ where: { id: device.id }, data: { trackInventory: true, stock: 4 } });
   await prisma.siteSetting.upsert({ where: { key: "shippingEnabled" }, update: { value: "true" }, create: { key: "shippingEnabled", value: "true" } });
   await prisma.siteSetting.upsert({ where: { key: "shippingFlatMinor" }, update: { value: "0" }, create: { key: "shippingFlatMinor", value: "0" } });
   const stamp = Date.now();
@@ -61,7 +61,7 @@ async function main() {
 
   try {
     const catalog = await request("/api/meta/catalog");
-    assert("catalog feed includes the real product id in USD", catalog.status === 200 && catalog.text.includes(device.id) && catalog.text.includes("USD") && !catalog.text.includes("INR"));
+    assert("catalog feed includes the real product id in INR", catalog.status === 200 && catalog.text.includes(device.id) && catalog.text.includes("INR") && catalog.text.includes("9999.00") && !catalog.text.includes("USD"));
     assert("catalog feed does not claim a live connection", catalog.text.includes("not connected"));
 
     const anonymous = `anon_${stamp}`;
@@ -216,7 +216,7 @@ async function main() {
     assert("purchase uses purchase_<order id>", paid.json?.data?.purchase?.eventId === `purchase_${order.id}` && purchase?.eventId === `purchase_${order.id}`);
     assert("purchase is not marked sent without Meta credentials", purchase?.status === "SKIPPED" && purchase.errorMessage === "credentials not configured");
     assert("verified order is paid", (await prisma.order.findUnique({ where: { id: order.id } })).paymentStatus === "PAID");
-    assert("purchase value matches the order total", (await prisma.analyticsEvent.findFirst({ where: { eventId: purchase.eventId } }))?.valueMinor === 250000);
+    assert("purchase value matches the order total", (await prisma.analyticsEvent.findFirst({ where: { eventId: purchase.eventId } }))?.valueMinor === 999900);
 
     const duplicate = await request("/api/payments/verify", {
       method: "POST",

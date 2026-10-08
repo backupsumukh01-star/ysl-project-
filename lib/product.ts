@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/config";
-import { publishedPrices } from "@/lib/pricing";
+import { publishedCompareMajor, publishedMajor, storeCurrency } from "@/lib/pricing";
 import { appRequirement, cartridges, ingredients, trios } from "../prisma/catalog-facts.mjs";
 
 export type GalleryImage = {
@@ -16,9 +16,9 @@ export const product = {
   shortDescription: "Design your lip shades, then take them with you.",
   description:
     "Rouge Sur Mesure is a custom lip color creator. The device, a supported cartridge trio, and the official companion app are used together. This purchase includes 3 complimentary cartridge sets — 9 cartridges total — and a retractable lip brush. Additional cartridge trios and refills are available separately.",
-  price: publishedPrices.device,
-  compareAtPrice: siteConfig.productComparePrice,
-  currency: publishedPrices.currency,
+  price: publishedMajor("DEVICE"),
+  compareAtPrice: publishedCompareMajor("DEVICE"),
+  currency: storeCurrency,
   availability: "Availability is confirmed with your order.",
   shippingMessage: siteConfig.shippingMessage,
   features: [
@@ -180,13 +180,13 @@ export function lineKind(sku: string): string {
   return "";
 }
 
-export function shippingChargeLabel(amount: number | null | undefined, currency = publishedPrices.currency): string {
+export function shippingChargeLabel(amount: number | null | undefined, currency = storeCurrency): string {
   if (amount == null) return "Not published";
   if (amount === 0) return "Included";
   return formatMoney(amount, currency);
 }
 
-export function formatMoney(amount: number | null, currency = publishedPrices.currency): string {
+export function formatMoney(amount: number | null, currency = storeCurrency): string {
   if (amount == null) return "Price to be confirmed";
   const wholeRupee = currency === "INR" && Math.abs(amount - Math.round(amount)) < 0.001;
   return new Intl.NumberFormat(wholeRupee ? "en-IN" : "en", {

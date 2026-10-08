@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api-client";
 import { checkoutLinePayload, type CartLine } from "@/components/cart-provider";
+import { storeCurrency } from "@/lib/pricing";
 import { formatMoney } from "@/lib/product";
 
 export type BagQuote = {
@@ -62,13 +63,13 @@ export function bagSubtotalLabel(
   usdSubtotal: number | null,
   quote: BagQuote | null,
 ) {
-  if (quote && quote.currency !== "USD") return formatMoney(quote.subtotal, quote.currency);
+  if (quote && quote.currency !== storeCurrency) return formatMoney(quote.subtotal, quote.currency);
   return money(usdSubtotal);
 }
 
 export function bagTotalLabel(money: (usd: number | null) => string, quote: BagQuote | null) {
   if (!quote || quote.total == null) return "";
-  if (quote.currency !== "USD") return formatMoney(quote.total, quote.currency);
+  if (quote.currency !== storeCurrency) return formatMoney(quote.total, quote.currency);
   return money(quote.total);
 }
 
@@ -80,7 +81,7 @@ export function bagShelf(
 ): BagShelf {
   const empty = { mrp: null, discount: null, coupon: null, saving: null };
   if (!items.length) return empty;
-  const couponMajor = quote?.discount && quote.discount > 0 && (!quote.currency || quote.currency === "USD" || quote.currency === marketCurrency) ? quote.discount : 0;
+  const couponMajor = quote?.discount && quote.discount > 0 && (!quote.currency || quote.currency === storeCurrency || quote.currency === marketCurrency) ? quote.discount : 0;
 
   let reference = 0;
   let selling = 0;
@@ -91,7 +92,7 @@ export function bagShelf(
   }
   const off = reference - selling;
   if (off <= 0 && couponMajor <= 0) return empty;
-  const savingUsd = off + (quote?.currency === "USD" ? couponMajor : 0);
+  const savingUsd = off + (quote?.currency === storeCurrency || quote?.currency === marketCurrency ? couponMajor : 0);
   return {
     mrp: off > 0 ? money(reference) : null,
     discount: off > 0 ? `−${money(off)}` : null,

@@ -2,19 +2,15 @@ import prices from "@/lib/catalog-prices.json";
 
 export const publishedPrices = prices;
 
+/** Charge, display, and ad currency. Dollar figures in the catalog file stay unused. */
+export const storeCurrency = "INR";
+
 export function publishedMajor(type: string): number | null {
-  if (type === "DEVICE") return publishedPrices.device;
-  if (type === "CARTRIDGE_TRIO") return publishedPrices.cartridgeTrio;
-  if (type === "REFILL") return publishedPrices.refill;
-  if (type === "BUNDLE") return publishedPrices.bundle;
-  return null;
+  return indiaMajorForType(type);
 }
 
 export function publishedCompareMajor(type: string): number | null {
-  if (type === "DEVICE") return publishedPrices.deviceCompareAt;
-  if (type === "CARTRIDGE_TRIO") return publishedPrices.cartridgeTrioCompareAt;
-  if (type === "BUNDLE") return publishedPrices.bundleCompareAt;
-  return null;
+  return indiaCompareForType(type);
 }
 
 export function publishedMinor(type: string): number | null {
@@ -44,24 +40,17 @@ export function catalogFeedAmounts(type: string, stored?: number | null): { curr
   const compare = publishedCompareMajor(type);
   const compareMinor = compare == null ? null : Math.round(compare * 100);
   if (compareMinor != null && compareMinor > selling) {
-    return { currency: publishedPrices.currency, regularMinor: compareMinor, saleMinor: selling };
+    return { currency: storeCurrency, regularMinor: compareMinor, saleMinor: selling };
   }
-  return { currency: publishedPrices.currency, regularMinor: selling, saleMinor: null };
+  return { currency: storeCurrency, regularMinor: selling, saleMinor: null };
 }
 
 export function catalogMajorForSlug(slug: string): number | null {
-  if (slug === "rouge-sur-mesure") return publishedPrices.device;
-  if (slug === "rouge-sur-mesure-bundle") return publishedPrices.bundle;
-  if (slug === "cartridge-refill") return publishedPrices.refill;
-  if (slug.startsWith("cartridge-trio-")) return publishedPrices.cartridgeTrio;
-  return null;
+  return indiaMajorForSlug(slug);
 }
 
 export function catalogCompareForSlug(slug: string): number | null {
-  if (slug === "rouge-sur-mesure") return publishedPrices.deviceCompareAt;
-  if (slug === "rouge-sur-mesure-bundle") return publishedPrices.bundleCompareAt;
-  if (slug.startsWith("cartridge-trio-")) return publishedPrices.cartridgeTrioCompareAt;
-  return null;
+  return indiaReferenceForSlug(slug);
 }
 
 const INR = publishedPrices.inr;
@@ -140,20 +129,20 @@ export function indiaReferenceSubtotalMajor(items: { slug: string; quantity: num
   return sum;
 }
 
-/** The store charges and advertises the USD catalog. Country does not select a rupee price. */
+/** Country and a browser currency do not select a price. Every active product uses the stored rupee table. */
 export function offerForCurrency(type: string, _currency?: string): { price: number | null; currency: string } {
-  return { price: publishedMajor(type), currency: publishedPrices.currency };
+  return { price: publishedMajor(type), currency: storeCurrency };
 }
 
-/** Pixel helpers may attach a catalog dollar amount. The server replaces it before Conversions API. */
-export function metaLineAmount(usdMajor: number | null | undefined, _marketCurrency?: string): { value?: number; currency: string } {
-  return usdMajor == null ? { currency: publishedPrices.currency } : { value: usdMajor, currency: publishedPrices.currency };
+/** Browser events report the catalog selling price already on the line. The server replaces this value. */
+export function metaLineAmount(major: number | null | undefined, _marketCurrency?: string): { value?: number; currency: string } {
+  return major == null ? { currency: storeCurrency } : { value: major, currency: storeCurrency };
 }
 
 export function metaBasketAmount(lines: { price?: number | null; quantity: number }[], _marketCurrency?: string): { value?: number; currency: string } {
-  if (lines.some((line) => line.price == null)) return { currency: publishedPrices.currency };
+  if (lines.some((line) => line.price == null)) return { currency: storeCurrency };
   return {
-    currency: publishedPrices.currency,
+    currency: storeCurrency,
     value: lines.reduce((sum, line) => sum + (line.price || 0) * line.quantity, 0),
   };
 }

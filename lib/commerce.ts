@@ -10,7 +10,7 @@ import { sendEmail, sendOwnerEmail } from "@/lib/email/service";
 import { createRazorpayOrder, createRazorpayRefund } from "@/lib/payments/razorpay";
 import { purchasePayload, recordPaymentOutcome, sendVerifiedPurchase } from "@/lib/analytics/purchase";
 import { reserveInventory, releaseInventory } from "@/lib/inventory";
-import { authoritativeMinor, publishedPrices } from "@/lib/pricing";
+import { authoritativeMinor, storeCurrency } from "@/lib/pricing";
 import { fromMinor } from "@/lib/fx";
 import { deviceFamilySelection } from "@/lib/trio-images";
 
@@ -187,7 +187,7 @@ function presentInStoreCurrency<T extends { unitMinor: number; quantity: number 
   const shippingMinor = amounts.shippingMinor;
   const taxMinor = amounts.taxMinor;
   const totalMinor = shippingMinor == null ? null : Math.max(0, subtotalMinor - discountMinor) + shippingMinor + taxMinor;
-  return { currency: publishedPrices.currency, lines, subtotalMinor, discountMinor, shippingMinor, taxMinor, totalMinor };
+  return { currency: storeCurrency, lines, subtotalMinor, discountMinor, shippingMinor, taxMinor, totalMinor };
 }
 
 export async function previewCheckout(input: { lines: LineInput[]; email?: string; couponCode?: string; country?: string }): Promise<Ok<{ preview: CheckoutPreview }> | Fail> {

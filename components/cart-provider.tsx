@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useLayoutEffect, use
 import { product } from "@/lib/product";
 import { cartridgePhotoSrc } from "@/lib/cartridge-photos";
 import { siteConfig } from "@/lib/config";
-import { catalogCompareForSlug, catalogMajorForSlug, metaLineAmount } from "@/lib/pricing";
+import { catalogCompareForSlug, catalogMajorForSlug, metaLineAmount, storeCurrency } from "@/lib/pricing";
 import { useMarket } from "@/components/market";
 import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics/meta";
 import { api } from "@/lib/api-client";
@@ -206,7 +206,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }),
     })
       .then((result) => {
-        if (cancel || !result.lines || (result.currency && result.currency !== "USD")) return;
+        if (cancel || !result.lines || (result.currency && result.currency !== storeCurrency)) return;
         setItems((current) => {
           const now = current.map((item) => `${item.id}:${item.variantId}:${item.variantName}:${item.quantity}`).join("|");
           if (now !== signature) return current;

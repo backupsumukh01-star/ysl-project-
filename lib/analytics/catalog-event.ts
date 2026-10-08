@@ -1,8 +1,6 @@
 import { db } from "@/lib/db";
-import { authoritativeMinor, publishedPrices } from "@/lib/pricing";
+import { authoritativeMinor, storeCurrency } from "@/lib/pricing";
 import { getSettings } from "@/lib/settings";
-
-export const storeCurrency = publishedPrices.currency;
 
 const PRICED = new Set(["ViewContent", "AddToCart", "InitiateCheckout"]);
 

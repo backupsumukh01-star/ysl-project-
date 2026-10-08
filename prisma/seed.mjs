@@ -6,10 +6,11 @@ import { appRequirement, cartridges, families, faqs, ingredients, refillVariants
 const publishedPrices = JSON.parse(readFileSync(new URL("../lib/catalog-prices.json", import.meta.url), "utf8"));
 
 function priceMinorFor(type) {
-  if (type === "DEVICE") return Math.round(publishedPrices.device * 100);
-  if (type === "CARTRIDGE_TRIO") return Math.round(publishedPrices.cartridgeTrio * 100);
-  if (type === "REFILL") return Math.round(publishedPrices.refill * 100);
-  if (type === "BUNDLE") return Math.round(publishedPrices.bundle * 100);
+  const inr = publishedPrices.inr;
+  if (type === "DEVICE") return inr.device * 100;
+  if (type === "CARTRIDGE_TRIO") return inr.cartridgeTrio * 100;
+  if (type === "REFILL") return inr.refill * 100;
+  if (type === "BUNDLE") return inr.bundle * 100;
   return null;
 }
 

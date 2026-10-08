@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { shadeNotes } from "@/lib/product";
 import { Price } from "@/components/commerce";
-import { publishedPrices } from "@/lib/pricing";
+import { publishedCompareMajor, publishedMajor } from "@/lib/pricing";
 import { trioDots, trioLook, type TrioFamilyName } from "@/lib/trio-images";
 
 const order = ["Red", "Pink", "Orange", "Nude", "Warm Red", "Warm Nude", "Cool Nude"] as const;
@@ -14,7 +14,7 @@ export function LiveColors({ images }: { images: Partial<Record<TrioFamilyName, 
   const [mood, setMood] = useState<(typeof order)[number]>("Red");
   const note = shadeNotes.find((entry) => entry.name === mood);
   const src = images[mood];
-  const price = publishedPrices.cartridgeTrio;
+  const price = publishedMajor("CARTRIDGE_TRIO");
 
   return (
     <section className="mk-live" id="colors" aria-labelledby="colors-title">
@@ -27,7 +27,7 @@ export function LiveColors({ images }: { images: Partial<Record<TrioFamilyName, 
         <p className="mk-kicker">Seven trios</p>
         <div className="mk-live__title">
           <h2 id="colors-title">{mood}</h2>
-          <div className="mk-price"><Price amount={price} compareAt={publishedPrices.cartridgeTrioCompareAt} /></div>
+          <div className="mk-price"><Price amount={price} compareAt={publishedCompareMajor("CARTRIDGE_TRIO")} /></div>
         </div>
         <p className="mk-live__shades">{trioLook[mood]}</p>
       </div>
