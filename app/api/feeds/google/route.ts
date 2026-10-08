@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
-import { getSettings } from "@/lib/settings";
 import { siteConfig } from "@/lib/config";
-import { authoritativeMinor } from "@/lib/pricing";
+import { catalogFeedAmounts } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +10,6 @@ function xml(value: string) {
 
 export async function GET() {
   const prisma = db();
-  const settings = await getSettings();
   if (!prisma) return new Response("Feed is not available.", { status: 503 });
   const products = await prisma.product.findMany({
     where: { active: true },
@@ -19,8 +17,8 @@ export async function GET() {
   });
   const items = products
     .map((product) => {
-      const priceMinor = authoritativeMinor(product.type, product.priceMinor);
-      if (priceMinor == null) return "";
+      const prices = catalogFeedAmounts(product.type, product.priceMinor);
+      if (!prices) return "";
       const image = product.images[0];
       const availability = product.trackInventory && product.stock - product.reserved <= 0 ? "out of stock" : "in stock";
       return `<item>
@@ -30,7 +28,8 @@ export async function GET() {
         <g:link>${xml(`${siteConfig.siteUrl}/product/${product.slug}`)}</g:link>
         <g:image_link>${xml(image ? new URL(image.src, siteConfig.siteUrl).toString() : "")}</g:image_link>
         <g:availability>${availability}</g:availability>
-        <g:price>${(priceMinor / 100).toFixed(2)} ${xml(settings.currency)}</g:price>
+        <g:price>${(prices.regularMinor / 100).toFixed(2)} ${xml(prices.currency)}</g:price>
+        ${prices.saleMinor == null ? "" : `<g:sale_price>${(prices.saleMinor / 100).toFixed(2)} ${xml(prices.currency)}</g:sale_price>`}
         <g:brand>Rouge Sur Mesure</g:brand>
         <g:condition>new</g:condition>
         <g:identifier_exists>no</g:identifier_exists>

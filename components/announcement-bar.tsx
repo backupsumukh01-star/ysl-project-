@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const TEXT = "✦ LIMITED INDIA RELEASE · ₹9,999 · LIMITED UNITS AVAILABLE ✦";
+const TEXT = "✦ LIMITED INDIA RELEASE · LIMITED UNITS AVAILABLE ✦";
 
 export function AnnouncementBar() {
   const barRef = useRef<HTMLDivElement>(null);

@@ -364,7 +364,6 @@ export default function CheckoutPage() {
         contents: items.map((item) => ({
           id: item.id,
           quantity: item.quantity,
-          ...(item.price != null ? { item_price: item.price } : {}),
         })),
         numItems: items.reduce((sum, item) => sum + item.quantity, 0),
         ...(order.total != null ? { value: order.total, currency: order.currency } : { currency: order.currency }),

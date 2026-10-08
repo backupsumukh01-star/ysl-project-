@@ -8,7 +8,7 @@ import { getSettings } from "@/lib/settings";
 import { CatalogProductView } from "@/components/catalog-product";
 import { RefillPurchase } from "@/components/refill-purchase";
 import { cartridgeColor, cartridgeCode, cartridgeFamily, cartridgeLabel, cartridgePhotoSrc, cartridgeShade, soldCartridgeOrder } from "@/lib/cartridge-photos";
-import { offerForCurrency } from "@/lib/pricing";
+import { offerForCurrency, publishedPrices } from "@/lib/pricing";
 import { productJsonLd } from "@/lib/seo-product";
 import "../../quiet.css";
 
@@ -87,7 +87,7 @@ export default async function ProductSlugPage({
   const shippingNote = shippingPublished
     ? settings.shippingFlatMinor === 0
       ? "Shipping is included in the price."
-      : `Shipping is ${formatMoney(settings.shippingFlatMinor! / 100, settings.currency)}.`
+      : `Shipping is ${formatMoney(settings.shippingFlatMinor! / 100, publishedPrices.currency)}.`
     : "A shipping price has not been published yet.";
   const photo = product.images.find((image) => image.src && !image.src.includes("swatches"));
   const offer = offerForCurrency(product.type, currencyForPlace((await cookies()).get("rsm-country")?.value));

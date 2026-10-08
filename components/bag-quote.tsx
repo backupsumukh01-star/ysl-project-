@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api-client";
 import { checkoutLinePayload, type CartLine } from "@/components/cart-provider";
 import { formatMoney } from "@/lib/product";
-import { indiaReferenceSubtotalMajor, indiaSubtotalMajor } from "@/lib/pricing";
 
 export type BagQuote = {
   subtotal: number;
@@ -57,17 +56,12 @@ export function useBagQuote(items: CartLine[], ready: boolean) {
 }
 
 export function bagSubtotalLabel(
-  marketCurrency: string,
+  _marketCurrency: string,
   money: (usd: number | null) => string,
-  items: { slug: string; quantity: number }[],
+  _items: { slug: string; quantity: number }[],
   usdSubtotal: number | null,
   quote: BagQuote | null,
 ) {
-  if (marketCurrency === "INR") {
-    const listed = indiaSubtotalMajor(items);
-    if (listed != null) return formatMoney(listed, "INR");
-    if (quote?.currency === "INR") return formatMoney(quote.subtotal, "INR");
-  }
   if (quote && quote.currency !== "USD") return formatMoney(quote.subtotal, quote.currency);
   return money(usdSubtotal);
 }
@@ -86,25 +80,7 @@ export function bagShelf(
 ): BagShelf {
   const empty = { mrp: null, discount: null, coupon: null, saving: null };
   if (!items.length) return empty;
-  const couponMajor = quote?.discount && quote.discount > 0 && (!quote.currency || quote.currency === marketCurrency) ? quote.discount : 0;
-
-  if (marketCurrency === "INR") {
-    const selling = indiaSubtotalMajor(items);
-    const reference = indiaReferenceSubtotalMajor(items);
-    if (selling == null || reference == null || reference <= selling) {
-      return couponMajor > 0
-        ? { mrp: null, discount: null, coupon: `−${formatMoney(couponMajor, "INR")}`, saving: formatMoney(couponMajor, "INR") }
-        : empty;
-    }
-    const off = reference - selling;
-    const saving = off + couponMajor;
-    return {
-      mrp: formatMoney(reference, "INR"),
-      discount: `−${formatMoney(off, "INR")}`,
-      coupon: couponMajor > 0 ? `−${formatMoney(couponMajor, "INR")}` : null,
-      saving: formatMoney(saving, "INR"),
-    };
-  }
+  const couponMajor = quote?.discount && quote.discount > 0 && (!quote.currency || quote.currency === "USD" || quote.currency === marketCurrency) ? quote.discount : 0;
 
   let reference = 0;
   let selling = 0;

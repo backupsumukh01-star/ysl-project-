@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getCustomer } from "@/lib/auth";
 import { canRecordAnalytics, canSendMarketingEvent, type ConsentChoice } from "@/lib/analytics/consent";
+import { authoritativeMetaEvent } from "@/lib/analytics/catalog-event";
 import { sendMetaServerEvent } from "@/lib/analytics/meta-server";
 import { recordPaymentOutcome } from "@/lib/analytics/purchase";
 
@@ -62,7 +63,8 @@ export async function acceptBrowserEvent(request: Request, body: Incoming, conse
   const payload = body.payload || {};
   const eventId = String(payload.eventId || "").slice(0, 120);
   if (!name || !eventId) return;
-  const contentIds = await canonicalContentIds(payload.contentIds || []);
+  const priced = await authoritativeMetaEvent(name, payload);
+  const contentIds = priced ? priced.contentIds : await canonicalContentIds(payload.contentIds || []);
   const userAgent = request.headers.get("user-agent") || "";
   const ip = (request.headers.get("x-forwarded-for") || "").split(",")[0]?.trim() || "";
   const cookie = request.headers.get("cookie") || "";
@@ -112,8 +114,8 @@ export async function acceptBrowserEvent(request: Request, body: Incoming, conse
           userId: userId.slice(0, 80),
           path: url.split("?")[0]?.slice(0, 200) || "",
           contentIds: contentIds.join(",").slice(0, 400),
-          valueMinor: typeof payload.value === "number" ? Math.round(payload.value * 100) : null,
-          currency: String(payload.currency || "").slice(0, 8),
+          valueMinor: priced ? priced.valueMinor : typeof payload.value === "number" ? Math.round(payload.value * 100) : null,
+          currency: priced ? priced.currency : String(payload.currency || "").slice(0, 8),
           source: source.slice(0, 120),
           medium: medium.slice(0, 120),
           campaign: campaign.slice(0, 120),
@@ -124,20 +126,22 @@ export async function acceptBrowserEvent(request: Request, body: Incoming, conse
     }
   }
   if (!SERVER_EVENTS.has(name) || !canSendMarketingEvent(consent)) return;
-  const customData: Record<string, unknown> = {};
-  if (contentIds.length) customData.content_ids = contentIds;
-  if (payload.contentType) customData.content_type = payload.contentType;
-  if (payload.contentName) customData.content_name = String(payload.contentName).slice(0, 160);
-  if (payload.contents?.length) {
-    customData.contents = payload.contents.slice(0, 20).map((item) => ({
-      ...item,
-      id: contentIds[payload.contentIds?.indexOf(item.id) ?? -1] || item.id,
-    }));
+  const customData: Record<string, unknown> = priced ? { ...priced.customData } : {};
+  if (!priced) {
+    if (contentIds.length) customData.content_ids = contentIds;
+    if (payload.contentType) customData.content_type = payload.contentType;
+    if (payload.contentName) customData.content_name = String(payload.contentName).slice(0, 160);
+    if (payload.contents?.length) {
+      customData.contents = payload.contents.slice(0, 20).map((item) => ({
+        ...item,
+        id: contentIds[payload.contentIds?.indexOf(item.id) ?? -1] || item.id,
+      }));
+    }
+    if (typeof payload.value === "number") customData.value = payload.value;
+    if (payload.currency) customData.currency = payload.currency;
+    if (typeof payload.quantity === "number") customData.quantity = payload.quantity;
+    if (typeof payload.numItems === "number") customData.num_items = payload.numItems;
   }
-  if (typeof payload.value === "number") customData.value = payload.value;
-  if (payload.currency) customData.currency = payload.currency;
-  if (typeof payload.quantity === "number") customData.quantity = payload.quantity;
-  if (typeof payload.numItems === "number") customData.num_items = payload.numItems;
   if (payload.searchString) customData.search_string = String(payload.searchString).slice(0, 100);
   await sendMetaServerEvent({
     eventName: name,

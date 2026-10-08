@@ -10,8 +10,8 @@ import { sendEmail, sendOwnerEmail } from "@/lib/email/service";
 import { createRazorpayOrder, createRazorpayRefund } from "@/lib/payments/razorpay";
 import { purchasePayload, recordPaymentOutcome, sendVerifiedPurchase } from "@/lib/analytics/purchase";
 import { reserveInventory, releaseInventory } from "@/lib/inventory";
-import { authoritativeMinor, indiaMinorForType } from "@/lib/pricing";
-import { convertUsdMinor, fromMinor, marketFor, type Market } from "@/lib/fx";
+import { authoritativeMinor, publishedPrices } from "@/lib/pricing";
+import { fromMinor } from "@/lib/fx";
 import { deviceFamilySelection } from "@/lib/trio-images";
 
 export type LineInput = { productId: string; variantId?: string; quantity: number; selection?: string };
@@ -178,21 +178,16 @@ async function priceCart(input: { lines: LineInput[]; email?: string; couponCode
   };
 }
 
-function presentInMarket<T extends { unitMinor: number; quantity: number; type?: string }>(
-  market: Market,
+function presentInStoreCurrency<T extends { unitMinor: number; quantity: number }>(
   lines: T[],
   amounts: { discountMinor: number; shippingMinor: number | null; taxMinor: number },
 ) {
-  const nextLines = lines.map((line) => {
-    const listed = market.currency === "INR" ? indiaMinorForType(line.type || "") : null;
-    return { ...line, unitMinor: listed ?? convertUsdMinor(line.unitMinor, market) };
-  });
-  const subtotalMinor = nextLines.reduce((sum, line) => sum + line.unitMinor * line.quantity, 0);
-  const discountMinor = Math.min(subtotalMinor, convertUsdMinor(amounts.discountMinor, market));
-  const shippingMinor = amounts.shippingMinor == null ? null : convertUsdMinor(amounts.shippingMinor, market);
-  const taxMinor = convertUsdMinor(amounts.taxMinor, market);
+  const subtotalMinor = lines.reduce((sum, line) => sum + line.unitMinor * line.quantity, 0);
+  const discountMinor = Math.min(subtotalMinor, amounts.discountMinor);
+  const shippingMinor = amounts.shippingMinor;
+  const taxMinor = amounts.taxMinor;
   const totalMinor = shippingMinor == null ? null : Math.max(0, subtotalMinor - discountMinor) + shippingMinor + taxMinor;
-  return { currency: market.currency, lines: nextLines, subtotalMinor, discountMinor, shippingMinor, taxMinor, totalMinor };
+  return { currency: publishedPrices.currency, lines, subtotalMinor, discountMinor, shippingMinor, taxMinor, totalMinor };
 }
 
 export async function previewCheckout(input: { lines: LineInput[]; email?: string; couponCode?: string; country?: string }): Promise<Ok<{ preview: CheckoutPreview }> | Fail> {
@@ -200,8 +195,7 @@ export async function previewCheckout(input: { lines: LineInput[]; email?: strin
   if (!priced.ok) return priced;
   const shipping = resolveShipping(priced.settings, priced.subtotalMinor);
   const shippingMinor = shipping.ok ? shipping.shippingMinor : null;
-  const market = await marketFor(input.country || priced.settings.currency);
-  const presented = presentInMarket(market, priced.lines, {
+  const presented = presentInStoreCurrency(priced.lines, {
     discountMinor: priced.discountMinor,
     shippingMinor,
     taxMinor: priced.taxMinor,
@@ -239,8 +233,7 @@ export async function quoteCart(input: { lines: LineInput[]; email?: string; cou
   if (usdTotal < 100) {
     return { ok: false, code: "AMOUNT_TOO_SMALL", message: "The payable amount is below the payment minimum." };
   }
-  const market = await marketFor(input.country || priced.settings.currency);
-  const presented = presentInMarket(market, priced.lines, {
+  const presented = presentInStoreCurrency(priced.lines, {
     discountMinor: priced.discountMinor,
     shippingMinor: shipping.shippingMinor,
     taxMinor: priced.taxMinor,

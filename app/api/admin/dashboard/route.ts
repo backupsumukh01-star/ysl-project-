@@ -69,7 +69,7 @@ export async function GET() {
   const metaEvents = await prisma.metaEvent.findMany({ orderBy: { createdAt: "desc" }, take: 8 });
   const recentOrders = await prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 6, include: { items: true } });
   const recentReviews = await prisma.review.findMany({ orderBy: { createdAt: "desc" }, take: 6 });
-  const currency = recentOrders[0]?.currency || "INR";
+  const currency = recentOrders[0]?.currency || "USD";
   return ok({
     orders,
     paid,

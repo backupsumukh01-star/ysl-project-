@@ -61,7 +61,7 @@ async function main() {
 
   try {
     const catalog = await request("/api/meta/catalog");
-    assert("catalog feed includes the real product id", catalog.status === 200 && catalog.text.includes(device.id) && catalog.text.includes("INR"));
+    assert("catalog feed includes the real product id in USD", catalog.status === 200 && catalog.text.includes(device.id) && catalog.text.includes("USD") && !catalog.text.includes("INR"));
     assert("catalog feed does not claim a live connection", catalog.text.includes("not connected"));
 
     const anonymous = `anon_${stamp}`;

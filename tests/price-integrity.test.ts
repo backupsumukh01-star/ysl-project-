@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PrismaClient } from "@prisma/client";
-import { authoritativeMinor, catalogMajorForSlug, indiaMinorForType, publishedPrices } from "@/lib/pricing";
+import { authoritativeMinor, catalogFeedAmounts, catalogMajorForSlug, publishedCompareMajor, publishedDiscountPercent, publishedPrices } from "@/lib/pricing";
 import { lineSchema } from "@/lib/validators";
 import { createCheckoutOrder, previewCheckout } from "@/lib/commerce";
 
@@ -26,6 +26,32 @@ test("catalog file is the only published price table", () => {
   assert.equal(publishedPrices.bundle, 101.5);
   assert.equal(new Set(expected.map((row) => catalogMajorForSlug(row[0]))).size, 3);
   for (const [slug, , , price] of expected) assert.equal(catalogMajorForSlug(slug), price);
+});
+
+test("reference price stays separate from the 71 percent selling price", () => {
+  assert.equal(Math.round(350 * 29) / 100, 101.5);
+  assert.equal(publishedPrices.deviceCompareAt, 350);
+  assert.equal(publishedPrices.device, 101.5);
+  assert.equal(publishedDiscountPercent("DEVICE"), 71);
+  assert.equal(authoritativeMinor("DEVICE", 35000), 10150);
+  assert.deepEqual(catalogFeedAmounts("DEVICE"), { currency: "USD", regularMinor: 35000, saleMinor: 10150 });
+
+  assert.equal(Math.round(89 * 29) / 100, 25.81);
+  assert.equal(publishedPrices.cartridgeTrioCompareAt, 89);
+  assert.equal(publishedPrices.cartridgeTrio, 25.81);
+  assert.equal(publishedDiscountPercent("CARTRIDGE_TRIO"), 71);
+  assert.deepEqual(catalogFeedAmounts("CARTRIDGE_TRIO"), { currency: "USD", regularMinor: 8900, saleMinor: 2581 });
+
+  assert.equal(publishedPrices.bundleCompareAt, 350);
+  assert.equal(publishedPrices.bundle, 101.5);
+  assert.equal(publishedDiscountPercent("BUNDLE"), 71);
+  assert.deepEqual(catalogFeedAmounts("BUNDLE"), { currency: "USD", regularMinor: 35000, saleMinor: 10150 });
+
+  assert.equal(publishedPrices.refill, 103.72);
+  assert.equal(publishedCompareMajor("REFILL"), null);
+  assert.equal(publishedDiscountPercent("REFILL"), null);
+  assert.deepEqual(catalogFeedAmounts("REFILL"), { currency: "USD", regularMinor: 10372, saleMinor: null });
+  assert.notEqual(publishedPrices.refill, 8.99);
 });
 
 test("a stored or browser amount cannot replace a catalog price", () => {
@@ -108,18 +134,7 @@ test("server quote ignores a drifted database price and a tampered client amount
   }
 });
 
-test("India checkout charges the published rupee prices", async () => {
-  assert.equal(publishedPrices.inr.device, 9999);
-  assert.equal(publishedPrices.inr.cartridgeTrio, 1999);
-  assert.equal(publishedPrices.inr.refill, 799);
-  assert.equal(Math.round(((35000 - 9999) / 35000) * 100), 71);
-  assert.equal(Math.round(((8999 - 1999) / 8999) * 100), 78);
-  assert.equal(Math.round(((2999 - 799) / 2999) * 100), 73);
-  assert.equal(9999 + 1999 + 799, 12797);
-  assert.equal(indiaMinorForType("DEVICE"), 999900);
-  assert.equal(indiaMinorForType("CARTRIDGE_TRIO"), 199900);
-  assert.equal(indiaMinorForType("REFILL"), 79900);
-
+test("an India address still charges the USD catalog, not a rupee price", async () => {
   const prisma = new PrismaClient();
   const device = await prisma.product.findUnique({ where: { slug: "rouge-sur-mesure" } });
   const trio = await prisma.product.findUnique({ where: { slug: "cartridge-trio-pink" } });
@@ -136,13 +151,12 @@ test("India checkout charges the published rupee prices", async () => {
     });
     assert.equal(quoted.ok, true);
     if (!quoted.ok) return;
-    assert.equal(quoted.preview.currency, "INR");
+    assert.equal(quoted.preview.currency, "USD");
     const byName = new Map(quoted.preview.lines.map((line) => [line.name, line]));
-    assert.equal(byName.get("Rouge Sur Mesure")?.unitMinor, 999900);
-    assert.equal(byName.get("Cartridge Trio — Pink")?.unitMinor, 199900);
-    assert.equal(byName.get("Cartridge refill")?.unitMinor, 79900);
-    assert.equal(quoted.preview.subtotalMinor, 1279700);
-    assert.equal(quoted.preview.totalMinor, 1279700);
+    assert.equal(byName.get("Rouge Sur Mesure")?.unitMinor, 10150);
+    assert.equal(byName.get("Cartridge Trio — Pink")?.unitMinor, 2581);
+    assert.equal(byName.get("Cartridge refill")?.unitMinor, 10372);
+    assert.equal(quoted.preview.subtotalMinor, 10150 + 2581 + 10372);
   } finally {
     await prisma.$disconnect();
   }

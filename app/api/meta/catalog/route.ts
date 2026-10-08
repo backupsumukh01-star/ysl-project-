@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { siteConfig } from "@/lib/config";
-import { authoritativeMinor, indiaCompareForType, indiaMajorForType } from "@/lib/pricing";
+import { catalogFeedAmounts } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +17,8 @@ export async function GET() {
   });
   const items = products
     .map((product) => {
-      const rupees = indiaMajorForType(product.type);
-      const priceMinor = authoritativeMinor(product.type, product.priceMinor);
-      if (rupees == null || priceMinor == null) return "";
-      const compare = indiaCompareForType(product.type);
+      const prices = catalogFeedAmounts(product.type, product.priceMinor);
+      if (!prices) return "";
       const image = product.images[0];
       const extras = product.images.slice(1, 6);
       const availability = product.trackInventory && product.stock <= 0 ? "out of stock" : "in stock";
@@ -32,8 +30,8 @@ export async function GET() {
         <g:description>${xml(product.description || product.shortDescription)}</g:description>
         <g:availability>${availability}</g:availability>
         <g:condition>new</g:condition>
-        <g:price>${(compare != null && compare > rupees ? compare : rupees).toFixed(2)} INR</g:price>
-        ${compare != null && compare > rupees ? `<g:sale_price>${rupees.toFixed(2)} INR</g:sale_price>` : ""}
+        <g:price>${(prices.regularMinor / 100).toFixed(2)} ${prices.currency}</g:price>
+        ${prices.saleMinor == null ? "" : `<g:sale_price>${(prices.saleMinor / 100).toFixed(2)} ${prices.currency}</g:sale_price>`}
         <g:link>${xml(link)}</g:link>
         <g:image_link>${xml(imageLink)}</g:image_link>
         ${extras.map((extra) => `<g:additional_image_link>${xml(new URL(extra.src, siteConfig.siteUrl).toString())}</g:additional_image_link>`).join("")}

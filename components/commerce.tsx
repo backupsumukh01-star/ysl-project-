@@ -3,9 +3,8 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, type CartInput } from "@/components/cart-provider";
-import { formatMoney, product } from "@/lib/product";
-import { useMarket, useMoney } from "@/components/market";
-import { indiaCompareForSellUsd, indiaListedMajor } from "@/lib/pricing";
+import { product } from "@/lib/product";
+import { useMoney } from "@/components/market";
 import { track } from "@/lib/analytics";
 
 export function discountOff(price: number | null | undefined, compareAt: number | null | undefined) {
@@ -22,19 +21,16 @@ export function Price({
   compareAt?: number | null;
   compare?: boolean;
 }) {
-  const market = useMarket();
   const money = useMoney();
   const price = amount === undefined ? product.price : amount;
   const explicit = compareAt === undefined ? product.compareAtPrice : compareAt;
   const comparePrice = !compare || explicit == null || price == null || !(explicit > price) ? null : explicit;
-  const inrNow = market.currency === "INR" ? indiaListedMajor(price) : null;
-  const inrWas = !compare || inrNow == null ? null : comparePrice != null ? indiaListedMajor(comparePrice) : indiaCompareForSellUsd(price);
-  const off = inrNow != null ? discountOff(inrNow, inrWas) : discountOff(price, comparePrice);
-  const was = inrWas != null ? formatMoney(inrWas, "INR") : comparePrice != null ? money(comparePrice) : null;
+  const off = discountOff(price, comparePrice);
+  const was = comparePrice != null ? money(comparePrice) : null;
   return (
     <p className="price">
       {off != null && was != null ? <s>{was}</s> : null}
-      <span className="price__now">{inrNow != null ? formatMoney(inrNow, "INR") : money(price)}</span>
+      <span className="price__now">{money(price)}</span>
       {off != null && was != null ? <span className="price__off">{off}% OFF</span> : null}
     </p>
   );

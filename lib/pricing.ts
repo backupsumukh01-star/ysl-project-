@@ -29,6 +29,26 @@ export function authoritativeMinor(type: string, stored?: number | null): number
   return stored ?? null;
 }
 
+/** Whole percent off the reference price. Null when this product has no reference price. */
+export function publishedDiscountPercent(type: string): number | null {
+  const selling = publishedMajor(type);
+  const compare = publishedCompareMajor(type);
+  if (selling == null || compare == null || !(compare > selling)) return null;
+  return Math.round(((compare - selling) / compare) * 100);
+}
+
+/** Feed regular price is the reference price. The sale price is what the customer pays. */
+export function catalogFeedAmounts(type: string, stored?: number | null): { currency: string; regularMinor: number; saleMinor: number | null } | null {
+  const selling = authoritativeMinor(type, stored);
+  if (selling == null) return null;
+  const compare = publishedCompareMajor(type);
+  const compareMinor = compare == null ? null : Math.round(compare * 100);
+  if (compareMinor != null && compareMinor > selling) {
+    return { currency: publishedPrices.currency, regularMinor: compareMinor, saleMinor: selling };
+  }
+  return { currency: publishedPrices.currency, regularMinor: selling, saleMinor: null };
+}
+
 export function catalogMajorForSlug(slug: string): number | null {
   if (slug === "rouge-sur-mesure") return publishedPrices.device;
   if (slug === "rouge-sur-mesure-bundle") return publishedPrices.bundle;
@@ -120,35 +140,22 @@ export function indiaReferenceSubtotalMajor(items: { slug: string; quantity: num
   return sum;
 }
 
-export function offerForCurrency(type: string, currency: string): { price: number | null; currency: string } {
-  if (currency === "INR") return { price: indiaMajorForType(type), currency: "INR" };
+/** The store charges and advertises the USD catalog. Country does not select a rupee price. */
+export function offerForCurrency(type: string, _currency?: string): { price: number | null; currency: string } {
   return { price: publishedMajor(type), currency: publishedPrices.currency };
 }
 
-/** Meta events use the rupee amount a visitor sees, not the stored dollar catalog amount. */
-export function metaLineAmount(usdMajor: number | null | undefined, marketCurrency: string): { value?: number; currency: string } {
-  if (marketCurrency === "INR") {
-    const listed = usdMajor == null ? null : indiaListedMajor(usdMajor);
-    return listed == null ? { currency: "INR" } : { value: listed, currency: "INR" };
-  }
+/** Pixel helpers may attach a catalog dollar amount. The server replaces it before Conversions API. */
+export function metaLineAmount(usdMajor: number | null | undefined, _marketCurrency?: string): { value?: number; currency: string } {
   return usdMajor == null ? { currency: publishedPrices.currency } : { value: usdMajor, currency: publishedPrices.currency };
 }
 
-export function metaBasketAmount(lines: { price?: number | null; quantity: number }[], marketCurrency: string): { value?: number; currency: string } {
-  if (marketCurrency !== "INR") {
-    if (lines.some((line) => line.price == null)) return { currency: publishedPrices.currency };
-    return {
-      currency: publishedPrices.currency,
-      value: lines.reduce((sum, line) => sum + (line.price || 0) * line.quantity, 0),
-    };
-  }
-  let value = 0;
-  for (const line of lines) {
-    const listed = line.price == null ? null : indiaListedMajor(line.price);
-    if (listed == null) return { currency: "INR" };
-    value += listed * line.quantity;
-  }
-  return { value, currency: "INR" };
+export function metaBasketAmount(lines: { price?: number | null; quantity: number }[], _marketCurrency?: string): { value?: number; currency: string } {
+  if (lines.some((line) => line.price == null)) return { currency: publishedPrices.currency };
+  return {
+    currency: publishedPrices.currency,
+    value: lines.reduce((sum, line) => sum + (line.price || 0) * line.quantity, 0),
+  };
 }
 
 export function indiaCompareForSellUsd(usd: number | null | undefined): number | null {

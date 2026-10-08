@@ -249,7 +249,7 @@ async function main() {
     shippingMessage: "Shipping is included in the product price. There is no separate shipping charge.",
     returnsMessage: "An order cannot be cancelled after it is placed. Replacement and refund rules are on the Terms page.",
     supportEmail: (process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "").includes("@example.") ? "" : process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "",
-    currency: process.env.NEXT_PUBLIC_CURRENCY || "INR",
+    currency: process.env.NEXT_PUBLIC_CURRENCY || "USD",
     reviewsPublicWithoutModeration: "false",
   };
   for (const [key, value] of Object.entries(settings)) {

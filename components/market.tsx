@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { api } from "@/lib/api-client";
 import { formatMoney } from "@/lib/product";
-import { indiaListedMajor } from "@/lib/pricing";
 
 export const COUNTRY_COOKIE = "rsm-country";
 export const COUNTRY_EVENT = "rsm-country";
@@ -55,16 +54,9 @@ export function useMarket() {
 }
 
 export function useMoney() {
-  const market = useContext(MarketContext);
   return (usdMajor: number | null | undefined) => {
     if (usdMajor == null) return "Price to be confirmed";
-    if (market.currency === "INR") {
-      const listed = indiaListedMajor(usdMajor);
-      if (listed != null) return formatMoney(listed, "INR");
-    }
-    if (market.currency === "USD" || market.rate <= 0) return formatMoney(usdMajor, "USD");
-    const major = (Math.round(usdMajor * market.rate * 10 ** market.exponent) / 10 ** market.exponent);
-    return formatMoney(major, market.currency);
+    return formatMoney(usdMajor, "USD");
   };
 }
 
