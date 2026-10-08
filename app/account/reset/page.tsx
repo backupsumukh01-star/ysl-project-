@@ -12,9 +12,15 @@ function ResetForm() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const password = String(new FormData(event.currentTarget).get("password") || "");
-    setPending(true);
+    const form = new FormData(event.currentTarget);
+    const password = String(form.get("password") || "");
+    const confirm = String(form.get("confirm") || "");
     setMessage("");
+    if (password !== confirm) {
+      setMessage("The two passwords do not match.");
+      return;
+    }
+    setPending(true);
     try {
       await api("/api/auth/password-reset/confirm", { method: "POST", body: JSON.stringify({ token, password }) });
       router.push("/account");
@@ -35,10 +41,14 @@ function ResetForm() {
             <span>New password</span>
             <input name="password" type="password" autoComplete="new-password" minLength={8} required />
           </label>
+          <label className="field">
+            <span>Reconfirm password</span>
+            <input name="confirm" type="password" autoComplete="new-password" minLength={8} required />
+          </label>
           <button className="btn btn-gold" type="submit" disabled={pending}>
             {pending ? "Saving" : "Save password"}
           </button>
-          {message ? <p className="notice">{message}</p> : null}
+          {message ? <p className="notice" role="status">{message}</p> : null}
         </form>
       ) : (
         <p className="lede">Open the reset link from your email. It expires after one hour.</p>
