@@ -4,7 +4,7 @@ import { canRecordAnalytics, canSendMarketingEvent, type ConsentChoice } from "@
 import { sendMetaServerEvent } from "@/lib/analytics/meta-server";
 import { recordPaymentOutcome } from "@/lib/analytics/purchase";
 
-const SERVER_OWNED = new Set(["Purchase", "AddPaymentInfo", "CompleteRegistration", "Contact"]);
+const SERVER_OWNED = new Set(["Purchase", "AddPaymentInfo", "PaymentStarted", "CompleteRegistration", "Contact"]);
 
 const SERVER_EVENTS = new Set([
   "PageView",

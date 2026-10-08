@@ -15,3 +15,7 @@ export function contactEventId(ticketId: string) {
 export function paymentInfoEventId(orderId: string) {
   return `add_payment_info_${orderId}`;
 }
+
+export function paymentStartedEventId(orderId: string) {
+  return `payment_started_${orderId}`;
+}

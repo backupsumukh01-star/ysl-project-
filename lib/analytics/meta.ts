@@ -1,6 +1,6 @@
 "use client";
 
-import { paymentInfoEventId, purchaseEventId, registrationEventId, contactEventId } from "@/lib/analytics/ids";
+import { paymentInfoEventId, paymentStartedEventId, purchaseEventId, registrationEventId, contactEventId } from "@/lib/analytics/ids";
 import { CONSENT_COOKIE, parseConsent } from "@/lib/analytics/consent";
 import { readAttribution } from "@/lib/analytics/browser";
 
@@ -202,6 +202,10 @@ export function trackInitiateCheckout(payload: CommercePayload) {
 
 export function trackAddPaymentInfo(orderId: string, payload: CommercePayload) {
   emit("AddPaymentInfo", { ...payload, eventId: paymentInfoEventId(orderId), orderId, contentType: "product" });
+}
+
+export function trackPaymentStarted(orderId: string, payload: CommercePayload) {
+  emit("PaymentStarted", { ...payload, eventId: paymentStartedEventId(orderId), orderId, contentType: "product" }, { custom: true });
 }
 
 export function trackPurchase(payload: CommercePayload & { eventId: string }) {

@@ -193,8 +193,13 @@ async function main() {
         },
       },
     });
-    assert("payment info starts only after a Razorpay order id exists", replay.status === 200 && replay.json?.data?.razorpayOrderId === razorpayOrderId);
+    assert("creating the order does not record payment before the Razorpay window opens", replay.status === 200 && replay.json?.data?.razorpayOrderId === razorpayOrderId && (await prisma.metaEvent.count({ where: { eventId: `add_payment_info_${order.id}` } })) === 0);
+    const started = await request("/api/payments/started", { method: "POST", cookie: session, body: { orderId: order.id } });
+    assert("payment started is accepted after the Razorpay order exists", started.status === 200);
+    await request("/api/payments/started", { method: "POST", cookie: session, body: { orderId: order.id } });
     const paymentInfo = await prisma.metaEvent.findUnique({ where: { eventId: `add_payment_info_${order.id}` } });
+    const paymentStarted = await prisma.metaEvent.findUnique({ where: { eventId: `payment_started_${order.id}` } });
+    assert("payment started uses one stable id", paymentStarted?.eventName === "PaymentStarted" && (await prisma.metaEvent.count({ where: { eventId: `payment_started_${order.id}` } })) === 1);
     assert("payment info event id is stable and has no card data", paymentInfo?.eventName === "AddPaymentInfo" && !JSON.stringify(paymentInfo).includes("4242") && !paymentInfo.errorMessage.toLowerCase().includes("cvv"));
 
     const paid = await request("/api/payments/verify", {

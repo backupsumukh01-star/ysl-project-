@@ -12,7 +12,7 @@ import { bagShelf } from "@/components/bag-quote";
 import { siteConfig } from "@/lib/config";
 import { formatMoney, shippingChargeLabel } from "@/lib/product";
 import { metaBasketAmount, metaLineAmount } from "@/lib/pricing";
-import { trackAddPaymentInfo, trackInitiateCheckout, trackInternal } from "@/lib/analytics/meta";
+import { trackAddPaymentInfo, trackInitiateCheckout, trackInternal, trackPaymentStarted } from "@/lib/analytics/meta";
 import { readAttribution } from "@/lib/analytics/browser";
 import { ApiError, api } from "@/lib/api-client";
 import "./checkout.css";
@@ -314,16 +314,6 @@ export default function CheckoutPage() {
         setMessage("Payment is temporarily unavailable. No charge was made.");
         return;
       }
-      trackAddPaymentInfo(order.orderId, {
-        contentIds: items.map((item) => item.id),
-        contents: items.map((item) => ({
-          id: item.id,
-          quantity: item.quantity,
-          ...(item.price != null ? { item_price: item.price } : {}),
-        })),
-        numItems: items.reduce((sum, item) => sum + item.quantity, 0),
-        ...(order.total != null ? { value: order.total, currency: order.currency } : { currency: order.currency }),
-      });
       const Razorpay = await loadRazorpay();
       const checkout = new Razorpay({
         key: order.keyId,
@@ -369,6 +359,19 @@ export default function CheckoutPage() {
         },
       });
       checkout.open();
+      const paymentPayload = {
+        contentIds: items.map((item) => item.id),
+        contents: items.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          ...(item.price != null ? { item_price: item.price } : {}),
+        })),
+        numItems: items.reduce((sum, item) => sum + item.quantity, 0),
+        ...(order.total != null ? { value: order.total, currency: order.currency } : { currency: order.currency }),
+      };
+      trackAddPaymentInfo(order.orderId, paymentPayload);
+      trackPaymentStarted(order.orderId, paymentPayload);
+      void api("/api/payments/started", { method: "POST", body: JSON.stringify({ orderId: order.orderId }) }).catch(() => undefined);
     } catch (error) {
       pendingRef.current = false;
       setPending(false);

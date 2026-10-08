@@ -1,4 +1,4 @@
-import { contactEventId, paymentInfoEventId, purchaseEventId, registrationEventId } from "@/lib/analytics/ids";
+import { contactEventId, paymentInfoEventId, paymentStartedEventId, purchaseEventId, registrationEventId } from "@/lib/analytics/ids";
 import { canRecordAnalytics, canSendMarketingEvent, consentFromRequest, type ConsentChoice } from "@/lib/analytics/consent";
 import { sendMetaServerEvent } from "@/lib/analytics/meta-server";
 import { db } from "@/lib/db";
@@ -169,6 +169,70 @@ function orderContext(order: { attributionJson: string; addressJson: string }) {
     /* Address is optional for matching. */
   }
   return { source, medium, campaign, fbp, fbc, city, region, postcode, country };
+}
+
+export async function sendPaymentStarted(orderId: string, request?: Request) {
+  await sendPaymentInfo(orderId, request);
+  const prisma = db();
+  if (!prisma) return;
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+  if (!order?.razorpayOrderId || order.paymentStatus === "PAID") return;
+  const consent: ConsentChoice = { necessary: true, analytics: order.analyticsConsent, advertising: order.marketingConsent };
+  const context = orderContext(order);
+  const signals = requestSignals(request);
+  const contents = order.items.map((item) => ({ id: item.productId, quantity: item.quantity, item_price: item.unitMinor / 100 }));
+  try {
+    if (canRecordAnalytics(consent)) {
+      const eventId = paymentStartedEventId(order.id);
+      const existing = await prisma.analyticsEvent.findFirst({ where: { eventId } });
+      if (!existing) {
+        await prisma.analyticsEvent.create({
+          data: {
+            name: "PaymentStarted",
+            eventId,
+            userId: order.userId || "",
+            contentIds: order.items.map((item) => item.productId).join(",").slice(0, 400),
+            valueMinor: order.totalMinor,
+            currency: order.currency,
+            source: context.source.slice(0, 120),
+            medium: context.medium.slice(0, 120),
+            campaign: context.campaign.slice(0, 120),
+          },
+        });
+      }
+    }
+    await sendMetaServerEvent({
+      eventName: "PaymentStarted",
+      eventId: paymentStartedEventId(order.id),
+      orderId: order.id,
+      userId: order.userId,
+      consent,
+      sourceUrl: process.env.NEXT_PUBLIC_SITE_URL || "",
+      customData: {
+        currency: order.currency,
+        value: order.totalMinor / 100,
+        content_ids: order.items.map((item) => item.productId),
+        contents,
+        content_type: "product",
+        num_items: order.items.reduce((sum, item) => sum + item.quantity, 0),
+        order_id: order.number,
+      },
+      userData: {
+        email: order.email,
+        phone: order.phone,
+        externalId: order.userId || undefined,
+        fbp: context.fbp,
+        fbc: context.fbc,
+        city: context.city,
+        region: context.region,
+        postcode: context.postcode,
+        country: context.country,
+        ...signals,
+      },
+    });
+  } catch {
+    logError("meta_event", { event: "PaymentStarted", eventId: paymentStartedEventId(order.id), status: "FAILED" });
+  }
 }
 
 export async function sendPaymentInfo(orderId: string, request?: Request) {

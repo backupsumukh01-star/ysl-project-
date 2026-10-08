@@ -5,7 +5,6 @@ import { createCheckoutOrder } from "@/lib/commerce";
 import { razorpayPublic } from "@/lib/payments/razorpay";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { consentFromRequest } from "@/lib/analytics/consent";
-import { sendPaymentInfo } from "@/lib/analytics/purchase";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +32,6 @@ export async function POST(request: Request) {
     attribution: parsed.data.attribution,
   });
   if (!result.ok) return fail(result.code, result.message, result.code === "PAYMENT_NOT_CONFIGURED" ? 503 : 400);
-  await sendPaymentInfo(result.orderId, request);
   const payment = razorpayPublic();
   return ok({
     orderId: result.orderId,
