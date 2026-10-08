@@ -11,10 +11,19 @@ export default function ContactPage() {
   const [noteError, setNoteError] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [whatsapp, setWhatsapp] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    api<{ whatsapp: string }>("/api/storefront").then((result) => setWhatsapp(result.whatsapp || "")).catch(() => setWhatsapp(""));
+    api<{ whatsapp: string; supportEmail: string }>("/api/storefront")
+      .then((result) => {
+        setWhatsapp(result.whatsapp || "");
+        setSupportEmail(result.supportEmail || "");
+      })
+      .catch(() => {
+        setWhatsapp("");
+        setSupportEmail("");
+      });
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -66,6 +75,7 @@ export default function ContactPage() {
       <PageBack href="/shop">All products</PageBack>
       <p className="kicker">Contact</p>
       <h1>Write to us.</h1>
+      {supportEmail ? <p className="lede">Email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>, or send the form below.</p> : null}
       {whatsapp ? <p><a href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}>WhatsApp support</a></p> : null}
       <form onSubmit={onSubmit} noValidate style={{ maxWidth: 560, marginTop: 24 }}>
         <label className="field">

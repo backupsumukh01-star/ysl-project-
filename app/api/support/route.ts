@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     dedupeKey: `support:${ticket.id}`,
     ...supportCustomerEmail({ number: ticket.number, subject: ticket.subject, message: ticket.message.slice(0, 400) }),
   });
-  const supportInbox = ownerRecipient() || publishedEmail(settings.supportEmail);
+  const supportInbox = publishedEmail(settings.supportEmail) || ownerRecipient();
   if (supportInbox) {
     await sendEmail({
       to: supportInbox,

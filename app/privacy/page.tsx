@@ -28,8 +28,9 @@ export default async function PrivacyPage() {
       <p>
         It applies to visitors and customers of this website, including customers in India. It describes what we collect,
         why we collect it, who receives it, and how you can ask to see it, correct it, or have an account deleted. It
-        does not appoint a separate grievance officer, because a dedicated privacy email has not been published. The
-        contact page is the way to reach us.
+        does not name a separate grievance officer. Privacy questions go to{" "}
+        {settings.supportEmail ? <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a> : "the contact page"}
+        {settings.supportEmail ? <>, or through the <Link href="/contact">contact page</Link></> : null}.
       </p>
 
       <h2>Information you give us</h2>
@@ -115,8 +116,18 @@ export default async function PrivacyPage() {
         contact page shows a WhatsApp link, that conversation uses the number published there.
       </p>
       <p>
-        A separate privacy email address has not been published. Use the <Link href="/contact">contact page</Link> and
-        include the email on your account or order so we can find the right record.
+        {settings.supportEmail ? (
+          <>
+            Write to <a href={`mailto:${settings.supportEmail}`}>{settings.supportEmail}</a>, or use the{" "}
+            <Link href="/contact">contact page</Link>, and include the email on your account or order so we can find the
+            right record.
+          </>
+        ) : (
+          <>
+            Use the <Link href="/contact">contact page</Link> and include the email on your account or order so we can
+            find the right record.
+          </>
+        )}
       </p>
 
       <h2>Cookies and similar storage</h2>

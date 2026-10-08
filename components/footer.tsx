@@ -62,6 +62,7 @@ export async function Footer() {
         <div className="footer-base">
           <div className="footer-note">
             <p>Sold by {settings.sellerName}. {settings.shippingMessage} {linkTerms(settings.returnsMessage)}</p>
+            {siteConfig.supportEmail ? <p><a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a></p> : null}
             <p>Payment is completed at checkout in Razorpay&apos;s secure window. Adding this to your bag does not charge you.</p>
           </div>
           {socials.length ? (

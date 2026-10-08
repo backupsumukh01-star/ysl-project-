@@ -46,7 +46,7 @@ async function deliver(message: EmailMessage): Promise<SendResult> {
           to: [message.to],
           subject: message.subject,
           html: message.html,
-          ...(replyAddress(message.replyTo) ? { reply_to: replyAddress(message.replyTo) } : {}),
+          ...(replyTarget(message.replyTo) ? { reply_to: replyTarget(message.replyTo) } : {}),
         }),
       });
       const payload = (await response.json().catch(() => ({}))) as { id?: string; message?: string };
@@ -65,7 +65,7 @@ async function deliver(message: EmailMessage): Promise<SendResult> {
     const info = await transport.sendMail({
       from: fromAddress(),
       to: message.to,
-      replyTo: replyAddress(message.replyTo) || undefined,
+      replyTo: replyTarget(message.replyTo),
       subject: message.subject,
       html: message.html,
       text: message.text,
@@ -80,6 +80,10 @@ async function deliver(message: EmailMessage): Promise<SendResult> {
 function replyAddress(value: string | undefined) {
   const email = publishedEmail(value);
   return email || undefined;
+}
+
+function replyTarget(value: string | undefined) {
+  return replyAddress(value) || publishedEmail(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || undefined;
 }
 
 function fromAddress() {
