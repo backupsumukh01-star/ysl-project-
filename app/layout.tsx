@@ -64,6 +64,11 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   icons: { icon: "/favicon.svg" },
+  verification: {
+    other: {
+      "facebook-domain-verification": "d71j03f28pmu43vdcggxxwlymuoe4f",
+    },
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
