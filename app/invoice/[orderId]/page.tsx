@@ -53,6 +53,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ orderI
           <div>
             <p className="invoice-brand">Rouge Sur Mesure</p>
             <p className="invoice-kicker">Sold by {siteConfig.sellerName}</p>
+            {siteConfig.supportAddress ? <p className="muted">{siteConfig.supportAddress}</p> : null}
+            {siteConfig.supportPhone ? <p className="muted">{siteConfig.supportPhone}{siteConfig.supportHours ? ` · ${siteConfig.supportHours}` : ""}</p> : null}
           </div>
           <div>
             <p className="invoice-kicker">Invoice</p>

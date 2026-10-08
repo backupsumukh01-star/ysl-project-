@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageBack } from "@/components/page-back";
+import { siteConfig, supportPhoneHref } from "@/lib/config";
 import { getSettings } from "@/lib/settings";
 import "../quiet.css";
 
@@ -22,7 +23,7 @@ export default async function PrivacyPage() {
         browse the shop, create an account, place an order, or write to us. Yves Saint Laurent Beauté identifies the
         product. This shop is not the official Yves Saint Laurent website.
       </p>
-      <p>Last updated 6 October 2026.</p>
+      <p>Last updated 8 October 2026.</p>
 
       <h2>Who this notice is for</h2>
       <p>
@@ -234,6 +235,14 @@ export default async function PrivacyPage() {
         This shop is sold by {settings.sellerName}. For a privacy question, a copy of your information, a correction, or
         a deletion request, use the <Link href="/contact">contact page</Link>. Include the email address on the account
         or the order.
+        {siteConfig.supportAddress ? <> The published address is {siteConfig.supportAddress}.</> : null}
+        {siteConfig.supportPhone ? (
+          <>
+            {" "}
+            The phone is <a href={supportPhoneHref(siteConfig.supportPhone)}>{siteConfig.supportPhone}</a>
+            {siteConfig.supportHours ? `, ${siteConfig.supportHours}` : ""}.
+          </>
+        ) : null}
       </p>
     </main>
   );

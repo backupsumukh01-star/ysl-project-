@@ -7,6 +7,9 @@ export async function GET() {
   return ok({
     whatsapp: siteConfig.whatsapp,
     supportEmail: siteConfig.supportEmail,
+    supportPhone: siteConfig.supportPhone,
+    supportHours: siteConfig.supportHours,
+    supportAddress: siteConfig.supportAddress,
     currency: siteConfig.currency,
   });
 }

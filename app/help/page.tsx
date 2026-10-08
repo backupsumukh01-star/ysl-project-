@@ -31,10 +31,19 @@ const groups = [
     label: "Account",
     sections: [
       ["Account", "Sign in with Google, with an email and password, or with a one-time email code. Orders, addresses, and support stay on the account.", "/account"],
-      ["Support", siteConfig.supportEmail ? `Write to ${siteConfig.supportEmail}.` : "Use the contact form. Replies are sent to the email you enter.", "/contact"],
+      ["Support", supportCopy(), "/contact"],
     ],
   },
 ];
+
+function supportCopy() {
+  const parts = [
+    siteConfig.supportEmail ? `Write to ${siteConfig.supportEmail}.` : "Use the contact form. Replies are sent to the email you enter.",
+    siteConfig.supportPhone ? `Call ${siteConfig.supportPhone}${siteConfig.supportHours ? `, ${siteConfig.supportHours}` : ""}.` : "",
+    siteConfig.supportAddress ? siteConfig.supportAddress + "." : "",
+  ].filter(Boolean);
+  return parts.join(" ");
+}
 
 export default function HelpPage() {
   return (

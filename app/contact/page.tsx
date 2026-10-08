@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { trackContact } from "@/lib/analytics/meta";
 import { PageBack } from "@/components/page-back";
+import { supportPhoneHref } from "@/lib/config";
 import "../quiet.css";
 
 export default function ContactPage() {
@@ -12,17 +13,26 @@ export default function ContactPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [whatsapp, setWhatsapp] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
+  const [supportPhone, setSupportPhone] = useState("");
+  const [supportHours, setSupportHours] = useState("");
+  const [supportAddress, setSupportAddress] = useState("");
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    api<{ whatsapp: string; supportEmail: string }>("/api/storefront")
+    api<{ whatsapp: string; supportEmail: string; supportPhone: string; supportHours: string; supportAddress: string }>("/api/storefront")
       .then((result) => {
         setWhatsapp(result.whatsapp || "");
         setSupportEmail(result.supportEmail || "");
+        setSupportPhone(result.supportPhone || "");
+        setSupportHours(result.supportHours || "");
+        setSupportAddress(result.supportAddress || "");
       })
       .catch(() => {
         setWhatsapp("");
         setSupportEmail("");
+        setSupportPhone("");
+        setSupportHours("");
+        setSupportAddress("");
       });
   }, []);
 
@@ -76,6 +86,8 @@ export default function ContactPage() {
       <p className="kicker">Contact</p>
       <h1>Write to us.</h1>
       {supportEmail ? <p className="lede">Email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>, or send the form below.</p> : null}
+      {supportPhone ? <p>Call <a href={supportPhoneHref(supportPhone)}>{supportPhone}</a>{supportHours ? `. ${supportHours}` : ""}.</p> : null}
+      {supportAddress ? <p>{supportAddress}</p> : null}
       {whatsapp ? <p><a href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}>WhatsApp support</a></p> : null}
       <form onSubmit={onSubmit} noValidate style={{ maxWidth: 560, marginTop: 24 }}>
         <label className="field">

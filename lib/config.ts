@@ -44,6 +44,7 @@ export const siteConfig = {
   supportEmail: publishedEmail(process.env.NEXT_PUBLIC_SUPPORT_EMAIL),
   supportPhone: optionalText(process.env.NEXT_PUBLIC_SUPPORT_PHONE),
   supportHours: optionalText(process.env.NEXT_PUBLIC_SUPPORT_HOURS),
+  supportAddress: optionalText(process.env.NEXT_PUBLIC_SUPPORT_ADDRESS),
   currency: optionalText(process.env.NEXT_PUBLIC_CURRENCY, prices.currency),
   defaultCountry: optionalText(process.env.NEXT_PUBLIC_DEFAULT_COUNTRY, "United States"),
   shippingMessage: optionalText(
@@ -85,6 +86,14 @@ export const siteConfig = {
 };
 
 export type SocialName = keyof typeof siteConfig.social;
+
+/** A tel: link for a published support number. A 10-digit US number gets the country code. */
+export function supportPhoneHref(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `tel:+1${digits}`;
+  if (!digits) return "";
+  return `tel:+${digits}`;
+}
 
 export const navLinks = [
   { href: "/shop", label: "Shop" },

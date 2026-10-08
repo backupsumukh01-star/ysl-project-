@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageBack } from "@/components/page-back";
+import { siteConfig, supportPhoneHref } from "@/lib/config";
 import { getSettings } from "@/lib/settings";
 import "../quiet.css";
 
@@ -22,12 +23,27 @@ export default async function TermsPage() {
         Beauté identifies the product. This shop is not the official Yves Saint Laurent website. By placing an order,
         you agree to these terms.
       </p>
-      <p>Last updated 6 October 2026.</p>
+      <p>Last updated 8 October 2026.</p>
 
       <h2>The shop</h2>
       <p>
-        The website shows the device, cartridge trios, and refills, and takes an order for them. A street address and a
-        governing law have not been published. Questions about an order go through the <Link href="/contact">contact page</Link>.
+        The website shows the device, cartridge trios, and refills, and takes an order for them.
+        {siteConfig.supportAddress ? (
+          <>
+            {" "}
+            The published address is {siteConfig.supportAddress}.
+            {siteConfig.supportPhone ? (
+              <>
+                {" "}
+                The phone is <a href={supportPhoneHref(siteConfig.supportPhone)}>{siteConfig.supportPhone}</a>
+                {siteConfig.supportHours ? `, ${siteConfig.supportHours}` : ""}.
+              </>
+            ) : null}{" "}
+          </>
+        ) : (
+          " A street address has not been published. "
+        )}
+        A governing law has not been published. Questions about an order go through the <Link href="/contact">contact page</Link>.
       </p>
 
       <h2>Prices</h2>

@@ -43,6 +43,12 @@ const PAYMENT_LABELS: Record<string, string> = {
   PARTIALLY_REFUNDED: "Partially refunded",
 };
 
+function postalLine() {
+  const parts = [siteConfig.supportAddress, siteConfig.supportPhone, siteConfig.supportHours].filter(Boolean);
+  if (!parts.length) return "";
+  return `<p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:${muted};">${escapeHtml(parts.join(" · "))}</p>`;
+}
+
 function shell(title: string, body: string, options?: { kicker?: string; preheader?: string; accent?: Accent }) {
   const tone = accent[options?.accent || "account"];
   const email = publishedEmail(siteConfig.supportEmail);
@@ -82,6 +88,7 @@ ${preheader}
           <td style="padding:22px 32px 36px;font-family:${sans};font-size:15px;line-height:1.65;color:${ink};">
             ${body}
             <p style="margin:28px 0 0;padding-top:22px;border-top:1px solid ${line};font-size:13px;line-height:1.6;color:${muted};">${contact}</p>
+            ${postalLine()}
             <p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:${muted};">Yves Saint Laurent and related trademarks are the property of their respective owner. This message is about your account or order. Marketing mail is not sent without consent.</p>
           </td>
         </tr>
